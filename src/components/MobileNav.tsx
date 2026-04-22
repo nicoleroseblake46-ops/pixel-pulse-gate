@@ -2,6 +2,7 @@ import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap, Menu, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCommerce } from "@/contexts/CommerceContext";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -18,6 +19,7 @@ const items = [
 export const MobileNav = () => {
   const [open, setOpen] = useState(false);
   const { signOut } = useAuth();
+  const { balance, cartItems } = useCommerce();
   const loc = useLocation();
 
   return (
@@ -29,9 +31,14 @@ export const MobileNav = () => {
           </div>
           <span className="font-display text-lg font-black neon-text">NEXUS</span>
         </div>
-        <button onClick={() => setOpen(!open)} className="rounded-md p-2 text-foreground hover:bg-secondary">
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <NavLink to="/payments" className="rounded-md border border-border bg-secondary/50 px-2 py-1 font-mono text-xs text-primary">
+            ${balance.toFixed(0)}{cartItems.length ? ` · ${cartItems.length}` : ""}
+          </NavLink>
+          <button onClick={() => setOpen(!open)} className="rounded-md p-2 text-foreground hover:bg-secondary">
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </header>
       {open && (
         <div className="fixed inset-0 top-16 z-30 bg-background/95 backdrop-blur-xl md:hidden animate-fade-up">
