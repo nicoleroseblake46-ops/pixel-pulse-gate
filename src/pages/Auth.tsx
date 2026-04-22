@@ -16,6 +16,8 @@ const schema = z.object({
   username: z.string().trim().min(2).max(32).optional(),
 });
 
+const emailSchema = z.string().trim().email("Invalid email").max(255);
+
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [loading, setLoading] = useState(false);
@@ -53,6 +55,26 @@ const Auth = () => {
       toast.error(err.message || "Authentication failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const sendPasswordReset = async () => {
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) {
+      toast.error("Enter your email first");
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+
+    if (error) {
+      toast.error("Reset failed", { description: error.message });
+    } else {
+      toast.success("Reset link sent", { description: "Check your email to create a new password." });
     }
   };
 
@@ -125,7 +147,19 @@ const Auth = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Password</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Password</Label>
+                {mode === "login" && (
+                  <button
+                    type="button"
+                    onClick={sendPasswordReset}
+                    disabled={loading}
+                    className="font-mono text-[10px] uppercase tracking-widest text-primary transition-smooth hover:text-accent disabled:opacity-50"
+                  >
+                    Forgot?
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
