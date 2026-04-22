@@ -93,6 +93,7 @@ export type Database = {
           description: string
           id: string
           title: string
+          updated_at: string
         }
         Insert: {
           category?: string
@@ -100,6 +101,7 @@ export type Database = {
           description: string
           id?: string
           title: string
+          updated_at?: string
         }
         Update: {
           category?: string
@@ -107,6 +109,7 @@ export type Database = {
           description?: string
           id?: string
           title?: string
+          updated_at?: string
         }
         Relationships: []
       }
