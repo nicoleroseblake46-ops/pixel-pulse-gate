@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Zap } from "lucide-react";
 import { z } from "zod";
@@ -14,15 +14,39 @@ const passwordSchema = z.string().min(6, "Min 6 characters").max(72);
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionReady, setSessionReady] = useState<boolean | null>(null);
   const navigate = useNavigate();
+  const hasRecoveryParams = useMemo(() => {
+    const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const searchParams = new URLSearchParams(window.location.search);
+
+    return Boolean(
+      hashParams.get("access_token") ||
+      hashParams.get("refresh_token") ||
+      hashParams.get("type") === "recovery" ||
+      searchParams.get("code")
+    );
+  }, []);
 
   useEffect(() => {
     let mounted = true;
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initializeRecoverySession = async () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get("code");
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error && mounted) {
+          toast.error("Reset link invalid", { description: error.message });
+        }
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
       if (mounted) setSessionReady(!!session);
-    });
+    };
+
+    void initializeRecoverySession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || event === "INITIAL_SESSION") {
@@ -94,8 +118,13 @@ const ResetPassword = () => {
                 />
               </div>
             </div>
-            <Button type="submit" disabled={loading || !sessionReady} className="h-12 w-full bg-gradient-primary font-display font-bold uppercase tracking-widest text-background glow-primary">
-              {loading ? "Updating..." : sessionReady ? "Update Password" : "Open Reset Link"}
+            {!sessionReady && sessionReady !== null && hasRecoveryParams && (
+              <p className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                Recovery link detected · try updating your password now
+              </p>
+            )}
+            <Button type="submit" disabled={loading || sessionReady === null} className="h-12 w-full bg-gradient-primary font-display font-bold uppercase tracking-widest text-background glow-primary">
+              {loading ? "Updating..." : sessionReady === null ? "Preparing..." : "Update Password"}
             </Button>
           </form>
         </div>
