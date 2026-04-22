@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,7 +25,9 @@ export const MobileNav = () => {
   const { balance, cartItems } = useCommerce();
   const { isAdmin } = useAdmin();
   const loc = useLocation();
-  const visibleItems = isAdmin ? [...items, { title: "Admin", url: "/admin/payments", icon: ShieldCheck }] : items;
+  const visibleItems = isAdmin
+    ? [...items, { title: "News Admin", url: "/admin/news", icon: FilePenLine }, { title: "Payments Admin", url: "/admin/payments", icon: ShieldCheck }]
+    : items;
 
   useEffect(() => {
     if (!user) {
