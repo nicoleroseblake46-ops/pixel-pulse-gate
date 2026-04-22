@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Zap } from "lucide-react";
 import { z } from "zod";
@@ -14,13 +14,39 @@ const passwordSchema = z.string().min(6, "Min 6 characters").max(72);
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (mounted) setSessionReady(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+        setSessionReady(!!session);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const parsed = passwordSchema.safeParse(password);
     if (!parsed.success) {
       toast.error(parsed.error.errors[0].message);
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error("Reset link expired", { description: "Request a new password reset link and open it from your email." });
       return;
     }
 
@@ -68,8 +94,8 @@ const ResetPassword = () => {
                 />
               </div>
             </div>
-            <Button type="submit" disabled={loading} className="h-12 w-full bg-gradient-primary font-display font-bold uppercase tracking-widest text-background glow-primary">
-              {loading ? "Updating..." : "Update Password"}
+            <Button type="submit" disabled={loading || !sessionReady} className="h-12 w-full bg-gradient-primary font-display font-bold uppercase tracking-widest text-background glow-primary">
+              {loading ? "Updating..." : sessionReady ? "Update Password" : "Open Reset Link"}
             </Button>
           </form>
         </div>
