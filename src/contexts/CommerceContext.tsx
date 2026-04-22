@@ -1,4 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Json } from "@/integrations/supabase/types";
 
 export interface CartItem {
   id: string;
@@ -14,18 +17,15 @@ interface CommerceContextValue {
   addToCart: (item: CartItem) => void;
   addManyToCart: (items: CartItem[]) => void;
   clearCart: () => void;
-  addFunds: (amount: number) => void;
+  refreshBalance: () => Promise<void>;
+  createPendingPayment: (amount: number, bonus: number, walletAddress: string) => Promise<string>;
 }
 
 const CommerceContext = createContext<CommerceContextValue | undefined>(undefined);
 
-const readStoredNumber = (key: string) => {
-  const value = Number(localStorage.getItem(key));
-  return Number.isFinite(value) ? value : 0;
-};
-
 export const CommerceProvider = ({ children }: { children: ReactNode }) => {
-  const [balance, setBalance] = useState(() => readStoredNumber("nexus-balance"));
+  const { user } = useAuth();
+  const [balance, setBalance] = useState(0);
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       return JSON.parse(localStorage.getItem("nexus-cart") || "[]") as CartItem[];
@@ -34,8 +34,22 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  useEffect(() => localStorage.setItem("nexus-balance", String(balance)), [balance]);
   useEffect(() => localStorage.setItem("nexus-cart", JSON.stringify(cartItems)), [cartItems]);
+
+  const refreshBalance = async () => {
+    if (!user) {
+      setBalance(0);
+      return;
+    }
+
+    const { data, error } = await supabase.from("profiles").select("balance").eq("id", user.id).single();
+    if (error) throw error;
+    setBalance(Number(data?.balance ?? 0));
+  };
+
+  useEffect(() => {
+    refreshBalance().catch(() => setBalance(0));
+  }, [user?.id]);
 
   const cartTotal = useMemo(() => cartItems.reduce((total, item) => total + item.price, 0), [cartItems]);
 
@@ -52,10 +66,33 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearCart = () => setCartItems([]);
-  const addFunds = (amount: number) => setBalance((current) => current + amount);
+
+  const createPendingPayment = async (amount: number, bonus: number, walletAddress: string) => {
+    if (!user) throw new Error("You must be signed in to checkout.");
+
+    const { data, error } = await supabase
+      .from("payments")
+      .insert({
+        user_id: user.id,
+        amount,
+        bonus_amount: bonus,
+        cart_total: cartTotal,
+        coin: "BTC",
+        wallet_address: walletAddress,
+        status: "pending",
+        metadata: { cart_items: cartItems.map((item) => ({ ...item })) } as Json,
+      })
+      .select("id")
+      .single();
+
+    if (error) throw error;
+    clearCart();
+    await refreshBalance();
+    return data.id;
+  };
 
   return (
-    <CommerceContext.Provider value={{ balance, cartItems, cartTotal, addToCart, addManyToCart, clearCart, addFunds }}>
+    <CommerceContext.Provider value={{ balance, cartItems, cartTotal, addToCart, addManyToCart, clearCart, refreshBalance, createPendingPayment }}>
       {children}
     </CommerceContext.Provider>
   );

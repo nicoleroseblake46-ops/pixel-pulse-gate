@@ -17,28 +17,46 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          bonus_amount: number
+          cart_total: number
           coin: string
+          confirmed_at: string | null
           created_at: string
           id: string
+          metadata: Json
           status: string
+          total_credit: number
+          updated_at: string
           user_id: string
           wallet_address: string
         }
         Insert: {
           amount: number
+          bonus_amount?: number
+          cart_total?: number
           coin: string
+          confirmed_at?: string | null
           created_at?: string
           id?: string
+          metadata?: Json
           status?: string
+          total_credit?: number
+          updated_at?: string
           user_id: string
           wallet_address: string
         }
         Update: {
           amount?: number
+          bonus_amount?: number
+          cart_total?: number
           coin?: string
+          confirmed_at?: string | null
           created_at?: string
           id?: string
+          metadata?: Json
           status?: string
+          total_credit?: number
+          updated_at?: string
           user_id?: string
           wallet_address?: string
         }
@@ -47,18 +65,21 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          balance: number
           created_at: string
           id: string
           username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          balance?: number
           created_at?: string
           id: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          balance?: number
           created_at?: string
           id?: string
           username?: string | null
@@ -94,7 +115,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      confirm_payment: { Args: { _payment_id: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

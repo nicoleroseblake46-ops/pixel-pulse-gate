@@ -12,10 +12,11 @@ const presetAmounts = [20, 50, 100, 200, 500];
 const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
 
 const Payments = () => {
-  const { balance, cartItems, cartTotal, clearCart, addFunds } = useCommerce();
+  const { balance, cartItems, cartTotal, createPendingPayment } = useCommerce();
   const [amount, setAmount] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const checkoutAmount = selected ?? Number(amount);
   const bonus = bonuses[checkoutAmount] ?? 0;
@@ -27,16 +28,22 @@ const Payments = () => {
     setTimeout(() => setCopied(false), 1600);
   };
 
-  const checkout = () => {
+  const checkout = async () => {
     if (!checkoutAmount || checkoutAmount < 20) {
       toast.error("Minimum deposit is $20");
       return;
     }
-    addFunds(checkoutAmount + bonus);
-    if (cartItems.length) clearCart();
-    toast.success("Checkout submitted", { description: `$${(checkoutAmount + bonus).toFixed(2)} credited after confirmation.` });
-    setAmount("");
-    setSelected(null);
+    setSubmitting(true);
+    try {
+      const paymentId = await createPendingPayment(checkoutAmount, bonus, WALLET_ADDRESS);
+      toast.success("Payment pending", { description: `Order ${paymentId.slice(0, 8)} is awaiting confirmation.` });
+      setAmount("");
+      setSelected(null);
+    } catch (error) {
+      toast.error("Checkout failed", { description: error instanceof Error ? error.message : "Please try again." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -126,8 +133,8 @@ const Payments = () => {
 
           <div className="mt-5 flex items-center justify-end gap-4">
             <Button variant="ghost" onClick={() => { setAmount(""); setSelected(null); }}>Cancel</Button>
-            <Button onClick={checkout} className="h-11 bg-gradient-primary px-8 font-display font-bold text-background glow-primary hover:opacity-90">
-              Checkout
+            <Button onClick={checkout} disabled={submitting} className="h-11 bg-gradient-primary px-8 font-display font-bold text-background glow-primary hover:opacity-90">
+              {submitting ? "Submitting..." : "Checkout"}
             </Button>
           </div>
         </section>
