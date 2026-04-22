@@ -1,7 +1,8 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap } from "lucide-react";
+import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
+import { useAdmin } from "@/hooks/use-admin";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -16,6 +17,7 @@ const items = [
 export const AppSidebar = () => {
   const { signOut, user } = useAuth();
   const { balance, cartItems } = useCommerce();
+  const { isAdmin } = useAdmin();
   const loc = useLocation();
 
   return (
@@ -90,6 +92,20 @@ export const AppSidebar = () => {
           <User className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
           <span className="text-sm tracking-wide">Profile</span>
         </NavLink>
+        {isAdmin && (
+          <NavLink
+            to="/admin/payments"
+            className={({ isActive }) =>
+              cn(
+                "group flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition-smooth hover:bg-sidebar-accent hover:translate-x-1",
+                isActive && "bg-sidebar-accent text-foreground"
+              )
+            }
+          >
+            <ShieldCheck className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
+            <span className="text-sm tracking-wide">Admin</span>
+          </NavLink>
+        )}
       </nav>
 
       {/* Footer */}

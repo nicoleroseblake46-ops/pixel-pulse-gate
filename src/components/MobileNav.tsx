@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap, Menu, X } from "lucide-react";
+import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap, Menu, X, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
+import { useAdmin } from "@/hooks/use-admin";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -20,7 +21,9 @@ export const MobileNav = () => {
   const [open, setOpen] = useState(false);
   const { signOut } = useAuth();
   const { balance, cartItems } = useCommerce();
+  const { isAdmin } = useAdmin();
   const loc = useLocation();
+  const visibleItems = isAdmin ? [...items, { title: "Admin", url: "/admin/payments", icon: ShieldCheck }] : items;
 
   return (
     <>
@@ -43,7 +46,7 @@ export const MobileNav = () => {
       {open && (
         <div className="fixed inset-0 top-16 z-30 bg-background/95 backdrop-blur-xl md:hidden animate-fade-up">
           <nav className="space-y-1 p-4">
-            {items.map((it) => {
+            {visibleItems.map((it) => {
               const Icon = it.icon;
               const active = loc.pathname === it.url;
               return (
