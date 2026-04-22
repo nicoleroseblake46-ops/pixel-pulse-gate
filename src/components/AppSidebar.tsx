@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
 import { cn } from "@/lib/utils";
 
 const items = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard, accent: "primary" },
+  { title: "News", url: "/", icon: Newspaper, accent: "primary" },
   { title: "Sales", url: "/sales", icon: Tag, accent: "accent" },
   { title: "Cards", url: "/cards", icon: CreditCard, accent: "primary" },
   { title: "Proxy", url: "/proxy", icon: Network, accent: "primary" },
