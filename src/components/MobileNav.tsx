@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap, Menu, X, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
@@ -10,9 +10,9 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Sales", url: "/sales", icon: Tag },
   { title: "Cards", url: "/cards", icon: CreditCard },
-  { title: "Socks", url: "/socks", icon: Zap },
   { title: "Proxy", url: "/proxy", icon: Network },
   { title: "Tools", url: "/tools", icon: Wrench },
+  { title: "My Orders", url: "/orders", icon: ShoppingBag },
   { title: "Payments", url: "/payments", icon: Wallet },
   { title: "Profile", url: "/profile", icon: User },
 ];

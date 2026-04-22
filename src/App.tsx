@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import AdminPayments from "./pages/AdminPayments";
 import ResetPassword from "./pages/ResetPassword";
 import { Sales, Cards, Socks, Proxy, Tools } from "./pages/Sections";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/socks" element={<ProtectedRoute><Socks /></ProtectedRoute>} />
               <Route path="/proxy" element={<ProtectedRoute><Proxy /></ProtectedRoute>} />
               <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
               <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
