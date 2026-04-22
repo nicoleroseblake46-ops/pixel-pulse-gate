@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/AppLayout";
 import { Newspaper } from "lucide-react";
 
@@ -21,8 +20,21 @@ const Dashboard = () => {
   const [updates, setUpdates] = useState<Update[]>([]);
 
   useEffect(() => {
-    supabase.from("updates").select("id,title,description,category,created_at").order("created_at", { ascending: false }).limit(24)
-      .then(({ data }) => data && setUpdates(data as Update[]));
+    const loadUpdates = () => {
+      supabase.from("updates").select("id,title,description,category,created_at").order("created_at", { ascending: false }).limit(24)
+        .then(({ data }) => data && setUpdates(data as Update[]));
+    };
+
+    loadUpdates();
+
+    const channel = supabase
+      .channel("news-updates")
+      .on("postgres_changes", { event: "*", schema: "public", table: "updates" }, loadUpdates)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return (
