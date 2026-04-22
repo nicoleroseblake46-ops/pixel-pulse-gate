@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import AdminPayments from "./pages/AdminPayments";
+import ResetPassword from "./pages/ResetPassword";
 import { Sales, Cards, Socks, Proxy, Tools } from "./pages/Sections";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -26,6 +27,7 @@ const App = () => (
           <CommerceProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/sales" element={<ProtectedRoute><Sales /></ProtectedRoute>} />
               <Route path="/cards" element={<ProtectedRoute><Cards /></ProtectedRoute>} />
