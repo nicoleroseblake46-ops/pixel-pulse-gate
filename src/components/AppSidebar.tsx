@@ -1,6 +1,7 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCommerce } from "@/contexts/CommerceContext";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -14,6 +15,7 @@ const items = [
 
 export const AppSidebar = () => {
   const { signOut, user } = useAuth();
+  const { balance, cartItems } = useCommerce();
   const loc = useLocation();
 
   return (
@@ -74,6 +76,7 @@ export const AppSidebar = () => {
         >
           <Wallet className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
           <span className="text-sm tracking-wide">Payments</span>
+          {!!cartItems.length && <span className="ml-auto rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] text-primary">{cartItems.length}</span>}
         </NavLink>
         <NavLink
           to="/profile"
@@ -91,6 +94,10 @@ export const AppSidebar = () => {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border p-4">
+        <div className="glass mb-3 rounded-lg p-3">
+          <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Balance</div>
+          <div className="mt-1 font-display text-2xl font-black text-primary text-glow">${balance.toFixed(2)}</div>
+        </div>
         <div className="glass mb-3 rounded-lg p-3">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-success animate-pulse-glow" />

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
@@ -6,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useCommerce } from "@/contexts/CommerceContext";
+import { toast } from "sonner";
 
 const cardInventory = [
   { bin: "453275", country: "USA", state: "CA", brand: "Visa", type: "Credit", bank: "Chase", info: "Classic · $300+ balance · verified", price: 45 },
@@ -44,11 +47,12 @@ export const Sales = () => (
 );
 
 export const Cards = () => {
+  const navigate = useNavigate();
+  const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [filters, setFilters] = useState(emptyFilters);
   const [priceRange, setPriceRange] = useState([0, 100]);
   const [appliedPriceRange, setAppliedPriceRange] = useState([0, 100]);
-  const [cartBins, setCartBins] = useState<string[]>([]);
 
   const availableCards = useMemo(
     () =>
@@ -75,12 +79,14 @@ export const Cards = () => {
     setAppliedPriceRange(priceRange);
   };
 
-  const addCard = (bin: string) => {
-    setCartBins((current) => (current.includes(bin) ? current : [...current, bin]));
+  const addCard = (card: (typeof cardInventory)[number]) => {
+    addToCart({ id: card.bin, name: `${card.brand} ${card.type}`, meta: `${card.country} · ${card.bank}`, price: card.price });
+    toast.success("Added to cart", { description: `BIN ${card.bin} is ready for checkout.` });
   };
 
   const addAll = () => {
-    setCartBins((current) => Array.from(new Set([...current, ...availableCards.map((card) => card.bin)])));
+    addManyToCart(availableCards.map((card) => ({ id: card.bin, name: `${card.brand} ${card.type}`, meta: `${card.country} · ${card.bank}`, price: card.price })));
+    toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
   };
 
   return (
@@ -98,10 +104,10 @@ export const Cards = () => {
               </h1>
             </div>
           </div>
-          <div className="glass flex items-center gap-2 rounded-xl px-4 py-3 font-mono text-sm text-primary">
+          <button onClick={() => navigate("/payments")} className="glass flex items-center gap-2 rounded-xl px-4 py-3 font-mono text-sm text-primary transition-smooth hover:border-primary/50 hover:text-accent">
             <ShoppingCart className="h-4 w-4" />
-            {cartBins.length} IN CART
-          </div>
+            {cartItems.length} IN CART · ${cartTotal.toFixed(2)}
+          </button>
         </div>
         <p className="mt-3 text-muted-foreground">Filter verified card inventory and add matches to your cart.</p>
       </div>
@@ -156,7 +162,7 @@ export const Cards = () => {
           </TableHeader>
           <TableBody>
             {availableCards.map((card) => {
-              const inCart = cartBins.includes(card.bin);
+              const inCart = cartItems.some((item) => item.id === card.bin);
 
               return (
                 <TableRow key={card.bin}>
@@ -168,7 +174,7 @@ export const Cards = () => {
                   </TableCell>
                   <TableCell className="font-mono font-bold text-primary">${card.price}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant={inCart ? "secondary" : "default"} onClick={() => addCard(card.bin)} disabled={inCart}>
+                    <Button size="sm" variant={inCart ? "secondary" : "default"} onClick={() => addCard(card)} disabled={inCart}>
                       <Plus />
                       {inCart ? "Added" : "Add"}
                     </Button>
