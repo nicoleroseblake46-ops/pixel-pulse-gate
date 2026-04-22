@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Json } from "@/integrations/supabase/types";
 
 export interface CartItem {
   id: string;
@@ -79,7 +80,7 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
         coin: "BTC",
         wallet_address: walletAddress,
         status: "pending",
-        metadata: { cart_items: cartItems },
+        metadata: { cart_items: cartItems.map((item) => ({ ...item })) } as Json,
       })
       .select("id")
       .single();
