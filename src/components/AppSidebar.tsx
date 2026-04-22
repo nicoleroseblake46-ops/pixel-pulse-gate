@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, Zap, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
@@ -9,9 +9,9 @@ const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, accent: "primary" },
   { title: "Sales", url: "/sales", icon: Tag, accent: "accent" },
   { title: "Cards", url: "/cards", icon: CreditCard, accent: "primary" },
-  { title: "Socks", url: "/socks", icon: Zap, accent: "accent" },
   { title: "Proxy", url: "/proxy", icon: Network, accent: "primary" },
   { title: "Tools", url: "/tools", icon: Wrench, accent: "accent" },
+  { title: "My Orders", url: "/orders", icon: ShoppingBag, accent: "primary" },
 ];
 
 export const AppSidebar = () => {
