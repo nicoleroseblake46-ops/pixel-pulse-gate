@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Check, ShieldCheck, X } from "lucide-react";
+import { Check, ShieldCheck, UserPlus, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Loader } from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/use-admin";
@@ -32,6 +33,8 @@ const AdminPayments = () => {
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [loading, setLoading] = useState(true);
   const [workingId, setWorkingId] = useState<string | null>(null);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [assigningAdmin, setAssigningAdmin] = useState(false);
 
   const pendingCount = useMemo(() => payments.filter((payment) => payment.status === "pending").length, [payments]);
   const pendingImpact = useMemo(
@@ -73,6 +76,25 @@ const AdminPayments = () => {
     setWorkingId(null);
   };
 
+  const assignAdminRole = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const email = adminEmail.trim().toLowerCase();
+    if (!email) {
+      toast.error("Enter an email address");
+      return;
+    }
+
+    setAssigningAdmin(true);
+    const { data, error } = await adminClient.rpc("assign_admin_role_by_email", { _email: email });
+    if (error) {
+      toast.error("Admin assignment failed", { description: error.message });
+    } else {
+      toast.success("Admin access confirmed", { description: `${data?.username ?? email} now has admin permissions.` });
+      setAdminEmail("");
+    }
+    setAssigningAdmin(false);
+  };
+
   if (adminLoading) return <Loader />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
@@ -93,6 +115,31 @@ const AdminPayments = () => {
           <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Balance Impact</div><div className="mt-2 font-display text-3xl font-black text-primary">${pendingImpact.toFixed(2)}</div></div>
           <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Reviewed</div><div className="mt-2 font-display text-3xl font-black text-primary">{payments.length - pendingCount}</div></div>
         </div>
+
+        <section className="glass rounded-xl p-4 md:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Admin Access</div>
+              <h2 className="mt-1 font-display text-2xl font-black tracking-tight">Assign admin by email</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Enter an existing account email to grant admin permissions.</p>
+            </div>
+            <form onSubmit={assignAdminRole} className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
+              <Input
+                type="email"
+                value={adminEmail}
+                onChange={(event) => setAdminEmail(event.target.value)}
+                placeholder="admin@example.com"
+                className="bg-secondary/50"
+                disabled={assigningAdmin}
+                required
+              />
+              <Button type="submit" disabled={assigningAdmin} className="shrink-0">
+                <UserPlus className="h-4 w-4" />
+                {assigningAdmin ? "Confirming..." : "Confirm Admin"}
+              </Button>
+            </form>
+          </div>
+        </section>
 
         <section className="glass rounded-xl p-4 md:p-5">
           {loading ? <Loader /> : (
