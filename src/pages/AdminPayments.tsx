@@ -1,0 +1,133 @@
+import { useEffect, useMemo, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { Check, ShieldCheck, X } from "lucide-react";
+import { AppLayout } from "@/components/AppLayout";
+import { Loader } from "@/components/Loader";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { supabase } from "@/integrations/supabase/client";
+import { useAdmin } from "@/hooks/use-admin";
+import { toast } from "sonner";
+
+type Payment = {
+  id: string;
+  user_id: string;
+  amount: number;
+  bonus_amount: number;
+  total_credit: number;
+  cart_total: number;
+  coin: string;
+  status: string;
+  created_at: string;
+};
+
+type Profile = { id: string; username: string | null; balance: number };
+
+const adminClient = supabase as any;
+
+const AdminPayments = () => {
+  const { isAdmin, loading: adminLoading } = useAdmin();
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, Profile>>({});
+  const [loading, setLoading] = useState(true);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+
+  const pendingCount = useMemo(() => payments.filter((payment) => payment.status === "pending").length, [payments]);
+  const pendingImpact = useMemo(
+    () => payments.filter((payment) => payment.status === "pending").reduce((total, payment) => total + Number(payment.total_credit), 0),
+    [payments],
+  );
+
+  const loadPayments = async () => {
+    setLoading(true);
+    const { data: paymentRows, error: paymentError } = await adminClient.from("payments").select("*").order("created_at", { ascending: false });
+    if (paymentError) throw paymentError;
+
+    const userIds = [...new Set((paymentRows as Payment[]).map((payment) => payment.user_id))];
+    const { data: profileRows, error: profileError } = await adminClient.from("profiles").select("id, username, balance").in("id", userIds);
+    if (profileError) throw profileError;
+
+    setPayments(paymentRows as Payment[]);
+    setProfiles(Object.fromEntries((profileRows as Profile[]).map((profile) => [profile.id, profile])));
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    loadPayments().catch((error) => {
+      toast.error("Could not load payments", { description: error instanceof Error ? error.message : "Please try again." });
+      setLoading(false);
+    });
+  }, [isAdmin]);
+
+  const reviewPayment = async (paymentId: string, action: "approve" | "reject") => {
+    setWorkingId(paymentId);
+    const { error } = await adminClient.rpc(action === "approve" ? "approve_payment" : "reject_payment", { _payment_id: paymentId });
+    if (error) {
+      toast.error("Review failed", { description: error.message });
+    } else {
+      toast.success(action === "approve" ? "Payment approved" : "Payment rejected");
+      await loadPayments();
+    }
+    setWorkingId(null);
+  };
+
+  if (adminLoading) return <Loader />;
+  if (!isAdmin) return <Navigate to="/" replace />;
+
+  return (
+    <AppLayout>
+      <div className="animate-fade-up space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="font-mono text-xs uppercase tracking-[0.3em] text-primary">Admin Console</div>
+            <h1 className="mt-2 font-display text-4xl font-black tracking-tight neon-text md:text-5xl">Payment Review</h1>
+            <p className="mt-2 text-muted-foreground">Approve deposits only after confirmation. Rejections never change balances.</p>
+          </div>
+          <Button variant="secondary" onClick={() => loadPayments()} disabled={loading}>Refresh</Button>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Pending</div><div className="mt-2 font-display text-3xl font-black text-primary">{pendingCount}</div></div>
+          <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Balance Impact</div><div className="mt-2 font-display text-3xl font-black text-primary">${pendingImpact.toFixed(2)}</div></div>
+          <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Reviewed</div><div className="mt-2 font-display text-3xl font-black text-primary">{payments.length - pendingCount}</div></div>
+        </div>
+
+        <section className="glass rounded-xl p-4 md:p-5">
+          {loading ? <Loader /> : (
+            <Table>
+              <TableHeader><TableRow><TableHead>User</TableHead><TableHead>Status</TableHead><TableHead>Deposit</TableHead><TableHead>Credit Impact</TableHead><TableHead>Balance After</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {payments.map((payment) => {
+                  const profile = profiles[payment.user_id];
+                  const beforeBalance = Number(profile?.balance ?? 0);
+                  const impact = payment.status === "pending" ? Number(payment.total_credit) : 0;
+                  return (
+                    <TableRow key={payment.id}>
+                      <TableCell><div className="font-medium">{profile?.username ?? "Unknown user"}</div><div className="font-mono text-xs text-muted-foreground">{payment.user_id.slice(0, 8)}</div></TableCell>
+                      <TableCell><Badge variant={payment.status === "pending" ? "secondary" : payment.status === "confirmed" ? "default" : "destructive"}>{payment.status}</Badge></TableCell>
+                      <TableCell className="font-mono">${Number(payment.amount).toFixed(2)} {payment.coin}</TableCell>
+                      <TableCell className="font-mono text-primary">+${Number(payment.total_credit).toFixed(2)}</TableCell>
+                      <TableCell className="font-mono">${(beforeBalance + impact).toFixed(2)}</TableCell>
+                      <TableCell className="text-right">
+                        {payment.status === "pending" ? (
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" onClick={() => reviewPayment(payment.id, "approve")} disabled={workingId === payment.id}><Check /> Approve</Button>
+                            <Button size="sm" variant="destructive" onClick={() => reviewPayment(payment.id, "reject")} disabled={workingId === payment.id}><X /> Reject</Button>
+                          </div>
+                        ) : <ShieldCheck className="ml-auto h-5 w-5 text-muted-foreground" />}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </section>
+      </div>
+    </AppLayout>
+  );
+};
+
+export default AdminPayments;
