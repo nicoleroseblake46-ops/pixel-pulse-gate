@@ -185,6 +185,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      purchase_cart: {
+        Args: { _cart_total: number; _items: Json }
+        Returns: string
+      }
       reject_payment: { Args: { _payment_id: string }; Returns: undefined }
     }
     Enums: {
