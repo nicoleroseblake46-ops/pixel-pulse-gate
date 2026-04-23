@@ -18,7 +18,8 @@ interface CommerceContextValue {
   addManyToCart: (items: CartItem[]) => void;
   clearCart: () => void;
   refreshBalance: () => Promise<void>;
-  createPendingPayment: (amount: number, bonus: number, walletAddress: string) => Promise<string>;
+  createPendingPayment: (amount: number, bonus: number, coin: string, walletAddress: string) => Promise<string>;
+  purchaseCartWithBalance: () => Promise<string>;
 }
 
 const CommerceContext = createContext<CommerceContextValue | undefined>(undefined);
@@ -67,7 +68,7 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
 
   const clearCart = () => setCartItems([]);
 
-  const createPendingPayment = async (amount: number, bonus: number, walletAddress: string) => {
+  const createPendingPayment = async (amount: number, bonus: number, coin: string, walletAddress: string) => {
     if (!user) throw new Error("You must be signed in to checkout.");
 
     const { data, error } = await supabase
@@ -77,7 +78,7 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
         amount,
         bonus_amount: bonus,
         cart_total: cartTotal,
-        coin: "BTC",
+        coin,
         wallet_address: walletAddress,
         status: "pending",
         metadata: { cart_items: cartItems.map((item) => ({ ...item })) } as Json,
@@ -91,8 +92,23 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
     return data.id;
   };
 
+  const purchaseCartWithBalance = async () => {
+    if (!user) throw new Error("You must be signed in to purchase.");
+    if (!cartItems.length) throw new Error("Your cart is empty.");
+
+    const { data, error } = await (supabase as any).rpc("purchase_cart", {
+      _items: cartItems.map((item) => ({ ...item })),
+      _cart_total: cartTotal,
+    });
+
+    if (error) throw error;
+    clearCart();
+    await refreshBalance();
+    return data as string;
+  };
+
   return (
-    <CommerceContext.Provider value={{ balance, cartItems, cartTotal, addToCart, addManyToCart, clearCart, refreshBalance, createPendingPayment }}>
+    <CommerceContext.Provider value={{ balance, cartItems, cartTotal, addToCart, addManyToCart, clearCart, refreshBalance, createPendingPayment, purchaseCartWithBalance }}>
       {children}
     </CommerceContext.Provider>
   );
