@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ParticleBackground } from "@/components/ParticleBackground";
 import { Zap, Mail, Lock, User as UserIcon } from "lucide-react";
 import { z } from "zod";
 import loginDesk from "@/assets/login-desk-reference.png";
