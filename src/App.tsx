@@ -12,9 +12,11 @@ import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import AdminPayments from "./pages/AdminPayments";
 import AdminNews from "./pages/AdminNews";
+import AdminTickets from "./pages/AdminTickets";
 import ResetPassword from "./pages/ResetPassword";
 import { Sales, Cards, Socks, Proxy, Tools } from "./pages/Sections";
 import MyOrders from "./pages/MyOrders";
+import Tickets from "./pages/Tickets";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -37,8 +39,10 @@ const App = () => (
               <Route path="/proxy" element={<ProtectedRoute><Proxy /></ProtectedRoute>} />
               <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
+              <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
               <Route path="/admin/news" element={<ProtectedRoute><AdminNews /></ProtectedRoute>} />
+              <Route path="/admin/tickets" element={<ProtectedRoute><AdminTickets /></ProtectedRoute>} />
               <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />

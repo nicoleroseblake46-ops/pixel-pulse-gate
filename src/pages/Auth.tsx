@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { ParticleBackground } from "@/components/ParticleBackground";
 import { Zap, Mail, Lock, User as UserIcon } from "lucide-react";
 import { z } from "zod";
+import loginDesk from "@/assets/login-desk-reference.png";
 
 const schema = z.object({
   email: z.string().trim().email("Invalid email").max(255),
@@ -79,36 +79,38 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4">
-      <ParticleBackground />
-      <div className="grid-bg absolute inset-0 opacity-30" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4">
+      <img src={loginDesk} alt="Secure marketplace login workspace" className="absolute inset-0 h-full w-full object-cover" />
+      <div className="absolute inset-0 bg-background/10 backdrop-blur-[1px]" />
 
       <div className="relative z-10 w-full max-w-md animate-fade-up">
         {/* Logo */}
-        <div className="mb-8 flex flex-col items-center">
+        <div className="mb-8 flex flex-col items-center sr-only">
           <div className="relative mb-4">
             <div className="h-16 w-16 rounded-xl bg-gradient-primary animate-pulse-glow flex items-center justify-center">
               <Zap className="h-8 w-8 text-background" strokeWidth={3} />
             </div>
           </div>
-          <h1 className="font-display text-4xl font-black tracking-[0.2em] neon-text">NEXUS</h1>
+          <div className="font-display text-4xl font-black tracking-[0.2em] neon-text">NEXUS</div>
           <p className="mt-2 font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Premium Marketplace · Crypto Only
           </p>
         </div>
 
-        <div className="glass-strong relative overflow-hidden rounded-2xl p-8 shadow-[var(--shadow-elevated)]">
+        <div className="relative overflow-hidden rounded-sm border border-primary-foreground/20 bg-foreground/35 p-7 shadow-[var(--shadow-elevated)] backdrop-blur-md md:p-8">
           {/* Top neon line */}
-          <div className="absolute left-0 right-0 top-0 h-[2px] bg-gradient-primary" />
+          <div className="absolute left-0 right-0 top-0 h-16 bg-primary-foreground/20 blur-xl" />
 
           {/* Tabs */}
-          <div className="mb-6 flex gap-1 rounded-lg bg-secondary/50 p-1">
+          <h1 className="relative mb-7 text-center font-display text-3xl font-black text-primary-foreground">{mode === "login" ? "Login" : "Create Account"}</h1>
+
+          <div className="mb-6 flex gap-1 rounded-sm bg-primary-foreground/15 p-1">
             {(["login", "signup"] as const).map((m) => (
               <button
                 key={m}
                 onClick={() => setMode(m)}
                 className={`flex-1 rounded-md py-2 font-display text-sm font-bold tracking-wider uppercase transition-smooth ${
-                  mode === m ? "bg-gradient-primary text-background glow-primary" : "text-muted-foreground hover:text-foreground"
+                  mode === m ? "bg-warning text-foreground" : "text-primary-foreground hover:bg-primary-foreground/10"
                 }`}
               >
                 {m === "login" ? "Sign In" : "Sign Up"}
@@ -119,42 +121,42 @@ const Auth = () => {
           <form onSubmit={submit} className="space-y-4">
             {mode === "signup" && (
               <div className="space-y-2 animate-fade-up">
-                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Username</Label>
+                <Label className="sr-only">Username</Label>
                 <div className="relative">
                   <UserIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="player_one"
-                    className="border-border bg-input/50 pl-10 font-mono"
+                    className="h-14 rounded-sm border-primary-foreground/20 bg-input pl-12 text-base"
                     required
                   />
                 </div>
               </div>
             )}
             <div className="space-y-2">
-              <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Email</Label>
+              <Label className="sr-only">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@nexus.io"
-                  className="border-border bg-input/50 pl-10 font-mono"
+                  placeholder="Login"
+                  className="h-14 rounded-sm border-primary-foreground/20 bg-input pl-12 text-base"
                   required
                 />
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
-                <Label className="font-mono text-xs uppercase tracking-widest text-muted-foreground">Password</Label>
+                <Label className="sr-only">Password</Label>
                 {mode === "login" && (
                   <button
                     type="button"
                     onClick={sendPasswordReset}
                     disabled={loading}
-                    className="font-mono text-[10px] uppercase tracking-widest text-primary transition-smooth hover:text-accent disabled:opacity-50"
+                    className="font-semibold text-warning transition-smooth hover:text-warning/80 disabled:opacity-50"
                   >
                     Forgot?
                   </button>
@@ -167,7 +169,7 @@ const Auth = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="border-border bg-input/50 pl-10 font-mono"
+                  className="h-14 rounded-sm border-primary-foreground/20 bg-input pl-12 text-base"
                   required
                 />
               </div>
@@ -176,14 +178,17 @@ const Auth = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="relative w-full overflow-hidden bg-gradient-primary font-display font-bold tracking-widest uppercase text-background hover:opacity-90 glow-primary h-12"
+              className="relative mt-8 h-14 w-full overflow-hidden rounded-sm bg-warning font-semibold text-foreground hover:bg-warning/90"
             >
-              {loading ? "Connecting..." : mode === "login" ? "Enter Nexus" : "Create Access"}
+              {loading ? "Connecting..." : mode === "login" ? "Login" : "Create an Account"}
             </Button>
           </form>
 
-          <p className="mt-6 text-center font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-            Encrypted · Anonymous · Crypto Native
+          <p className="mt-5 text-center text-base font-semibold text-primary-foreground">
+            {mode === "login" ? "Not a member? " : "Already a member? "}
+            <button type="button" onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-warning hover:text-warning/80">
+              {mode === "login" ? "Create an Account" : "Login"}
+            </button>
           </p>
         </div>
       </div>

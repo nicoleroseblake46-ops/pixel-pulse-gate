@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
@@ -12,6 +12,7 @@ const items = [
   { title: "Proxy", url: "/proxy", icon: Network, accent: "primary" },
   { title: "Tools", url: "/tools", icon: Wrench, accent: "accent" },
   { title: "My Orders", url: "/orders", icon: ShoppingBag, accent: "primary" },
+  { title: "Tickets", url: "/tickets", icon: MessageSquareText, accent: "accent" },
 ];
 
 export const AppSidebar = () => {
@@ -114,6 +115,18 @@ export const AppSidebar = () => {
             >
               <ShieldCheck className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
               <span className="text-sm tracking-wide">Payments Admin</span>
+            </NavLink>
+            <NavLink
+              to="/admin/tickets"
+              className={({ isActive }) =>
+                cn(
+                  "group flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition-smooth hover:bg-sidebar-accent hover:translate-x-1",
+                  isActive && "bg-sidebar-accent text-foreground"
+                )
+              }
+            >
+              <MessageSquareText className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
+              <span className="text-sm tracking-wide">Tickets Admin</span>
             </NavLink>
           </>
         )}
