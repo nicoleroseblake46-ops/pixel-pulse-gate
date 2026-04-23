@@ -45,25 +45,25 @@ export const MobileNav = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-4 md:hidden">
-        <NavLink to="/payments" className="flex h-10 items-center gap-2 rounded-lg bg-primary/15 px-3 font-mono text-sm font-bold text-primary">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-between bg-gradient-primary px-4 text-primary-foreground shadow-[var(--shadow-elevated)] md:hidden">
+        <NavLink to="/payments" className="flex h-10 items-center gap-2 rounded-lg bg-primary-foreground/15 px-3 font-mono text-sm font-bold text-primary-foreground">
           <Wallet className="h-5 w-5" />
           ${balance.toFixed(2)}{cartItems.length ? ` · ${cartItems.length}` : ""}
         </NavLink>
         <div className="flex items-center gap-2">
-          <NavLink to="/profile" className="flex h-10 items-center gap-2 rounded-lg border border-border bg-background/60 px-2.5 text-sm font-semibold text-foreground">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/15 font-display text-sm font-black text-primary">
+          <NavLink to="/profile" className="flex h-10 items-center gap-2 rounded-lg bg-primary-foreground/15 px-2.5 text-sm font-semibold text-primary-foreground">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary-foreground font-display text-sm font-black text-primary">
               {(displayName || user?.email || "U").charAt(0).toUpperCase()}
             </span>
             <span className="max-w-20 truncate">{displayName || "User"}</span>
           </NavLink>
-          <button onClick={() => setOpen(!open)} className="rounded-md p-2 text-foreground hover:bg-secondary">
+          <button onClick={() => setOpen(!open)} className="rounded-md p-2 text-primary-foreground hover:bg-primary-foreground/15">
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </header>
       {open && (
-        <div className="fixed inset-0 top-16 z-30 bg-background/95 backdrop-blur-xl md:hidden animate-fade-up">
+        <div className="fixed inset-0 top-16 z-30 bg-sidebar/95 backdrop-blur-xl md:hidden animate-fade-up">
           <nav className="space-y-1 p-4">
             {visibleItems.map((it) => {
               const Icon = it.icon;
