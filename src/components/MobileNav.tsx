@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine, MessageSquareText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ const items = [
   { title: "Proxy", url: "/proxy", icon: Network },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "My Orders", url: "/orders", icon: ShoppingBag },
+  { title: "Tickets", url: "/tickets", icon: MessageSquareText },
   { title: "Payments", url: "/payments", icon: Wallet },
   { title: "Profile", url: "/profile", icon: User },
 ];
@@ -26,7 +27,7 @@ export const MobileNav = () => {
   const { isAdmin } = useAdmin();
   const loc = useLocation();
   const visibleItems = isAdmin
-    ? [...items, { title: "News Admin", url: "/admin/news", icon: FilePenLine }, { title: "Payments Admin", url: "/admin/payments", icon: ShieldCheck }]
+    ? [...items, { title: "News Admin", url: "/admin/news", icon: FilePenLine }, { title: "Tickets Admin", url: "/admin/tickets", icon: MessageSquareText }, { title: "Payments Admin", url: "/admin/payments", icon: ShieldCheck }]
     : items;
 
   useEffect(() => {
