@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCommerce } from "@/contexts/CommerceContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { User, Trophy, Zap, Activity } from "lucide-react";
+import { MessageSquareText, ShoppingCart, User, Wallet } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
+  const { balance, cartItems } = useCommerce();
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [saving, setSaving] = useState(false);
@@ -31,12 +34,6 @@ const Profile = () => {
     setSaving(false);
     if (error) toast.error(error.message); else toast.success("Profile updated");
   };
-
-  const stats = [
-    { label: "Rank", value: "Elite", icon: Trophy, color: "text-warning" },
-    { label: "Sessions", value: "1,247", icon: Activity, color: "text-accent" },
-    { label: "Power", value: "98.4", icon: Zap, color: "text-primary" },
-  ];
 
   const initial = (username || user?.email || "?").charAt(0).toUpperCase();
 
@@ -70,16 +67,21 @@ const Profile = () => {
           </div>
 
           <div className="mt-6 grid grid-cols-3 gap-2">
-            {stats.map((s) => {
-              const Icon = s.icon;
-              return (
-                <div key={s.label} className="rounded-lg bg-secondary/40 p-3">
-                  <Icon className={`mx-auto h-4 w-4 ${s.color}`} />
-                  <div className="mt-1 font-display text-lg font-bold">{s.value}</div>
-                  <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{s.label}</div>
-                </div>
-              );
-            })}
+            <NavLink to="/payments" className="rounded-lg bg-secondary/40 p-3 transition-smooth hover:bg-primary hover:text-primary-foreground">
+              <Wallet className="mx-auto h-4 w-4" />
+              <div className="mt-1 font-display text-lg font-bold">${balance.toFixed(0)}</div>
+              <div className="font-mono text-[9px] uppercase tracking-widest">Balance</div>
+            </NavLink>
+            <NavLink to="/payments" className="rounded-lg bg-secondary/40 p-3 transition-smooth hover:bg-primary hover:text-primary-foreground">
+              <ShoppingCart className="mx-auto h-4 w-4" />
+              <div className="mt-1 font-display text-lg font-bold">{cartItems.length}</div>
+              <div className="font-mono text-[9px] uppercase tracking-widest">Cart</div>
+            </NavLink>
+            <NavLink to="/tickets" className="rounded-lg bg-secondary/40 p-3 transition-smooth hover:bg-primary hover:text-primary-foreground">
+              <MessageSquareText className="mx-auto h-4 w-4" />
+              <div className="mt-1 font-display text-lg font-bold">Open</div>
+              <div className="font-mono text-[9px] uppercase tracking-widest">Tickets</div>
+            </NavLink>
           </div>
         </div>
 
