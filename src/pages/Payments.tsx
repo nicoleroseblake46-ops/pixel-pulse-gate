@@ -1,41 +1,48 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { AlertCircle, Check, Copy, ShoppingCart, Wallet, X } from "lucide-react";
+import { AlertCircle, Check, Copy, CreditCard, ShoppingCart, Wallet, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { toast } from "sonner";
 
-const WALLET_ADDRESS = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh";
-const presetAmounts = [20, 50, 100, 200, 500];
+const wallets = {
+  BTC: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+  LTC: "ltc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+  "USDT/TRC20": "TXy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+};
+const presetAmounts = [50, 100, 200, 500, 1000];
 const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
 
 const Payments = () => {
-  const { balance, cartItems, cartTotal, createPendingPayment } = useCommerce();
+  const { balance, cartItems, cartTotal, createPendingPayment, purchaseCartWithBalance } = useCommerce();
   const [amount, setAmount] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
+  const [coin, setCoin] = useState<keyof typeof wallets>("BTC");
   const [copied, setCopied] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
 
   const checkoutAmount = selected ?? Number(amount);
   const bonus = bonuses[checkoutAmount] ?? 0;
+  const walletAddress = wallets[coin];
 
   const copyWallet = async () => {
-    await navigator.clipboard.writeText(WALLET_ADDRESS);
+    await navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     toast.success("Wallet copied");
     setTimeout(() => setCopied(false), 1600);
   };
 
   const checkout = async () => {
-    if (!checkoutAmount || checkoutAmount < 20) {
-      toast.error("Minimum deposit is $20");
+    if (!checkoutAmount || checkoutAmount < 50) {
+      toast.error("Minimum top up is $50");
       return;
     }
     setSubmitting(true);
     try {
-      const paymentId = await createPendingPayment(checkoutAmount, bonus, WALLET_ADDRESS);
+      const paymentId = await createPendingPayment(checkoutAmount, bonus, coin, walletAddress);
       toast.success("Payment pending", { description: `Order ${paymentId.slice(0, 8)} is awaiting confirmation.` });
       setAmount("");
       setSelected(null);
@@ -43,6 +50,18 @@ const Payments = () => {
       toast.error("Checkout failed", { description: error instanceof Error ? error.message : "Please try again." });
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const buyCart = async () => {
+    setPurchasing(true);
+    try {
+      const orderId = await purchaseCartWithBalance();
+      toast.success("Purchase complete", { description: `Order ${orderId.slice(0, 8)} is now in My Orders.` });
+    } catch (error) {
+      toast.error("Purchase failed", { description: error instanceof Error ? error.message : "Please top up first." });
+    } finally {
+      setPurchasing(false);
     }
   };
 
@@ -95,15 +114,23 @@ const Payments = () => {
             </div>
           )}
 
-          <label className="font-display text-lg font-bold">Amount (USD)</label>
+          <label className="font-display text-lg font-bold">Top up amount (USD)</label>
           <Input
             type="number"
-            min={20}
+            min={50}
             value={amount}
             onChange={(event) => { setAmount(event.target.value); setSelected(null); }}
-            placeholder="Minimum $20"
+            placeholder="Minimum $50"
             className="mt-3 h-12 rounded-lg border-2 border-border bg-input/70 px-4 text-base font-semibold focus-visible:ring-primary"
           />
+
+          <div className="mt-4 grid grid-cols-3 gap-3">
+            {(Object.keys(wallets) as (keyof typeof wallets)[]).map((value) => (
+              <button key={value} onClick={() => setCoin(value)} className={`rounded-lg border p-3 font-display font-bold transition-smooth ${coin === value ? "border-primary bg-primary text-primary-foreground glow-primary" : "border-border bg-secondary/20 hover:border-primary/60"}`}>
+                {value}
+              </button>
+            ))}
+          </div>
 
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {presetAmounts.map((value) => (
@@ -123,8 +150,8 @@ const Payments = () => {
               <QRCodeSVG value={WALLET_ADDRESS} size={108} bgColor="#fafafa" fgColor="#0a0a0f" level="M" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="mb-1 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground"><Wallet className="h-4 w-4" /> BTC deposit address</div>
-              <code className="block truncate rounded-md bg-background/70 px-3 py-2 font-mono text-xs">{WALLET_ADDRESS}</code>
+              <div className="mb-1 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground"><Wallet className="h-4 w-4" /> {coin} deposit address</div>
+              <code className="block truncate rounded-md bg-background/70 px-3 py-2 font-mono text-xs">{walletAddress}</code>
             </div>
             <Button variant="secondary" onClick={copyWallet} className="shrink-0">
               {copied ? <Check /> : <Copy />} Copy
@@ -134,10 +161,25 @@ const Payments = () => {
           <div className="mt-5 flex items-center justify-end gap-4">
             <Button variant="ghost" onClick={() => { setAmount(""); setSelected(null); }}>Cancel</Button>
             <Button onClick={checkout} disabled={submitting} className="h-11 bg-gradient-primary px-8 font-display font-bold text-background glow-primary hover:opacity-90">
-              {submitting ? "Submitting..." : "Checkout"}
+              {submitting ? "Submitting..." : "Submit Top Up"}
             </Button>
           </div>
         </section>
+
+        {!!cartItems.length && (
+          <section className="glass-strong mt-5 rounded-2xl border border-border p-5 shadow-2xl md:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="font-mono text-xs uppercase tracking-widest text-primary">Balance checkout</div>
+                <h2 className="mt-1 font-display text-2xl font-black">Buy cart with confirmed balance</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Top ups must be confirmed by admin before this balance can be used.</p>
+              </div>
+              <Button onClick={buyCart} disabled={purchasing || balance < cartTotal} className="h-11 bg-gradient-primary px-6 font-display font-bold text-background glow-primary hover:opacity-90">
+                <CreditCard /> {purchasing ? "Buying..." : `Buy · $${cartTotal.toFixed(2)}`}
+              </Button>
+            </div>
+          </section>
+        )}
       </div>
     </AppLayout>
   );
