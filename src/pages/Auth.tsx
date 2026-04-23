@@ -91,7 +91,7 @@ const Auth = () => {
               <Zap className="h-8 w-8 text-background" strokeWidth={3} />
             </div>
           </div>
-          <h1 className="font-display text-4xl font-black tracking-[0.2em] neon-text">NEXUS</h1>
+          <div className="font-display text-4xl font-black tracking-[0.2em] neon-text">NEXUS</div>
           <p className="mt-2 font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
             Premium Marketplace · Crypto Only
           </p>
