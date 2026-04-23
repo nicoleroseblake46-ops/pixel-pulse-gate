@@ -3,71 +3,71 @@
 @tailwind utilities;
 
 /* NEXUS — Cyberpunk Gaming Design System
-   All colors HSL. Neon violet + cyan on obsidian black.
+   All colors HSL. High-energy magenta, cyan, lime, and amber on obsidian.
 */
 
 @layer base {
   :root {
     /* Surfaces */
-    --background: 240 18% 5%;
-    --foreground: 220 30% 96%;
+    --background: 230 26% 4%;
+    --foreground: 180 40% 98%;
 
-    --card: 240 20% 8%;
-    --card-foreground: 220 30% 96%;
+    --card: 232 26% 8%;
+    --card-foreground: 180 40% 98%;
 
-    --popover: 240 22% 7%;
-    --popover-foreground: 220 30% 96%;
+    --popover: 232 28% 7%;
+    --popover-foreground: 180 40% 98%;
 
     /* Neon brand */
-    --primary: 270 95% 65%;            /* electric violet */
-    --primary-foreground: 240 18% 5%;
-    --primary-glow: 280 100% 70%;
+    --primary: 322 100% 62%;           /* hot magenta */
+    --primary-foreground: 230 26% 4%;
+    --primary-glow: 332 100% 70%;
 
-    --accent: 185 100% 55%;            /* neon cyan */
-    --accent-foreground: 240 18% 5%;
-    --accent-glow: 175 100% 60%;
+    --accent: 184 100% 52%;            /* electric cyan */
+    --accent-foreground: 230 26% 4%;
+    --accent-glow: 152 100% 58%;
 
-    --secondary: 240 25% 12%;
-    --secondary-foreground: 220 30% 96%;
+    --secondary: 242 34% 13%;
+    --secondary-foreground: 180 40% 98%;
 
-    --muted: 240 15% 14%;
-    --muted-foreground: 220 12% 65%;
+    --muted: 232 22% 15%;
+    --muted-foreground: 190 18% 72%;
 
-    --success: 145 90% 55%;            /* neon green */
-    --warning: 45 100% 60%;
-    --destructive: 0 95% 62%;
-    --destructive-foreground: 220 30% 96%;
+    --success: 145 100% 52%;           /* acid green */
+    --warning: 40 100% 58%;
+    --destructive: 355 100% 64%;
+    --destructive-foreground: 180 40% 98%;
 
-    --border: 270 30% 18%;
-    --input: 240 20% 12%;
-    --ring: 270 95% 65%;
+    --border: 295 55% 24%;
+    --input: 232 28% 13%;
+    --ring: 322 100% 62%;
 
     --radius: 0.75rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(270 95% 60%) 0%, hsl(185 100% 55%) 100%);
-    --gradient-violet: linear-gradient(135deg, hsl(270 95% 55%) 0%, hsl(310 90% 60%) 100%);
-    --gradient-mesh: radial-gradient(at 20% 20%, hsl(270 95% 25% / 0.6) 0px, transparent 50%),
-                     radial-gradient(at 80% 0%, hsl(185 100% 25% / 0.45) 0px, transparent 50%),
-                     radial-gradient(at 80% 80%, hsl(310 90% 25% / 0.4) 0px, transparent 50%),
-                     radial-gradient(at 0% 100%, hsl(220 90% 20% / 0.5) 0px, transparent 50%);
-    --gradient-card: linear-gradient(145deg, hsl(240 22% 10% / 0.85), hsl(240 25% 7% / 0.85));
+    --gradient-primary: linear-gradient(135deg, hsl(322 100% 60%) 0%, hsl(184 100% 52%) 48%, hsl(145 100% 52%) 100%);
+    --gradient-violet: linear-gradient(135deg, hsl(322 100% 58%) 0%, hsl(40 100% 58%) 100%);
+    --gradient-mesh: radial-gradient(at 18% 18%, hsl(322 100% 34% / 0.68) 0px, transparent 48%),
+                     radial-gradient(at 82% 8%, hsl(184 100% 32% / 0.56) 0px, transparent 48%),
+                     radial-gradient(at 78% 82%, hsl(145 100% 28% / 0.46) 0px, transparent 48%),
+                     radial-gradient(at 0% 100%, hsl(40 100% 30% / 0.42) 0px, transparent 50%);
+    --gradient-card: linear-gradient(145deg, hsl(232 30% 11% / 0.9), hsl(256 32% 8% / 0.88));
 
     /* Glows / shadows */
-    --glow-primary: 0 0 20px hsl(270 95% 65% / 0.5), 0 0 40px hsl(270 95% 65% / 0.25);
-    --glow-accent: 0 0 20px hsl(185 100% 55% / 0.5), 0 0 40px hsl(185 100% 55% / 0.25);
-    --glow-soft: 0 8px 32px hsl(270 95% 30% / 0.25);
-    --shadow-elevated: 0 20px 60px -10px hsl(240 50% 2% / 0.8), 0 0 0 1px hsl(270 30% 22% / 0.5);
+    --glow-primary: 0 0 22px hsl(322 100% 62% / 0.62), 0 0 48px hsl(184 100% 52% / 0.28);
+    --glow-accent: 0 0 22px hsl(184 100% 52% / 0.62), 0 0 48px hsl(145 100% 52% / 0.28);
+    --glow-soft: 0 10px 36px hsl(322 100% 36% / 0.32);
+    --shadow-elevated: 0 20px 60px -10px hsl(230 60% 2% / 0.82), 0 0 0 1px hsl(322 85% 38% / 0.5);
 
     /* Sidebar */
-    --sidebar-background: 240 24% 6%;
-    --sidebar-foreground: 220 20% 80%;
-    --sidebar-primary: 270 95% 65%;
-    --sidebar-primary-foreground: 240 18% 5%;
-    --sidebar-accent: 240 25% 12%;
-    --sidebar-accent-foreground: 220 30% 96%;
-    --sidebar-border: 270 30% 14%;
-    --sidebar-ring: 270 95% 65%;
+    --sidebar-background: 232 30% 6%;
+    --sidebar-foreground: 190 22% 84%;
+    --sidebar-primary: 322 100% 62%;
+    --sidebar-primary-foreground: 230 26% 4%;
+    --sidebar-accent: 238 34% 14%;
+    --sidebar-accent-foreground: 180 40% 98%;
+    --sidebar-border: 295 55% 18%;
+    --sidebar-ring: 322 100% 62%;
 
     /* Transitions */
     --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
