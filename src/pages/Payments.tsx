@@ -147,7 +147,7 @@ const Payments = () => {
 
           <div className="mt-5 flex flex-col gap-4 rounded-xl border border-border bg-secondary/20 p-4 sm:flex-row sm:items-center">
             <div className="rounded-lg bg-foreground p-3">
-              <QRCodeSVG value={WALLET_ADDRESS} size={108} bgColor="#fafafa" fgColor="#0a0a0f" level="M" />
+              <QRCodeSVG value={walletAddress} size={108} bgColor="#fafafa" fgColor="#0a0a0f" level="M" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground"><Wallet className="h-4 w-4" /> {coin} deposit address</div>

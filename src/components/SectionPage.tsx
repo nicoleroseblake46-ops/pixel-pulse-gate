@@ -1,5 +1,8 @@
 import { AppLayout } from "@/components/AppLayout";
-import { ArrowUpRight, LucideIcon } from "lucide-react";
+import { LucideIcon, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCommerce } from "@/contexts/CommerceContext";
+import { toast } from "sonner";
 
 interface Props {
   title: string;
@@ -9,7 +12,19 @@ interface Props {
 }
 
 export const SectionPage = ({ title, tagline, Icon, items }: Props) => (
-  <AppLayout>
+  <SectionPageContent title={title} tagline={tagline} Icon={Icon} items={items} />
+);
+
+const SectionPageContent = ({ title, tagline, Icon, items }: Props) => {
+  const { cartItems, addToCart } = useCommerce();
+
+  const addItem = (item: Props["items"][number]) => {
+    const price = Number(item.price.replace(/[^0-9.]/g, ""));
+    addToCart({ id: `${title}-${item.name}`, name: item.name, meta: item.meta, price });
+    toast.success("Added to cart", { description: `${item.name} is ready for balance checkout.` });
+  };
+
+  return <AppLayout>
     <div className="mb-8 animate-fade-up">
       <div className="flex items-center gap-3">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary glow-primary">
@@ -42,10 +57,12 @@ export const SectionPage = ({ title, tagline, Icon, items }: Props) => (
           <p className="mt-1 text-xs text-muted-foreground">{item.meta}</p>
           <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-4">
             <span className="font-mono text-lg font-bold text-primary text-glow">{item.price}</span>
-            <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-smooth group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-primary" />
+            <Button size="sm" variant={cartItems.some((cartItem) => cartItem.id === `${title}-${item.name}`) ? "secondary" : "default"} onClick={() => addItem(item)}>
+              <ShoppingCart /> {cartItems.some((cartItem) => cartItem.id === `${title}-${item.name}`) ? "Added" : "Add"}
+            </Button>
           </div>
         </article>
       ))}
     </div>
   </AppLayout>
-);
+};

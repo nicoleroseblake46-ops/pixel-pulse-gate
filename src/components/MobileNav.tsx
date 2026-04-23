@@ -52,6 +52,13 @@ export const MobileNav = () => {
           ${balance.toFixed(2)}{cartItems.length ? ` · ${cartItems.length}` : ""}
         </NavLink>
         <div className="flex items-center gap-2">
+          <NavLink to="/tickets" className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground">
+            <MessageSquareText className="h-5 w-5" />
+          </NavLink>
+          <NavLink to="/payments" className="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground">
+            <ShoppingBag className="h-5 w-5" />
+            {!!cartItems.length && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 font-mono text-[10px] text-accent-foreground">{cartItems.length}</span>}
+          </NavLink>
           <NavLink to="/profile" className="flex h-10 items-center gap-2 rounded-lg bg-primary-foreground/15 px-2.5 text-sm font-semibold text-primary-foreground">
             <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary-foreground font-display text-sm font-black text-primary">
               {(displayName || user?.email || "U").charAt(0).toUpperCase()}
