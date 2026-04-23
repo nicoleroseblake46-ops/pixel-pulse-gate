@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { User, Wallet } from "lucide-react";
+import { MessageSquareText, ShoppingCart, User, Wallet } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,13 @@ export const AccountTopBar = () => {
   return (
     <div className="sticky top-0 z-30 hidden bg-gradient-primary px-8 py-3 text-primary-foreground shadow-[var(--shadow-elevated)] md:block">
       <div className="mx-auto flex max-w-7xl items-center justify-end gap-3">
+        <NavLink to="/tickets" className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground transition-smooth hover:bg-primary-foreground/25" aria-label="Tickets">
+          <MessageSquareText className="h-5 w-5" />
+        </NavLink>
+        <NavLink to="/payments" className="relative flex h-11 w-11 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground transition-smooth hover:bg-primary-foreground/25" aria-label="Cart">
+          <ShoppingCart className="h-5 w-5" />
+          {!!cartItems.length && <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 font-mono text-[10px] text-accent-foreground">{cartItems.length}</span>}
+        </NavLink>
         <NavLink
           to="/payments"
           className="flex h-11 min-w-36 items-center justify-center gap-2 rounded-lg bg-primary-foreground/15 px-4 font-mono text-sm font-bold text-primary-foreground transition-smooth hover:bg-primary-foreground/25"
