@@ -2,72 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-/* NEXUS — Clean Gaming Design System
-   All colors HSL. White surfaces with crisp electric accents.
+/* CERBERUX — bold navy control panel design system
+   All colors HSL. Deep navigation, soft app canvas, crisp white surfaces.
 */
 
 @layer base {
   :root {
     /* Surfaces */
-    --background: 210 40% 98%;
-    --foreground: 224 32% 12%;
+    --background: 220 30% 94%;
+    --foreground: 236 40% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 224 32% 12%;
+    --card-foreground: 236 40% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 224 32% 12%;
+    --popover-foreground: 236 40% 10%;
 
-    /* Neon brand */
-    --primary: 217 100% 55%;           /* electric blue */
+    /* Cerberux brand */
+    --primary: 241 86% 27%;            /* royal navy */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 192 100% 55%;
+    --primary-glow: 242 82% 38%;
 
-    --accent: 168 100% 42%;            /* mint cyan */
-    --accent-foreground: 224 32% 12%;
-    --accent-glow: 280 95% 64%;
+    --accent: 204 94% 43%;             /* bright action blue */
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 195 92% 58%;
 
-    --secondary: 216 38% 94%;
-    --secondary-foreground: 224 32% 12%;
+    --secondary: 220 26% 91%;
+    --secondary-foreground: 236 40% 10%;
 
-    --muted: 214 32% 92%;
-    --muted-foreground: 220 13% 42%;
+    --muted: 220 24% 90%;
+    --muted-foreground: 230 14% 38%;
 
     --success: 150 82% 42%;
     --warning: 38 100% 52%;
     --destructive: 355 86% 56%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 216 28% 84%;
+    --border: 220 22% 84%;
     --input: 0 0% 100%;
     --ring: 217 100% 55%;
 
     --radius: 0.75rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 100% 55%) 0%, hsl(168 100% 42%) 100%);
-    --gradient-violet: linear-gradient(135deg, hsl(217 100% 55%) 0%, hsl(280 95% 64%) 100%);
-    --gradient-mesh: radial-gradient(at 18% 18%, hsl(217 100% 72% / 0.24) 0px, transparent 46%),
-                     radial-gradient(at 82% 8%, hsl(168 100% 64% / 0.2) 0px, transparent 44%),
-                     radial-gradient(at 78% 82%, hsl(280 95% 76% / 0.18) 0px, transparent 46%),
-                     radial-gradient(at 0% 100%, hsl(38 100% 70% / 0.16) 0px, transparent 48%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(214 48% 96% / 0.9));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+    --gradient-violet: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+    --gradient-mesh: linear-gradient(180deg, hsl(220 30% 94%) 0%, hsl(220 32% 90%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 28% 98%));
 
     /* Glows / shadows */
-    --glow-primary: 0 10px 28px hsl(217 100% 55% / 0.24), 0 0 36px hsl(168 100% 42% / 0.14);
-    --glow-accent: 0 10px 28px hsl(168 100% 42% / 0.22), 0 0 36px hsl(280 95% 64% / 0.12);
-    --glow-soft: 0 14px 40px hsl(217 100% 55% / 0.14);
-    --shadow-elevated: 0 18px 50px -18px hsl(224 32% 12% / 0.22), 0 0 0 1px hsl(216 28% 84% / 0.7);
+    --glow-primary: 0 14px 30px hsl(var(--primary) / 0.24), 0 2px 0 hsl(var(--primary-glow) / 0.18);
+    --glow-accent: 0 12px 26px hsl(var(--accent) / 0.22);
+    --glow-soft: 0 18px 44px hsl(236 40% 10% / 0.13);
+    --shadow-elevated: 0 18px 46px -20px hsl(236 40% 10% / 0.3), 0 0 0 1px hsl(220 22% 84% / 0.8);
 
     /* Sidebar */
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 224 22% 24%;
-    --sidebar-primary: 217 100% 55%;
+    --sidebar-foreground: 236 40% 10%;
+    --sidebar-primary: 241 86% 27%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 216 38% 94%;
-    --sidebar-accent-foreground: 224 32% 12%;
-    --sidebar-border: 216 28% 86%;
-    --sidebar-ring: 217 100% 55%;
+    --sidebar-accent: 220 30% 94%;
+    --sidebar-accent-foreground: 236 40% 10%;
+    --sidebar-border: 220 22% 86%;
+    --sidebar-ring: 241 86% 27%;
 
     /* Transitions */
     --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,7 +87,7 @@
 
   h1, h2, h3, h4, .font-display {
     font-family: 'Orbitron', 'Rajdhani', sans-serif;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 
   .font-mono { font-family: 'JetBrains Mono', monospace; }
@@ -108,14 +105,14 @@
 
 @layer components {
   .glass {
-    background: var(--gradient-card);
+    background: hsl(var(--card));
     backdrop-filter: blur(16px) saturate(140%);
     -webkit-backdrop-filter: blur(16px) saturate(140%);
     border: 1px solid hsl(var(--border) / 0.7);
   }
 
   .glass-strong {
-    background: hsl(var(--card) / 0.75);
+    background: hsl(var(--card) / 0.92);
     backdrop-filter: blur(24px) saturate(160%);
     border: 1px solid hsl(var(--primary) / 0.25);
   }
