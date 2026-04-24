@@ -8,9 +8,9 @@ import { useCommerce } from "@/contexts/CommerceContext";
 import { toast } from "sonner";
 
 const wallets = {
-  BTC: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-  LTC: "ltc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-  "USDT/TRC20": "TXy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
+  BTC: "bc1qrz7zdzjrht9njz24zhpzvyta82yqdpa59cthsq",
+  LTC: "ltc1qu78zvrz0u6n0z4cxn34280p9fag6qrjxunz442",
+  "USDT/TRC20": "TBTM7mbjaptqK2sKr8hxqDSMdmaQawd2t8",
 };
 const presetAmounts = [50, 100, 200, 500, 1000];
 const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
