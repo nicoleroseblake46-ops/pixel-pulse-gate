@@ -62,6 +62,63 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          bank: string | null
+          bin: string | null
+          brand: string | null
+          card_type: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          country: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          meta: string
+          name: string
+          price: number
+          sort_order: number
+          state: string | null
+          tag: string | null
+          updated_at: string
+        }
+        Insert: {
+          bank?: string | null
+          bin?: string | null
+          brand?: string | null
+          card_type?: string | null
+          category: Database["public"]["Enums"]["product_category"]
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          meta?: string
+          name: string
+          price?: number
+          sort_order?: number
+          state?: string | null
+          tag?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bank?: string | null
+          bin?: string | null
+          brand?: string | null
+          card_type?: string | null
+          category?: Database["public"]["Enums"]["product_category"]
+          country?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          meta?: string
+          name?: string
+          price?: number
+          sort_order?: number
+          state?: string | null
+          tag?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -193,6 +250,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      product_category: "sales" | "cards" | "proxy" | "tools" | "socks" | "rdp"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -321,6 +379,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      product_category: ["sales", "cards", "proxy", "tools", "socks", "rdp"],
     },
   },
 } as const
