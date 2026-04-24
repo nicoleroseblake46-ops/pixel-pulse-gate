@@ -65,6 +65,10 @@ const Payments = () => {
     }
   };
 
+  const hasCart = !!cartItems.length;
+  const canBuyWithBalance = hasCart && balance >= cartTotal;
+  const shortfall = hasCart ? Math.max(0, cartTotal - balance) : 0;
+
   return (
     <AppLayout>
       <div className="mx-auto max-w-3xl animate-fade-up">
@@ -79,9 +83,68 @@ const Payments = () => {
           </div>
         </div>
 
+        {hasCart && (
+          <section className="glass-strong mb-5 rounded-2xl border border-primary/40 p-5 shadow-2xl md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-primary">
+                  <ShoppingCart className="h-4 w-4" /> Checkout with balance
+                </div>
+                <h2 className="mt-1 font-display text-2xl font-black">Pay instantly using your funds</h2>
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-lg border border-border bg-secondary/20 p-3">
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Cart total</div>
+                    <div className="font-display text-lg font-black">${cartTotal.toFixed(2)}</div>
+                  </div>
+                  <div className="rounded-lg border border-border bg-secondary/20 p-3">
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Available</div>
+                    <div className="font-display text-lg font-black text-primary">${balance.toFixed(2)}</div>
+                  </div>
+                  <div className={`rounded-lg border p-3 ${canBuyWithBalance ? "border-primary/40 bg-primary/10" : "border-destructive/40 bg-destructive/10"}`}>
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{canBuyWithBalance ? "After purchase" : "Top up needed"}</div>
+                    <div className="font-display text-lg font-black">
+                      {canBuyWithBalance ? `$${(balance - cartTotal).toFixed(2)}` : `$${shortfall.toFixed(2)}`}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-3 max-h-40 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-3">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between gap-3 py-1 text-sm">
+                      <span className="truncate text-muted-foreground">{item.name} <span className="text-xs text-muted-foreground/60">· {item.meta}</span></span>
+                      <span className="font-mono text-foreground">${item.price.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex shrink-0 flex-col items-stretch gap-2 md:w-56">
+                <Button
+                  onClick={buyCart}
+                  disabled={purchasing || !canBuyWithBalance}
+                  className="h-12 bg-gradient-primary font-display text-base font-bold text-background glow-primary hover:opacity-90"
+                >
+                  <CreditCard /> {purchasing ? "Processing..." : `Pay $${cartTotal.toFixed(2)}`}
+                </Button>
+                {!canBuyWithBalance && (
+                  <p className="text-center text-xs font-semibold text-muted-foreground">
+                    Top up <span className="text-foreground">${shortfall.toFixed(2)}</span> more below to checkout.
+                  </p>
+                )}
+                {canBuyWithBalance && (
+                  <p className="text-center text-xs font-semibold text-primary">Funds ready · instant delivery</p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         <section className="glass-strong rounded-2xl border border-border p-5 shadow-2xl md:p-8">
           <div className="mb-5 flex items-start justify-between gap-4">
-            <h2 className="font-display text-2xl font-black">Add money to your account</h2>
+            <div>
+              <div className="font-mono text-xs uppercase tracking-widest text-primary">Crypto top up</div>
+              <h2 className="mt-1 font-display text-2xl font-black">Add money to your account</h2>
+            </div>
             <X className="h-5 w-5 text-muted-foreground" />
           </div>
 
@@ -96,23 +159,6 @@ const Payments = () => {
               </div>
             </div>
           </div>
-
-          {!!cartItems.length && (
-            <div className="mb-5 rounded-xl border border-primary/30 bg-primary/10 p-4">
-              <div className="mb-2 flex items-center justify-between gap-3 font-mono text-xs uppercase tracking-widest text-primary">
-                <span className="flex items-center gap-2"><ShoppingCart className="h-4 w-4" /> Cart checkout</span>
-                <span>${cartTotal.toFixed(2)}</span>
-              </div>
-              <div className="space-y-2">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="truncate text-muted-foreground">{item.id} · {item.name}</span>
-                    <span className="font-mono text-foreground">${item.price.toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
 
           <label className="font-display text-lg font-bold">Top up amount (USD)</label>
           <Input
@@ -165,21 +211,6 @@ const Payments = () => {
             </Button>
           </div>
         </section>
-
-        {!!cartItems.length && (
-          <section className="glass-strong mt-5 rounded-2xl border border-border p-5 shadow-2xl md:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="font-mono text-xs uppercase tracking-widest text-primary">Balance checkout</div>
-                <h2 className="mt-1 font-display text-2xl font-black">Buy cart with confirmed balance</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Top ups must be confirmed by admin before this balance can be used.</p>
-              </div>
-              <Button onClick={buyCart} disabled={purchasing || balance < cartTotal} className="h-11 bg-gradient-primary px-6 font-display font-bold text-background glow-primary hover:opacity-90">
-                <CreditCard /> {purchasing ? "Buying..." : `Buy · $${cartTotal.toFixed(2)}`}
-              </Button>
-            </div>
-          </section>
-        )}
       </div>
     </AppLayout>
   );
