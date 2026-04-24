@@ -86,7 +86,7 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
       .select("id")
       .single();
 
-    if (error) throw error;
+    if (error) throw new Error(error.message || "Top up failed");
     clearCart();
     await refreshBalance();
     return data.id;
@@ -101,7 +101,7 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
       _cart_total: cartTotal,
     });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message || "Purchase failed");
     clearCart();
     await refreshBalance();
     return data as string;
