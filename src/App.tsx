@@ -13,8 +13,9 @@ import Profile from "./pages/Profile";
 import AdminPayments from "./pages/AdminPayments";
 import AdminNews from "./pages/AdminNews";
 import AdminTickets from "./pages/AdminTickets";
+import AdminProducts from "./pages/AdminProducts";
 import ResetPassword from "./pages/ResetPassword";
-import { Sales, Cards, Socks, Proxy, Tools } from "./pages/Sections";
+import { Sales, Cards, Socks, Proxy, Tools, RDP } from "./pages/Sections";
 import MyOrders from "./pages/MyOrders";
 import Tickets from "./pages/Tickets";
 import NotFound from "./pages/NotFound.tsx";
@@ -38,11 +39,13 @@ const App = () => (
               <Route path="/socks" element={<ProtectedRoute><Socks /></ProtectedRoute>} />
               <Route path="/proxy" element={<ProtectedRoute><Proxy /></ProtectedRoute>} />
               <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
+              <Route path="/rdp" element={<ProtectedRoute><RDP /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
               <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
               <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
               <Route path="/admin/news" element={<ProtectedRoute><AdminNews /></ProtectedRoute>} />
               <Route path="/admin/tickets" element={<ProtectedRoute><AdminTickets /></ProtectedRoute>} />
+              <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
               <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
