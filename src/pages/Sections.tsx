@@ -1,15 +1,15 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone, ShieldCheck } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
+import { flagEmoji } from "@/lib/flag";
 import { toast } from "sonner";
 
 const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
@@ -141,55 +141,99 @@ export const Cards = () => {
         </div>
       </section>
 
-      <section className="glass rounded-xl p-4 animate-fade-up md:p-5" style={{ animationDelay: "80ms" }}>
-        <div className="mb-4 flex items-center justify-between">
+      <section className="space-y-3 animate-fade-up" style={{ animationDelay: "80ms" }}>
+        <div className="flex items-center justify-between">
           <div className="font-mono text-xs uppercase tracking-[0.3em] text-primary">Available Cards</div>
           <div className="font-mono text-xs text-muted-foreground">{availableCards.length} MATCHES</div>
         </div>
+
         {loading ? (
           <Loader />
+        ) : !availableCards.length ? (
+          <div className="glass rounded-xl px-6 py-12 text-center text-muted-foreground">
+            No cards match the current filters.
+          </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>BIN</TableHead>
-                <TableHead>Country</TableHead>
-                <TableHead>Info</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {availableCards.map((card) => {
-                const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
-                return (
-                  <TableRow key={card.id}>
-                    <TableCell className="font-mono text-primary">{card.bin ?? "—"}</TableCell>
-                    <TableCell>{card.country ?? "—"}</TableCell>
-                    <TableCell className="min-w-[240px]">
-                      <div className="font-medium">{card.brand ?? card.name} {card.card_type ?? ""} · {card.bank ?? ""}</div>
-                      <div className="text-xs text-muted-foreground">{card.state ?? ""} · {card.meta}</div>
-                    </TableCell>
-                    <TableCell className="font-mono font-bold text-primary">${Number(card.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant={inCart ? "secondary" : "default"} onClick={() => addCard(card)} disabled={inCart}>
-                        <Plus /> {inCart ? "Added" : "Add"}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {!availableCards.length && (
-                <TableRow>
-                  <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                    No cards match the current filters.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+          <div className="space-y-3">
+            {/* Column headers — visible on lg+ */}
+            <div className="hidden gap-2 rounded-lg border border-border bg-card/70 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground lg:grid lg:grid-cols-[1.2fr_0.6fr_0.7fr_0.5fr_0.6fr_1.1fr_0.5fr_0.8fr_0.6fr_0.7fr_0.6fr]">
+              <div>Base</div>
+              <div>Seller</div>
+              <div>BIN</div>
+              <div>Exp</div>
+              <div>ZIP</div>
+              <div>Bank</div>
+              <div>Valid</div>
+              <div>Scheme</div>
+              <div>Type</div>
+              <div>Level</div>
+              <div>Country</div>
+            </div>
+
+            {availableCards.map((card) => {
+              const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
+              return (
+                <article
+                  key={card.id}
+                  className="group rounded-xl border border-border bg-card p-4 shadow-sm transition-smooth hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)] md:p-5"
+                >
+                  {/* Top row: data grid */}
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4 lg:grid-cols-[1.2fr_0.6fr_0.7fr_0.5fr_0.6fr_1.1fr_0.5fr_0.8fr_0.6fr_0.7fr_0.6fr] lg:items-center">
+                    <Field label="Base" valueClass="font-mono font-bold text-accent">{card.name}</Field>
+                    <Field label="Seller" valueClass="font-mono font-bold text-success">{card.seller ?? "—"}</Field>
+                    <Field label="BIN" valueClass="font-mono font-bold text-primary">{card.bin ?? "—"}</Field>
+                    <Field label="Exp" valueClass="font-mono font-semibold text-foreground">{card.exp ?? "—"}</Field>
+                    <Field label="ZIP" valueClass="font-mono font-semibold text-warning">{card.zip ?? "—"}</Field>
+                    <Field label="Bank" valueClass="font-medium text-foreground">{card.bank ?? "—"}</Field>
+                    <Field label="Valid" valueClass="font-mono font-bold text-success">{card.valid ?? "—"}</Field>
+                    <Field label="Scheme" valueClass="font-mono font-bold uppercase text-foreground">{card.scheme ?? card.brand ?? "—"}</Field>
+                    <Field label="Type" valueClass="font-medium text-foreground">{card.card_type ?? "—"}</Field>
+                    <Field label="Level" valueClass="font-mono font-bold uppercase text-foreground">{card.level ?? "—"}</Field>
+                    <Field label="Country" valueClass="text-foreground">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="text-lg leading-none">{flagEmoji(card.country_code)}</span>
+                        <span className="font-mono text-xs uppercase">{card.country_code ?? card.country ?? ""}</span>
+                      </span>
+                    </Field>
+                  </div>
+
+                  {/* Bottom row: price, CTA, extras */}
+                  <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 font-mono text-xs font-bold text-background">
+                      <span className="text-muted-foreground/80">PRICE:</span>
+                      <span className="text-background">${Number(card.price).toFixed(2)}</span>
+                    </span>
+                    <Button
+                      size="sm"
+                      variant={inCart ? "secondary" : "default"}
+                      onClick={() => addCard(card)}
+                      disabled={inCart}
+                      className="rounded-full"
+                    >
+                      <ShoppingCart className="h-4 w-4" /> {inCart ? "Added" : "Add to cart"}
+                    </Button>
+                    {card.extras && (
+                      <span className="font-mono text-xs text-accent">{card.extras}</span>
+                    )}
+                    {card.tag && (
+                      <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-accent">
+                        <ShieldCheck className="h-3 w-3" /> {card.tag}
+                      </span>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         )}
       </section>
     </AppLayout>
   );
 };
+
+const Field = ({ label, valueClass, children }: { label: string; valueClass?: string; children: React.ReactNode }) => (
+  <div className="min-w-0">
+    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground lg:hidden">{label}</div>
+    <div className={`truncate ${valueClass ?? ""}`}>{children}</div>
+  </div>
+);

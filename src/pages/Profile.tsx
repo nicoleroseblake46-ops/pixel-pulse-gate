@@ -61,7 +61,6 @@ const Profile = () => {
             </div>
           </div>
           <div className="mt-4 font-display text-xl font-bold">{username || "Unnamed Agent"}</div>
-          <div className="font-mono text-xs text-muted-foreground">{user?.email}</div>
           <div className="mt-4 inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-success">
             <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse-glow" /> ACTIVE
           </div>

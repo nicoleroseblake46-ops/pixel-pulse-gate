@@ -33,6 +33,14 @@ const emptyForm = {
   brand: "",
   card_type: "",
   bank: "",
+  seller: "",
+  exp: "",
+  zip: "",
+  valid: "",
+  scheme: "",
+  level: "",
+  country_code: "",
+  extras: "",
 };
 
 const AdminProducts = () => {
@@ -96,6 +104,14 @@ const AdminProducts = () => {
       brand: isCards ? form.brand.trim() || null : null,
       card_type: isCards ? form.card_type.trim() || null : null,
       bank: isCards ? form.bank.trim() || null : null,
+      seller: isCards ? form.seller.trim() || null : null,
+      exp: isCards ? form.exp.trim() || null : null,
+      zip: isCards ? form.zip.trim() || null : null,
+      valid: isCards ? form.valid.trim() || null : null,
+      scheme: isCards ? form.scheme.trim() || null : null,
+      level: isCards ? form.level.trim() || null : null,
+      country_code: isCards ? form.country_code.trim().toUpperCase() || null : null,
+      extras: isCards ? form.extras.trim() || null : null,
     };
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
@@ -123,6 +139,14 @@ const AdminProducts = () => {
       brand: p.brand ?? "",
       card_type: p.card_type ?? "",
       bank: p.bank ?? "",
+      seller: p.seller ?? "",
+      exp: p.exp ?? "",
+      zip: p.zip ?? "",
+      valid: p.valid ?? "",
+      scheme: p.scheme ?? "",
+      level: p.level ?? "",
+      country_code: p.country_code ?? "",
+      extras: p.extras ?? "",
     });
   };
 
@@ -201,12 +225,21 @@ const AdminProducts = () => {
 
                   {isCards && (
                     <div className="grid gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 md:grid-cols-3">
+                      <Input placeholder="Base (e.g. Galaxy:25-04)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                      <Input placeholder="Seller (e.g. 6369)" value={form.seller} onChange={(e) => setForm({ ...form, seller: e.target.value })} />
                       <Input placeholder="BIN" value={form.bin} onChange={(e) => setForm({ ...form, bin: e.target.value })} />
-                      <Input placeholder="Country" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-                      <Input placeholder="State" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-                      <Input placeholder="Brand" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-                      <Input placeholder="Card type" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
+                      <Input placeholder="Exp (e.g. 2/27)" value={form.exp} onChange={(e) => setForm({ ...form, exp: e.target.value })} />
+                      <Input placeholder="ZIP" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
                       <Input placeholder="Bank" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
+                      <Input placeholder="Valid % (e.g. 85%)" value={form.valid} onChange={(e) => setForm({ ...form, valid: e.target.value })} />
+                      <Input placeholder="Scheme (e.g. MASTERCARD)" value={form.scheme} onChange={(e) => setForm({ ...form, scheme: e.target.value })} />
+                      <Input placeholder="Type (e.g. Credit)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
+                      <Input placeholder="Level (e.g. STANDARD)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
+                      <Input placeholder="Country name" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+                      <Input placeholder="Country code (e.g. NL)" maxLength={2} value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value.toUpperCase() })} />
+                      <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+                      <Input placeholder="Brand (legacy)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
+                      <Input placeholder="Extras (e.g. Full name + Address...)" className="md:col-span-3" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} />
                     </div>
                   )}
 
