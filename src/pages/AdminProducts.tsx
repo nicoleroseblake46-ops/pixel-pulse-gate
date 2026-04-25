@@ -104,6 +104,14 @@ const AdminProducts = () => {
       brand: isCards ? form.brand.trim() || null : null,
       card_type: isCards ? form.card_type.trim() || null : null,
       bank: isCards ? form.bank.trim() || null : null,
+      seller: isCards ? form.seller.trim() || null : null,
+      exp: isCards ? form.exp.trim() || null : null,
+      zip: isCards ? form.zip.trim() || null : null,
+      valid: isCards ? form.valid.trim() || null : null,
+      scheme: isCards ? form.scheme.trim() || null : null,
+      level: isCards ? form.level.trim() || null : null,
+      country_code: isCards ? form.country_code.trim().toUpperCase() || null : null,
+      extras: isCards ? form.extras.trim() || null : null,
     };
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
