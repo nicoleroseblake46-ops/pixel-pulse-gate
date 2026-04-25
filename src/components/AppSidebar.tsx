@@ -28,10 +28,10 @@ export const AppSidebar = () => {
       <div className="relative flex h-28 flex-col items-center justify-center gap-2 bg-gradient-primary px-6 text-primary-foreground">
         <div className="relative">
           <div className="flex h-12 w-16 items-center justify-center rounded-t-full rounded-bl-xl rounded-br-sm bg-primary-foreground shadow-sm">
-            <span className="font-display text-2xl font-black text-primary">C</span>
+            <span className="font-display text-2xl font-black text-primary">N</span>
           </div>
         </div>
-        <div className="font-display text-xl font-black uppercase tracking-normal">CERBERUX</div>
+        <div className="font-display text-xl font-black uppercase tracking-normal">NEXUS</div>
       </div>
 
       {/* Nav */}
