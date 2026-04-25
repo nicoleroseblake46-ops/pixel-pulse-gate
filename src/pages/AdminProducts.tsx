@@ -139,6 +139,14 @@ const AdminProducts = () => {
       brand: p.brand ?? "",
       card_type: p.card_type ?? "",
       bank: p.bank ?? "",
+      seller: p.seller ?? "",
+      exp: p.exp ?? "",
+      zip: p.zip ?? "",
+      valid: p.valid ?? "",
+      scheme: p.scheme ?? "",
+      level: p.level ?? "",
+      country_code: p.country_code ?? "",
+      extras: p.extras ?? "",
     });
   };
 
