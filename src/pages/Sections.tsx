@@ -1,15 +1,15 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone, ShieldCheck } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
+import { flagEmoji } from "@/lib/flag";
 import { toast } from "sonner";
 
 const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
