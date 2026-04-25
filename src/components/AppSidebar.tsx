@@ -156,7 +156,6 @@ export const AppSidebar = () => {
             <div className="h-2 w-2 rounded-full bg-success animate-pulse-glow" />
             <div className="font-mono text-xs text-muted-foreground">SYSTEM ONLINE</div>
           </div>
-          <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground/70">{user?.email}</div>
         </div>
         <button
           onClick={signOut}
