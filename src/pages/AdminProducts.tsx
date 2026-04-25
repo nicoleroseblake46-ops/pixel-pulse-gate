@@ -112,7 +112,7 @@ const AdminProducts = () => {
       valid: isCards ? form.valid.trim() || null : null,
       scheme: isCards ? form.scheme.trim() || null : null,
       level: isCards ? form.level.trim() || null : null,
-      country_code: isCards ? form.country_code.trim().toUpperCase() || null : null,
+      country_code: isCards ? form.country_code.trim() || null : null,
       extras: isCards ? form.extras.trim() || null : null,
     };
     const { error } = editingId
