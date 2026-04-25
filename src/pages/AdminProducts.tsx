@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAdmin } from "@/hooks/use-admin";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductCategory } from "@/hooks/use-products";
+import { COUNTRIES, findCountry } from "@/lib/countries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon }[] = [
   { value: "sales", label: "Sales", Icon: TagIcon },
