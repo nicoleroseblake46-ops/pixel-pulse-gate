@@ -191,8 +191,10 @@ export const Cards = () => {
                     <Field label="Level" valueClass="font-mono font-bold uppercase text-foreground">{card.level ?? "—"}</Field>
                     <Field label="Country" valueClass="text-foreground">
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="text-lg leading-none">{flagEmoji(card.country_code)}</span>
-                        <span className="font-mono text-xs uppercase">{card.country_code ?? card.country ?? ""}</span>
+                        {flagEmoji(card.country_code) && (
+                          <span className="text-lg leading-none">{flagEmoji(card.country_code)}</span>
+                        )}
+                        <span className="font-mono text-xs uppercase">{card.country ?? card.country_code ?? "—"}</span>
                       </span>
                     </Field>
                   </div>
