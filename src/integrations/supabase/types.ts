@@ -70,16 +70,24 @@ export type Database = {
           card_type: string | null
           category: Database["public"]["Enums"]["product_category"]
           country: string | null
+          country_code: string | null
           created_at: string
+          exp: string | null
+          extras: string | null
           id: string
           is_active: boolean
+          level: string | null
           meta: string
           name: string
           price: number
+          scheme: string | null
+          seller: string | null
           sort_order: number
           state: string | null
           tag: string | null
           updated_at: string
+          valid: string | null
+          zip: string | null
         }
         Insert: {
           bank?: string | null
@@ -88,16 +96,24 @@ export type Database = {
           card_type?: string | null
           category: Database["public"]["Enums"]["product_category"]
           country?: string | null
+          country_code?: string | null
           created_at?: string
+          exp?: string | null
+          extras?: string | null
           id?: string
           is_active?: boolean
+          level?: string | null
           meta?: string
           name: string
           price?: number
+          scheme?: string | null
+          seller?: string | null
           sort_order?: number
           state?: string | null
           tag?: string | null
           updated_at?: string
+          valid?: string | null
+          zip?: string | null
         }
         Update: {
           bank?: string | null
@@ -106,16 +122,24 @@ export type Database = {
           card_type?: string | null
           category?: Database["public"]["Enums"]["product_category"]
           country?: string | null
+          country_code?: string | null
           created_at?: string
+          exp?: string | null
+          extras?: string | null
           id?: string
           is_active?: boolean
+          level?: string | null
           meta?: string
           name?: string
           price?: number
+          scheme?: string | null
+          seller?: string | null
           sort_order?: number
           state?: string | null
           tag?: string | null
           updated_at?: string
+          valid?: string | null
+          zip?: string | null
         }
         Relationships: []
       }
