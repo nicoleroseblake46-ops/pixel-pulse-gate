@@ -79,15 +79,17 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Rajdhani', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
     background-color: hsl(var(--background));
     background-image: var(--gradient-mesh);
     background-attachment: fixed;
   }
 
   h1, h2, h3, h4, .font-display {
-    font-family: 'Orbitron', 'Rajdhani', sans-serif;
-    letter-spacing: 0;
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    letter-spacing: -0.015em;
+    font-weight: 700;
   }
 
   .font-mono { font-family: 'JetBrains Mono', monospace; }
