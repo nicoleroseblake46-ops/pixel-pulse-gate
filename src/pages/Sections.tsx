@@ -230,3 +230,10 @@ export const Cards = () => {
     </AppLayout>
   );
 };
+
+const Field = ({ label, valueClass, children }: { label: string; valueClass?: string; children: React.ReactNode }) => (
+  <div className="min-w-0">
+    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground lg:hidden">{label}</div>
+    <div className={`truncate ${valueClass ?? ""}`}>{children}</div>
+  </div>
+);
