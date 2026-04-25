@@ -18,6 +18,14 @@ export type Product = {
   brand: string | null;
   card_type: string | null;
   bank: string | null;
+  seller: string | null;
+  exp: string | null;
+  zip: string | null;
+  valid: string | null;
+  scheme: string | null;
+  level: string | null;
+  country_code: string | null;
+  extras: string | null;
   created_at: string;
   updated_at: string;
 };
