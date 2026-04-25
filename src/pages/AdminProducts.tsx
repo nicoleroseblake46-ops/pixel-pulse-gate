@@ -33,6 +33,14 @@ const emptyForm = {
   brand: "",
   card_type: "",
   bank: "",
+  seller: "",
+  exp: "",
+  zip: "",
+  valid: "",
+  scheme: "",
+  level: "",
+  country_code: "",
+  extras: "",
 };
 
 const AdminProducts = () => {
