@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAdmin } from "@/hooks/use-admin";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductCategory } from "@/hooks/use-products";
+import { COUNTRIES, findCountry } from "@/lib/countries";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon }[] = [
   { value: "sales", label: "Sales", Icon: TagIcon },
@@ -110,7 +112,7 @@ const AdminProducts = () => {
       valid: isCards ? form.valid.trim() || null : null,
       scheme: isCards ? form.scheme.trim() || null : null,
       level: isCards ? form.level.trim() || null : null,
-      country_code: isCards ? form.country_code.trim().toUpperCase() || null : null,
+      country_code: isCards ? form.country_code.trim() || null : null,
       extras: isCards ? form.extras.trim() || null : null,
     };
     const { error } = editingId
@@ -235,8 +237,37 @@ const AdminProducts = () => {
                       <Input placeholder="Scheme (e.g. MASTERCARD)" value={form.scheme} onChange={(e) => setForm({ ...form, scheme: e.target.value })} />
                       <Input placeholder="Type (e.g. Credit)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
                       <Input placeholder="Level (e.g. STANDARD)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
-                      <Input placeholder="Country name" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-                      <Input placeholder="Country code (e.g. NL)" maxLength={2} value={form.country_code} onChange={(e) => setForm({ ...form, country_code: e.target.value.toUpperCase() })} />
+                      <div className="md:col-span-2">
+                        <Select
+                          value={findCountry(form.country_code)?.code ?? ""}
+                          onValueChange={(code) => {
+                            const c = COUNTRIES.find((x) => x.code === code);
+                            if (c) setForm({ ...form, country: c.name, country_code: c.flag });
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Country (with real flag)">
+                              {form.country_code && (
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="text-lg leading-none">{form.country_code}</span>
+                                  <span>{form.country || findCountry(form.country_code)?.name}</span>
+                                </span>
+                              )}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            {COUNTRIES.map((c) => (
+                              <SelectItem key={c.code} value={c.code}>
+                                <span className="inline-flex items-center gap-2">
+                                  <span className="text-lg leading-none">{c.flag}</span>
+                                  <span>{c.name}</span>
+                                  <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                       <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
                       <Input placeholder="Brand (legacy)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
                       <Input placeholder="Extras (e.g. Full name + Address...)" className="md:col-span-3" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} />

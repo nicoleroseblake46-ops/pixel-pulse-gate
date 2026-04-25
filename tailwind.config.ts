@@ -8,8 +8,8 @@ export default {
     container: { center: true, padding: "1.5rem", screens: { "2xl": "1400px" } },
     extend: {
       fontFamily: {
-        display: ["Orbitron", "sans-serif"],
-        sans: ["Rajdhani", "system-ui", "sans-serif"],
+        display: ["Space Grotesk", "Inter", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
