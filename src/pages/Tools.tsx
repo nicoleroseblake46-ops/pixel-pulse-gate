@@ -128,8 +128,19 @@ const Tools = () => {
               <span className="font-mono font-bold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span> for this service per card.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-success">
-            <ShieldCheck className="h-3.5 w-3.5" /> Secure · Encrypted
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest ${
+                insufficient && lines.length
+                  ? "border-destructive/40 bg-destructive/10 text-destructive"
+                  : "border-primary/40 bg-primary/10 text-primary"
+              }`}
+            >
+              <Wallet className="h-3.5 w-3.5" /> Balance · ${balance.toFixed(2)}
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-success">
+              <ShieldCheck className="h-3.5 w-3.5" /> Secure · Encrypted
+            </div>
           </div>
         </div>
 
