@@ -170,11 +170,20 @@ const Tools = () => {
             </div>
             <Button
               onClick={runCheck}
-              disabled={running || !lines.length}
+              disabled={running || !lines.length || insufficient}
               className="mt-4 h-12 w-full rounded-xl bg-destructive font-display text-base font-black uppercase tracking-widest text-destructive-foreground hover:bg-destructive/90"
             >
-              {running ? "Checking..." : "Check"}
+              {running
+                ? "Checking..."
+                : insufficient && lines.length
+                  ? `Insufficient balance · need $${totalCost.toFixed(2)}`
+                  : "Check"}
             </Button>
+            {insufficient && lines.length > 0 && (
+              <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-destructive">
+                Top up your balance to run this check
+              </p>
+            )}
           </div>
 
           {/* Results panels */}
