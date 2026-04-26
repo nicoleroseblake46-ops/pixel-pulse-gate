@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { AlertCircle, Check, Copy, CreditCard, ShoppingCart, Wallet, X } from "lucide-react";
+import { AlertCircle, Check, Copy, CreditCard, ShoppingCart, Trash2, Wallet, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCommerce } from "@/contexts/CommerceContext";
+import { useCryptoRates, formatCrypto } from "@/hooks/use-crypto-rates";
 import { toast } from "sonner";
 
 const wallets = {
@@ -16,23 +17,36 @@ const presetAmounts = [50, 100, 200, 500, 1000];
 const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
 
 const Payments = () => {
-  const { balance, cartItems, cartTotal, createPendingPayment, purchaseCartWithBalance } = useCommerce();
+  const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
+  const { rates, loading: ratesLoading } = useCryptoRates();
   const [amount, setAmount] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
   const [coin, setCoin] = useState<keyof typeof wallets>("BTC");
   const [copied, setCopied] = useState(false);
+  const [copiedAmount, setCopiedAmount] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
 
   const checkoutAmount = selected ?? Number(amount);
   const bonus = bonuses[checkoutAmount] ?? 0;
   const walletAddress = wallets[coin];
+  const rate = rates[coin];
+  const cryptoAmount = checkoutAmount > 0 && rate > 0 ? checkoutAmount / rate : 0;
+  const cryptoDisplay = formatCrypto(cryptoAmount, coin);
 
   const copyWallet = async () => {
     await navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     toast.success("Wallet copied");
     setTimeout(() => setCopied(false), 1600);
+  };
+
+  const copyCryptoAmount = async () => {
+    if (!cryptoAmount) return;
+    await navigator.clipboard.writeText(cryptoDisplay);
+    setCopiedAmount(true);
+    toast.success(`${cryptoDisplay} ${coin.split("/")[0]} copied`);
+    setTimeout(() => setCopiedAmount(false), 1600);
   };
 
   const checkout = async () => {
