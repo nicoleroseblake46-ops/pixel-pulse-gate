@@ -16,6 +16,7 @@ interface CommerceContextValue {
   cartTotal: number;
   addToCart: (item: CartItem) => void;
   addManyToCart: (items: CartItem[]) => void;
+  removeFromCart: (id: string) => void;
   clearCart: () => void;
   refreshBalance: () => Promise<void>;
   createPendingPayment: (amount: number, bonus: number, coin: string, walletAddress: string) => Promise<string>;
