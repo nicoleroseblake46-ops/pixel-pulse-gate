@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductCategory } from "@/hooks/use-products";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CountryFlag } from "@/components/CountryFlag";
 
 const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon }[] = [
   { value: "sales", label: "Sales", Icon: TagIcon },
