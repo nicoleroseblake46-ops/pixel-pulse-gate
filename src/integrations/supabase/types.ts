@@ -258,6 +258,10 @@ export type Database = {
     Functions: {
       approve_payment: { Args: { _payment_id: string }; Returns: undefined }
       assign_admin_role_by_email: { Args: { _email: string }; Returns: Json }
+      charge_checker_fee: {
+        Args: { _count: number; _price_per_check: number }
+        Returns: number
+      }
       confirm_payment: { Args: { _payment_id: string }; Returns: undefined }
       has_role: {
         Args: {

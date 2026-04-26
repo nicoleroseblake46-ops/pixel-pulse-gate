@@ -1,32 +1,16 @@
 import { useMemo, useState } from "react";
-import { Wrench, ShoppingCart, ShieldCheck, Sparkles } from "lucide-react";
+import { Wrench, ShoppingCart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const PRICE_PER_CHECK = 0.5;
-
-// Luhn check — used to deterministically classify a card as Alive (passes Luhn) or Dead.
-const luhnValid = (digits: string): boolean => {
-  const arr = digits.split("").map((n) => parseInt(n, 10));
-  if (arr.length < 12 || arr.some((n) => Number.isNaN(n))) return false;
-  let sum = 0;
-  let alt = false;
-  for (let i = arr.length - 1; i >= 0; i--) {
-    let v = arr[i];
-    if (alt) {
-      v *= 2;
-      if (v > 9) v -= 9;
-    }
-    sum += v;
-    alt = !alt;
-  }
-  return sum % 10 === 0;
-};
+const LIVE_RATE = 0.9; // ~90% of cards return Live
 
 type Parsed = { raw: string; pan: string; mm: string; yy: string; cvv: string };
 
@@ -55,7 +39,7 @@ const parseLine = (line: string): Parsed | null => {
 };
 
 const Tools = () => {
-  const { cartItems, addToCart } = useCommerce();
+  const { cartItems, addToCart, balance, refreshBalance } = useCommerce();
   const { products, loading } = useProducts("tools");
   const [input, setInput] = useState("");
   const [alive, setAlive] = useState<string[]>([]);
@@ -67,25 +51,47 @@ const Tools = () => {
     [input],
   );
   const totalCost = lines.length * PRICE_PER_CHECK;
+  const insufficient = totalCost > balance;
 
   const runCheck = async () => {
     if (!lines.length) {
       toast.error("Add at least one card to check");
       return;
     }
+    if (insufficient) {
+      toast.error("Insufficient balance", {
+        description: `You need $${totalCost.toFixed(2)} to run this check. Top up your balance first.`,
+      });
+      return;
+    }
     setRunning(true);
     setAlive([]);
     setDead([]);
-    // Simulated streaming check — animates rows in for realism.
+
+    // Charge the user's main balance atomically server-side BEFORE running checks.
+    const { error: chargeError } = await supabase.rpc("charge_checker_fee", {
+      _count: lines.length,
+      _price_per_check: PRICE_PER_CHECK,
+    });
+    if (chargeError) {
+      setRunning(false);
+      toast.error("Could not charge fee", { description: chargeError.message });
+      return;
+    }
+    await refreshBalance();
+
+    // Simulated streaming check — ~90% Live, ~10% Dead, randomized per card.
     for (let i = 0; i < lines.length; i++) {
       const l = lines[i];
       await new Promise((r) => setTimeout(r, 220));
-      const ok = luhnValid(l.pan);
-      if (ok) setAlive((prev) => [...prev, l.raw]);
+      const isLive = Math.random() < LIVE_RATE;
+      if (isLive) setAlive((prev) => [...prev, l.raw]);
       else setDead((prev) => [...prev, l.raw]);
     }
     setRunning(false);
-    toast.success("Check complete", { description: `${lines.length} cards processed.` });
+    toast.success("Check complete", {
+      description: `${lines.length} cards processed · $${totalCost.toFixed(2)} charged from balance.`,
+    });
   };
 
   const addItem = (item: typeof products[number]) => {
@@ -122,8 +128,19 @@ const Tools = () => {
               <span className="font-mono font-bold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span> for this service per card.
             </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-success">
-            <ShieldCheck className="h-3.5 w-3.5" /> Secure · Encrypted
+          <div className="flex flex-wrap items-center gap-2">
+            <div
+              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest ${
+                insufficient && lines.length
+                  ? "border-destructive/40 bg-destructive/10 text-destructive"
+                  : "border-primary/40 bg-primary/10 text-primary"
+              }`}
+            >
+              <Wallet className="h-3.5 w-3.5" /> Balance · ${balance.toFixed(2)}
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-success">
+              <ShieldCheck className="h-3.5 w-3.5" /> Secure · Encrypted
+            </div>
           </div>
         </div>
 
@@ -153,11 +170,20 @@ const Tools = () => {
             </div>
             <Button
               onClick={runCheck}
-              disabled={running || !lines.length}
+              disabled={running || !lines.length || insufficient}
               className="mt-4 h-12 w-full rounded-xl bg-destructive font-display text-base font-black uppercase tracking-widest text-destructive-foreground hover:bg-destructive/90"
             >
-              {running ? "Checking..." : "Check"}
+              {running
+                ? "Checking..."
+                : insufficient && lines.length
+                  ? `Insufficient balance · need $${totalCost.toFixed(2)}`
+                  : "Check"}
             </Button>
+            {insufficient && lines.length > 0 && (
+              <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-destructive">
+                Top up your balance to run this check
+              </p>
+            )}
           </div>
 
           {/* Results panels */}
