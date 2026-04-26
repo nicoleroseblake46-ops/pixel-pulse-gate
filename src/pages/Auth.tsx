@@ -30,13 +30,25 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [captcha, setCaptcha] = useState(generateCaptcha);
+  const [captchaInput, setCaptchaInput] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => { if (user) navigate("/", { replace: true }); }, [user, navigate]);
 
+  const refreshCaptcha = useCallback(() => {
+    setCaptcha(generateCaptcha());
+    setCaptchaInput("");
+  }, []);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (parseInt(captchaInput, 10) !== captcha.answer) {
+      toast.error("Captcha incorrect", { description: "Please solve the math challenge to continue." });
+      refreshCaptcha();
+      return;
+    }
     const parsed = schema.safeParse({ email, password, username: mode === "signup" ? username : undefined });
     if (!parsed.success) {
       toast.error(parsed.error.errors[0].message);
