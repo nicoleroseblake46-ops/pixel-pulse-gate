@@ -16,6 +16,7 @@ interface CommerceContextValue {
   cartTotal: number;
   addToCart: (item: CartItem) => void;
   addManyToCart: (items: CartItem[]) => void;
+  removeFromCart: (id: string) => void;
   clearCart: () => void;
   refreshBalance: () => Promise<void>;
   createPendingPayment: (amount: number, bonus: number, coin: string, walletAddress: string) => Promise<string>;
@@ -66,6 +67,8 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const removeFromCart = (id: string) => setCartItems((current) => current.filter((item) => item.id !== id));
+
   const clearCart = () => setCartItems([]);
 
   const createPendingPayment = async (amount: number, bonus: number, coin: string, walletAddress: string) => {
@@ -108,7 +111,7 @@ export const CommerceProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <CommerceContext.Provider value={{ balance, cartItems, cartTotal, addToCart, addManyToCart, clearCart, refreshBalance, createPendingPayment, purchaseCartWithBalance }}>
+    <CommerceContext.Provider value={{ balance, cartItems, cartTotal, addToCart, addManyToCart, removeFromCart, clearCart, refreshBalance, createPendingPayment, purchaseCartWithBalance }}>
       {children}
     </CommerceContext.Provider>
   );

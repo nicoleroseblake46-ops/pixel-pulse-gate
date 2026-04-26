@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { AlertCircle, Check, Copy, CreditCard, ShoppingCart, Wallet, X } from "lucide-react";
+import { AlertCircle, Check, Copy, CreditCard, ShoppingCart, Trash2, Wallet, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCommerce } from "@/contexts/CommerceContext";
+import { useCryptoRates, formatCrypto } from "@/hooks/use-crypto-rates";
 import { toast } from "sonner";
 
 const wallets = {
@@ -16,23 +17,36 @@ const presetAmounts = [50, 100, 200, 500, 1000];
 const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
 
 const Payments = () => {
-  const { balance, cartItems, cartTotal, createPendingPayment, purchaseCartWithBalance } = useCommerce();
+  const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
+  const { rates, loading: ratesLoading } = useCryptoRates();
   const [amount, setAmount] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
   const [coin, setCoin] = useState<keyof typeof wallets>("BTC");
   const [copied, setCopied] = useState(false);
+  const [copiedAmount, setCopiedAmount] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
 
   const checkoutAmount = selected ?? Number(amount);
   const bonus = bonuses[checkoutAmount] ?? 0;
   const walletAddress = wallets[coin];
+  const rate = rates[coin];
+  const cryptoAmount = checkoutAmount > 0 && rate > 0 ? checkoutAmount / rate : 0;
+  const cryptoDisplay = formatCrypto(cryptoAmount, coin);
 
   const copyWallet = async () => {
     await navigator.clipboard.writeText(walletAddress);
     setCopied(true);
     toast.success("Wallet copied");
     setTimeout(() => setCopied(false), 1600);
+  };
+
+  const copyCryptoAmount = async () => {
+    if (!cryptoAmount) return;
+    await navigator.clipboard.writeText(cryptoDisplay);
+    setCopiedAmount(true);
+    toast.success(`${cryptoDisplay} ${coin.split("/")[0]} copied`);
+    setTimeout(() => setCopiedAmount(false), 1600);
   };
 
   const checkout = async () => {
@@ -108,11 +122,20 @@ const Payments = () => {
                   </div>
                 </div>
 
-                <div className="mt-3 max-h-40 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-3">
+                <div className="mt-3 max-h-44 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-3">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between gap-3 py-1 text-sm">
-                      <span className="truncate text-muted-foreground">{item.name} <span className="text-xs text-muted-foreground/60">· {item.meta}</span></span>
+                    <div key={item.id} className="group flex items-center justify-between gap-3 rounded-md px-1 py-1.5 text-sm hover:bg-secondary/30">
+                      <span className="min-w-0 flex-1 truncate text-foreground/90">
+                        {item.name} <span className="text-xs text-muted-foreground">· {item.meta}</span>
+                      </span>
                       <span className="font-mono text-foreground">${item.price.toFixed(2)}</span>
+                      <button
+                        onClick={() => { removeFromCart(item.id); toast.success("Removed from cart"); }}
+                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+                        aria-label={`Remove ${item.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -190,6 +213,30 @@ const Payments = () => {
               </button>
             ))}
           </div>
+
+          {checkoutAmount > 0 && (
+            <div className="mt-5 rounded-xl border border-primary/40 bg-primary/5 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    You will send {ratesLoading ? "(updating rate…)" : `· 1 ${coin.split("/")[0]} ≈ $${rate.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                  </div>
+                  <div className="mt-1 font-display text-2xl font-black text-primary text-glow">
+                    ≈ {cryptoDisplay} <span className="text-base text-foreground/80">{coin.split("/")[0]}</span>
+                  </div>
+                  <div className="mt-1 text-xs font-semibold text-muted-foreground">
+                    For ${checkoutAmount.toFixed(2)}{bonus > 0 ? ` · +$${bonus.toFixed(2)} bonus` : ""}
+                  </div>
+                </div>
+                <Button variant="secondary" onClick={copyCryptoAmount} className="shrink-0" disabled={!cryptoAmount}>
+                  {copiedAmount ? <Check /> : <Copy />} Copy amount
+                </Button>
+              </div>
+              <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                Live rate from CoinGecko · refreshed every 2 min. Send the exact crypto amount above to the {coin} address below. Network fees are paid by you.
+              </p>
+            </div>
+          )}
 
           <div className="mt-5 flex flex-col gap-4 rounded-xl border border-border bg-secondary/20 p-4 sm:flex-row sm:items-center">
             <div className="rounded-lg bg-foreground p-3">
