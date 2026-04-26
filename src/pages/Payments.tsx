@@ -214,6 +214,30 @@ const Payments = () => {
             ))}
           </div>
 
+          {checkoutAmount > 0 && (
+            <div className="mt-5 rounded-xl border border-primary/40 bg-primary/5 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    You will send {ratesLoading ? "(updating rate…)" : `· 1 ${coin.split("/")[0]} ≈ $${rate.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                  </div>
+                  <div className="mt-1 font-display text-2xl font-black text-primary text-glow">
+                    ≈ {cryptoDisplay} <span className="text-base text-foreground/80">{coin.split("/")[0]}</span>
+                  </div>
+                  <div className="mt-1 text-xs font-semibold text-muted-foreground">
+                    For ${checkoutAmount.toFixed(2)}{bonus > 0 ? ` · +$${bonus.toFixed(2)} bonus` : ""}
+                  </div>
+                </div>
+                <Button variant="secondary" onClick={copyCryptoAmount} className="shrink-0" disabled={!cryptoAmount}>
+                  {copiedAmount ? <Check /> : <Copy />} Copy amount
+                </Button>
+              </div>
+              <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+                Live rate from CoinGecko · refreshed every 2 min. Send the exact crypto amount above to the {coin} address below. Network fees are paid by you.
+              </p>
+            </div>
+          )}
+
           <div className="mt-5 flex flex-col gap-4 rounded-xl border border-border bg-secondary/20 p-4 sm:flex-row sm:items-center">
             <div className="rounded-lg bg-foreground p-3">
               <QRCodeSVG value={walletAddress} size={108} bgColor="#fafafa" fgColor="#0a0a0f" level="M" />
