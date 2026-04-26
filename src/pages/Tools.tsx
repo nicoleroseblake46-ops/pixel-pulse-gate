@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react";
-import { Wrench, ShoppingCart, ShieldCheck, Sparkles } from "lucide-react";
+import { Wrench, ShoppingCart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const PRICE_PER_CHECK = 0.5;
+const LIVE_RATE = 0.9; // ~90% of cards return Live
 
 // Luhn check — used to deterministically classify a card as Alive (passes Luhn) or Dead.
 const luhnValid = (digits: string): boolean => {
