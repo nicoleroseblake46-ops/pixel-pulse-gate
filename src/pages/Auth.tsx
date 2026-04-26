@@ -194,10 +194,37 @@ const Auth = () => {
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary-foreground/80">
+                <Shield className="h-3 w-3" /> Security Check
+              </Label>
+              <div className="flex items-center gap-2">
+                <div className="flex h-14 flex-1 items-center justify-center rounded-sm border border-primary-foreground/20 bg-input/60 px-4 font-mono text-lg font-bold tracking-widest text-primary-foreground select-none">
+                  {captcha.a} + {captcha.b} = ?
+                </div>
+                <button
+                  type="button"
+                  onClick={refreshCaptcha}
+                  className="flex h-14 w-14 items-center justify-center rounded-sm border border-primary-foreground/20 bg-input/60 text-primary-foreground transition-smooth hover:bg-primary-foreground/10"
+                  aria-label="Refresh captcha"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </button>
+                <Input
+                  type="number"
+                  value={captchaInput}
+                  onChange={(e) => setCaptchaInput(e.target.value)}
+                  placeholder="?"
+                  className="h-14 w-20 rounded-sm border-primary-foreground/20 bg-input text-center text-base font-bold"
+                  required
+                />
+              </div>
+            </div>
+
             <Button
               type="submit"
               disabled={loading}
-              className="relative mt-8 h-14 w-full overflow-hidden rounded-sm bg-warning font-semibold text-foreground hover:bg-warning/90"
+              className="relative mt-6 h-14 w-full overflow-hidden rounded-sm bg-warning font-semibold text-foreground hover:bg-warning/90"
             >
               {loading ? "Connecting..." : mode === "login" ? "Login" : "Create an Account"}
             </Button>
