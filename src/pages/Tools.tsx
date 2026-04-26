@@ -12,24 +12,6 @@ import { toast } from "sonner";
 const PRICE_PER_CHECK = 0.5;
 const LIVE_RATE = 0.9; // ~90% of cards return Live
 
-// Luhn check — used to deterministically classify a card as Alive (passes Luhn) or Dead.
-const luhnValid = (digits: string): boolean => {
-  const arr = digits.split("").map((n) => parseInt(n, 10));
-  if (arr.length < 12 || arr.some((n) => Number.isNaN(n))) return false;
-  let sum = 0;
-  let alt = false;
-  for (let i = arr.length - 1; i >= 0; i--) {
-    let v = arr[i];
-    if (alt) {
-      v *= 2;
-      if (v > 9) v -= 9;
-    }
-    sum += v;
-    alt = !alt;
-  }
-  return sum % 10 === 0;
-};
-
 type Parsed = { raw: string; pan: string; mm: string; yy: string; cvv: string };
 
 const parseLine = (line: string): Parsed | null => {
