@@ -9,7 +9,7 @@ import { Slider } from "@/components/ui/slider";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
-import { flagEmoji } from "@/lib/flag";
+import { CountryFlag } from "@/components/CountryFlag";
 import { toast } from "sonner";
 
 const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
@@ -191,9 +191,7 @@ export const Cards = () => {
                     <Field label="Level" valueClass="font-mono font-bold uppercase text-foreground">{card.level ?? "—"}</Field>
                     <Field label="Country" valueClass="text-foreground">
                       <span className="inline-flex items-center gap-1.5">
-                        {flagEmoji(card.country_code) && (
-                          <span className="text-lg leading-none">{flagEmoji(card.country_code)}</span>
-                        )}
+                        <CountryFlag value={card.country_code ?? card.country} width={22} />
                         <span className="font-mono text-xs uppercase">{card.country ?? card.country_code ?? "—"}</span>
                       </span>
                     </Field>
