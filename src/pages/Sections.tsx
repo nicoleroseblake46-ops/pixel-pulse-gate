@@ -26,9 +26,6 @@ export const Proxy = () => (
   <SectionPage title="Proxy" tagline="Datacenter, residential, mobile — choose your battlefield." Icon={Network} category="proxy" />
 );
 
-export const Tools = () => (
-  <SectionPage title="Tools" tagline="GPU-accelerated checkers, scrapers and automation kits." Icon={Wrench} category="tools" />
-);
 
 export const RDP = () => (
   <SectionPage title="RDP" tagline="Private remote desktops · Windows · admin access · global regions." Icon={MonitorSmartphone} category="rdp" />
