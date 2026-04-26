@@ -122,11 +122,20 @@ const Payments = () => {
                   </div>
                 </div>
 
-                <div className="mt-3 max-h-40 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-3">
+                <div className="mt-3 max-h-44 overflow-y-auto rounded-lg border border-border/60 bg-background/40 p-3">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between gap-3 py-1 text-sm">
-                      <span className="truncate text-muted-foreground">{item.name} <span className="text-xs text-muted-foreground/60">· {item.meta}</span></span>
+                    <div key={item.id} className="group flex items-center justify-between gap-3 rounded-md px-1 py-1.5 text-sm hover:bg-secondary/30">
+                      <span className="min-w-0 flex-1 truncate text-foreground/90">
+                        {item.name} <span className="text-xs text-muted-foreground">· {item.meta}</span>
+                      </span>
                       <span className="font-mono text-foreground">${item.price.toFixed(2)}</span>
+                      <button
+                        onClick={() => { removeFromCart(item.id); toast.success("Removed from cart"); }}
+                        className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+                        aria-label={`Remove ${item.name}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   ))}
                 </div>
