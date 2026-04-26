@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductCategory } from "@/hooks/use-products";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CountryFlag } from "@/components/CountryFlag";
 
 const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon }[] = [
   { value: "sales", label: "Sales", Icon: TagIcon },
@@ -242,14 +243,14 @@ const AdminProducts = () => {
                           value={findCountry(form.country_code)?.code ?? ""}
                           onValueChange={(code) => {
                             const c = COUNTRIES.find((x) => x.code === code);
-                            if (c) setForm({ ...form, country: c.name, country_code: c.flag });
+                            if (c) setForm({ ...form, country: c.name, country_code: c.code });
                           }}
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Country (with real flag)">
                               {form.country_code && (
                                 <span className="inline-flex items-center gap-2">
-                                  <span className="text-lg leading-none">{form.country_code}</span>
+                                  <CountryFlag value={form.country_code} width={22} />
                                   <span>{form.country || findCountry(form.country_code)?.name}</span>
                                 </span>
                               )}
@@ -259,7 +260,7 @@ const AdminProducts = () => {
                             {COUNTRIES.map((c) => (
                               <SelectItem key={c.code} value={c.code}>
                                 <span className="inline-flex items-center gap-2">
-                                  <span className="text-lg leading-none">{c.flag}</span>
+                                  <CountryFlag value={c.code} width={22} />
                                   <span>{c.name}</span>
                                   <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
                                 </span>
