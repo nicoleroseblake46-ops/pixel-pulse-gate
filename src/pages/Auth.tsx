@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Zap, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Zap, Mail, Lock, User as UserIcon, Shield, RefreshCw } from "lucide-react";
 import { z } from "zod";
 import loginDesk from "@/assets/login-desk-reference.png";
+
+const generateCaptcha = () => {
+  const a = Math.floor(Math.random() * 9) + 1;
+  const b = Math.floor(Math.random() * 9) + 1;
+  return { a, b, answer: a + b };
+};
 
 const schema = z.object({
   email: z.string().trim().email("Invalid email").max(255),
