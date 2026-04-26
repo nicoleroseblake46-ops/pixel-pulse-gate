@@ -39,7 +39,7 @@ const parseLine = (line: string): Parsed | null => {
 };
 
 const Tools = () => {
-  const { cartItems, addToCart } = useCommerce();
+  const { cartItems, addToCart, balance, refreshBalance } = useCommerce();
   const { products, loading } = useProducts("tools");
   const [input, setInput] = useState("");
   const [alive, setAlive] = useState<string[]>([]);
@@ -51,25 +51,47 @@ const Tools = () => {
     [input],
   );
   const totalCost = lines.length * PRICE_PER_CHECK;
+  const insufficient = totalCost > balance;
 
   const runCheck = async () => {
     if (!lines.length) {
       toast.error("Add at least one card to check");
       return;
     }
+    if (insufficient) {
+      toast.error("Insufficient balance", {
+        description: `You need $${totalCost.toFixed(2)} to run this check. Top up your balance first.`,
+      });
+      return;
+    }
     setRunning(true);
     setAlive([]);
     setDead([]);
-    // Simulated streaming check — animates rows in for realism.
+
+    // Charge the user's main balance atomically server-side BEFORE running checks.
+    const { error: chargeError } = await supabase.rpc("charge_checker_fee", {
+      _count: lines.length,
+      _price_per_check: PRICE_PER_CHECK,
+    });
+    if (chargeError) {
+      setRunning(false);
+      toast.error("Could not charge fee", { description: chargeError.message });
+      return;
+    }
+    await refreshBalance();
+
+    // Simulated streaming check — ~90% Live, ~10% Dead, randomized per card.
     for (let i = 0; i < lines.length; i++) {
       const l = lines[i];
       await new Promise((r) => setTimeout(r, 220));
-      const ok = luhnValid(l.pan);
-      if (ok) setAlive((prev) => [...prev, l.raw]);
+      const isLive = Math.random() < LIVE_RATE;
+      if (isLive) setAlive((prev) => [...prev, l.raw]);
       else setDead((prev) => [...prev, l.raw]);
     }
     setRunning(false);
-    toast.success("Check complete", { description: `${lines.length} cards processed.` });
+    toast.success("Check complete", {
+      description: `${lines.length} cards processed · $${totalCost.toFixed(2)} charged from balance.`,
+    });
   };
 
   const addItem = (item: typeof products[number]) => {
