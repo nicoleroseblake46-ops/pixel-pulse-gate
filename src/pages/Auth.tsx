@@ -23,6 +23,7 @@ const schema = z.object({
 });
 
 const emailSchema = z.string().trim().email("Invalid email").max(255);
+const productionUrl = "https://nexuscc.vercel.app";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -86,7 +87,7 @@ const Auth = () => {
 
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: `${productionUrl}/reset-password`,
     });
     setLoading(false);
 
