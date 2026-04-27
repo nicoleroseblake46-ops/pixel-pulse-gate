@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const passwordSchema = z.string().min(6, "Min 6 characters").max(72);
+const productionUrl = "https://nexuscc.vercel.app";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -83,7 +84,7 @@ const ResetPassword = () => {
     } else {
       toast.success("Password updated", { description: "Sign in with your new password." });
       await supabase.auth.signOut();
-      navigate("/auth", { replace: true });
+      window.location.replace(`${productionUrl}/auth`);
     }
   };
 
