@@ -37,12 +37,33 @@ export const RDP = () => (
 
 export const Cards = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const { products, loading } = useProducts("cards");
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [filters, setFilters] = useState(emptyFilters);
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [appliedPriceRange, setAppliedPriceRange] = useState([0, 500]);
+  const [depositTotal, setDepositTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setDepositTotal(0);
+      return;
+    }
+    supabase
+      .from("payments")
+      .select("total_credit, coin, status")
+      .eq("user_id", user.id)
+      .eq("status", "confirmed")
+      .neq("coin", "BALANCE")
+      .then(({ data }) => {
+        const sum = (data ?? []).reduce((acc, row: any) => acc + Number(row.total_credit ?? 0), 0);
+        setDepositTotal(sum);
+      });
+  }, [user?.id]);
+
+  const hasAccess = (depositTotal ?? 0) >= CARDS_MIN_DEPOSIT;
 
   const availableCards = useMemo(
     () =>
