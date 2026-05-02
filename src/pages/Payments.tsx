@@ -13,8 +13,8 @@ const wallets = {
   LTC: "ltc1qu78zvrz0u6n0z4cxn34280p9fag6qrjxunz442",
   "USDT/TRC20": "TBTM7mbjaptqK2sKr8hxqDSMdmaQawd2t8",
 };
-const presetAmounts = [50, 100, 200, 500, 1000];
-const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
+const presetAmounts = [100, 200, 500, 1000];
+const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65 };
 
 const Payments = () => {
   const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
