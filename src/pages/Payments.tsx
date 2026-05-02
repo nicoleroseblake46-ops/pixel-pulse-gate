@@ -13,8 +13,8 @@ const wallets = {
   LTC: "ltc1qu78zvrz0u6n0z4cxn34280p9fag6qrjxunz442",
   "USDT/TRC20": "TBTM7mbjaptqK2sKr8hxqDSMdmaQawd2t8",
 };
-const presetAmounts = [50, 100, 200, 500, 1000];
-const bonuses: Record<number, number> = { 50: 2.5, 100: 8, 200: 20, 500: 65 };
+const presetAmounts = [100, 200, 500, 1000];
+const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65 };
 
 const Payments = () => {
   const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
@@ -50,8 +50,8 @@ const Payments = () => {
   };
 
   const checkout = async () => {
-    if (!checkoutAmount || checkoutAmount < 50) {
-      toast.error("Minimum top up is $50");
+    if (!checkoutAmount || checkoutAmount < 100) {
+      toast.error("Minimum top up is $100");
       return;
     }
     setSubmitting(true);
@@ -186,10 +186,10 @@ const Payments = () => {
           <label className="font-display text-lg font-bold">Top up amount (USD)</label>
           <Input
             type="number"
-            min={50}
+            min={100}
             value={amount}
             onChange={(event) => { setAmount(event.target.value); setSelected(null); }}
-            placeholder="Minimum $50"
+            placeholder="Minimum $100"
             className="mt-3 h-12 rounded-lg border-2 border-border bg-input/70 px-4 text-base font-semibold focus-visible:ring-primary"
           />
 
