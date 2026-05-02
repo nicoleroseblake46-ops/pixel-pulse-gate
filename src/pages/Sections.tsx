@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone, ShieldCheck } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone, ShieldCheck, Lock } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,11 @@ import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
 import { CountryFlag } from "@/components/CountryFlag";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const CARDS_MIN_DEPOSIT = 100;
 
 const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
 
