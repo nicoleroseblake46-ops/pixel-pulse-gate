@@ -104,6 +104,7 @@ const MyOrders = () => {
               <TableHead>Item</TableHead>
               <TableHead>Order</TableHead>
               <TableHead>Price</TableHead>
+              <TableHead>Delivery</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
