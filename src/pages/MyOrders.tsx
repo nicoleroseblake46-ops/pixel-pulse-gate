@@ -148,7 +148,7 @@ const MyOrders = () => {
             })}
             {!items.length && (
               <TableRow>
-                <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
                   {loading ? "Loading orders..." : "No delivered items yet. Checkout items will appear here after purchase."}
                 </TableCell>
               </TableRow>
