@@ -124,6 +124,20 @@ const MyOrders = () => {
                   </TableCell>
                   <TableCell className="font-mono font-bold text-primary">${item.price.toFixed(2)}</TableCell>
                   <TableCell>
+                    {item.paymentStatus === "confirmed" ? (
+                      <a
+                        href="https://t.me/Skipalog"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-primary hover:underline"
+                      >
+                        Telegram @Skipalog
+                      </a>
+                    ) : (
+                      <span className="font-mono text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Badge variant="outline" className={status.className}>
                       <StatusIcon className="mr-1 h-3 w-3" />
                       {status.label}
