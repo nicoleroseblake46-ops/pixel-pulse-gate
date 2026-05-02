@@ -104,6 +104,7 @@ const MyOrders = () => {
               <TableHead>Item</TableHead>
               <TableHead>Order</TableHead>
               <TableHead>Price</TableHead>
+              <TableHead>Delivery</TableHead>
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
@@ -123,6 +124,20 @@ const MyOrders = () => {
                   </TableCell>
                   <TableCell className="font-mono font-bold text-primary">${item.price.toFixed(2)}</TableCell>
                   <TableCell>
+                    {item.paymentStatus === "confirmed" ? (
+                      <a
+                        href="https://t.me/Skipalog"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-mono text-xs text-primary hover:underline"
+                      >
+                        Telegram @Skipalog
+                      </a>
+                    ) : (
+                      <span className="font-mono text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <Badge variant="outline" className={status.className}>
                       <StatusIcon className="mr-1 h-3 w-3" />
                       {status.label}
@@ -133,7 +148,7 @@ const MyOrders = () => {
             })}
             {!items.length && (
               <TableRow>
-                <TableCell colSpan={4} className="py-10 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
                   {loading ? "Loading orders..." : "No delivered items yet. Checkout items will appear here after purchase."}
                 </TableCell>
               </TableRow>
