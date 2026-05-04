@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
@@ -12,6 +12,7 @@ const items = [
   { title: "Proxy", url: "/proxy", icon: Network, accent: "primary" },
   { title: "Tools", url: "/tools", icon: Wrench, accent: "accent" },
   { title: "RDP", url: "/rdp", icon: MonitorSmartphone, accent: "primary" },
+  { title: "Logs", url: "/logs", icon: ScrollText, accent: "accent" },
   { title: "My Orders", url: "/orders", icon: ShoppingBag, accent: "primary" },
   { title: "Tickets", url: "/tickets", icon: MessageSquareText, accent: "accent" },
 ];

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-export type ProductCategory = "sales" | "cards" | "proxy" | "tools" | "socks" | "rdp";
+export type ProductCategory = "sales" | "cards" | "proxy" | "tools" | "socks" | "rdp" | "logs";
 
 export type Product = {
   id: string;

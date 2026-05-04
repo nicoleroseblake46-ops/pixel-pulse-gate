@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ const items = [
   { title: "Proxy", url: "/proxy", icon: Network },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "RDP", url: "/rdp", icon: MonitorSmartphone },
+  { title: "Logs", url: "/logs", icon: ScrollText },
   { title: "My Orders", url: "/orders", icon: ShoppingBag },
   { title: "Tickets", url: "/tickets", icon: MessageSquareText },
   { title: "Payments", url: "/payments", icon: Wallet },

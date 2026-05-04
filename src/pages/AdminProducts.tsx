@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap } from "lucide-react";
+import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap, ScrollText } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { Loader } from "@/components/Loader";
@@ -22,6 +22,7 @@ const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon 
   { value: "proxy", label: "Proxy", Icon: Network },
   { value: "tools", label: "Tools", Icon: Wrench },
   { value: "rdp", label: "RDP", Icon: MonitorSmartphone },
+  { value: "logs", label: "Logs", Icon: ScrollText },
 ];
 
 const emptyForm = {

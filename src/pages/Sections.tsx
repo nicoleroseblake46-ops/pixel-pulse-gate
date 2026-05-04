@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Wrench, Search, ShoppingCart, Plus, MonitorSmartphone, ShieldCheck, Lock } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ShieldCheck, ScrollText, Globe2, FileArchive, Calendar, BadgeCheck } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
@@ -10,11 +10,7 @@ import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
 import { CountryFlag } from "@/components/CountryFlag";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const CARDS_MIN_DEPOSIT = 100;
 
 const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
 
@@ -37,33 +33,12 @@ export const RDP = () => (
 
 export const Cards = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const { products, loading } = useProducts("cards");
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [filters, setFilters] = useState(emptyFilters);
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [appliedPriceRange, setAppliedPriceRange] = useState([0, 500]);
-  const [depositTotal, setDepositTotal] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!user) {
-      setDepositTotal(0);
-      return;
-    }
-    supabase
-      .from("payments")
-      .select("total_credit, coin, status")
-      .eq("user_id", user.id)
-      .eq("status", "confirmed")
-      .neq("coin", "BALANCE")
-      .then(({ data }) => {
-        const sum = (data ?? []).reduce((acc, row: any) => acc + Number(row.total_credit ?? 0), 0);
-        setDepositTotal(sum);
-      });
-  }, [user?.id]);
-
-  const hasAccess = (depositTotal ?? 0) >= CARDS_MIN_DEPOSIT;
 
   const availableCards = useMemo(
     () =>
@@ -113,41 +88,6 @@ export const Cards = () => {
     );
     toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
   };
-
-  if (depositTotal === null) {
-    return (
-      <AppLayout>
-        <Loader />
-      </AppLayout>
-    );
-  }
-
-  if (!hasAccess) {
-    return (
-      <AppLayout>
-        <div className="mx-auto mt-10 max-w-xl animate-fade-up">
-          <div className="glass rounded-2xl p-8 text-center">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary glow-primary">
-              <Lock className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">/ Locked</div>
-            <h1 className="mt-2 font-display text-3xl font-black tracking-tight md:text-4xl">
-              <span className="neon-text">Cards Access Restricted</span>
-            </h1>
-            <p className="mt-4 text-muted-foreground">
-              You must deposit at least <span className="font-mono font-bold text-primary">${CARDS_MIN_DEPOSIT}</span> in total to unlock the Cards inventory.
-            </p>
-            <p className="mt-2 font-mono text-xs text-muted-foreground">
-              Your lifetime deposits: <span className="text-accent">${(depositTotal ?? 0).toFixed(2)}</span> / ${CARDS_MIN_DEPOSIT}
-            </p>
-            <Button onClick={() => navigate("/payments")} className="mt-6 glow-primary">
-              <Plus /> Top Up Balance
-            </Button>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
 
   return (
     <AppLayout>
@@ -211,72 +151,90 @@ export const Cards = () => {
             No cards match the current filters.
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Column headers — visible on lg+ */}
-            <div className="hidden gap-2 rounded-lg border border-border bg-card/70 px-4 py-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground lg:grid lg:grid-cols-[1.2fr_0.6fr_0.7fr_0.5fr_0.6fr_1.1fr_0.5fr_0.8fr_0.6fr_0.7fr_0.6fr]">
-              <div>Base</div>
-              <div>Seller</div>
-              <div>BIN</div>
-              <div>Exp</div>
-              <div>ZIP</div>
-              <div>Bank</div>
-              <div>Valid</div>
-              <div>Scheme</div>
-              <div>Type</div>
-              <div>Level</div>
-              <div>Country</div>
-            </div>
-
-            {availableCards.map((card) => {
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {availableCards.map((card, idx) => {
               const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
+              const scheme = (card.scheme ?? card.brand ?? "").toUpperCase();
               return (
                 <article
                   key={card.id}
-                  className="group rounded-xl border border-border bg-card p-4 shadow-sm transition-smooth hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)] md:p-5"
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-secondary/40 p-5 shadow-sm transition-smooth hover:-translate-y-1 hover:border-primary/60 hover:shadow-[var(--shadow-elevated)] animate-fade-up"
+                  style={{ animationDelay: `${idx * 40}ms` }}
                 >
-                  {/* Top row: data grid */}
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm sm:grid-cols-4 lg:grid-cols-[1.2fr_0.6fr_0.7fr_0.5fr_0.6fr_1.1fr_0.5fr_0.8fr_0.6fr_0.7fr_0.6fr] lg:items-center">
-                    <Field label="Base" valueClass="font-mono font-bold text-accent">{card.name}</Field>
-                    <Field label="Seller" valueClass="font-mono font-bold text-success">{card.seller ?? "—"}</Field>
-                    <Field label="BIN" valueClass="font-mono font-bold text-primary">{card.bin ?? "—"}</Field>
-                    <Field label="Exp" valueClass="font-mono font-semibold text-foreground">{card.exp ?? "—"}</Field>
-                    <Field label="ZIP" valueClass="font-mono font-semibold text-warning">{card.zip ?? "—"}</Field>
-                    <Field label="Bank" valueClass="font-medium text-foreground">{card.bank ?? "—"}</Field>
-                    <Field label="Valid" valueClass="font-mono font-bold text-success">{card.valid ?? "—"}</Field>
-                    <Field label="Scheme" valueClass="font-mono font-bold uppercase text-foreground">{card.scheme ?? card.brand ?? "—"}</Field>
-                    <Field label="Type" valueClass="font-medium text-foreground">{card.card_type ?? "—"}</Field>
-                    <Field label="Level" valueClass="font-mono font-bold uppercase text-foreground">{card.level ?? "—"}</Field>
-                    <Field label="Country" valueClass="text-foreground">
-                      <span className="inline-flex items-center gap-1.5">
-                        <CountryFlag value={card.country_code ?? card.country} width={22} />
-                        <span className="font-mono text-xs uppercase">{card.country ?? card.country_code ?? "—"}</span>
+                  {/* Top accent bar */}
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-primary opacity-70 transition-smooth group-hover:opacity-100" />
+                  {/* Decorative chip glow */}
+                  <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl transition-smooth group-hover:bg-primary/20" />
+
+                  {/* Header: scheme + tag */}
+                  <div className="relative flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-10 w-14 items-center justify-center rounded-md bg-gradient-to-br from-primary/30 to-accent/20 ring-1 ring-primary/30">
+                        <CreditCard className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">Scheme</div>
+                        <div className="font-display text-sm font-black tracking-wide text-foreground">{scheme || "—"}</div>
+                      </div>
+                    </div>
+                    {card.tag && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-accent">
+                        <ShieldCheck className="h-3 w-3" /> {card.tag}
                       </span>
-                    </Field>
+                    )}
                   </div>
 
-                  {/* Bottom row: price, CTA, extras */}
-                  <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border/60 pt-4">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 font-mono text-xs font-bold text-background">
-                      <span className="text-muted-foreground/80">PRICE:</span>
-                      <span className="text-background">${Number(card.price).toFixed(2)}</span>
-                    </span>
+                  {/* BIN feature */}
+                  <div className="relative mt-4">
+                    <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">BIN</div>
+                    <div className="font-mono text-2xl font-black tracking-widest text-primary text-glow">
+                      {card.bin ?? "••••••"} <span className="text-muted-foreground">•• ••</span>
+                    </div>
+                  </div>
+
+                  {/* Mini grid */}
+                  <div className="relative mt-4 grid grid-cols-3 gap-2 text-xs">
+                    <Stat icon={<Calendar className="h-3 w-3" />} label="Exp" value={card.exp ?? "—"} />
+                    <Stat icon={<BadgeCheck className="h-3 w-3" />} label="Valid" value={card.valid ?? "—"} accent="success" />
+                    <Stat icon={<CreditCard className="h-3 w-3" />} label="Type" value={card.card_type ?? "—"} />
+                    <Stat icon={<ScrollText className="h-3 w-3" />} label="Level" value={card.level ?? "—"} />
+                    <Stat icon={<Tag className="h-3 w-3" />} label="ZIP" value={card.zip ?? "—"} accent="warning" />
+                    <Stat icon={<ShieldCheck className="h-3 w-3" />} label="Seller" value={card.seller ?? "—"} accent="success" />
+                  </div>
+
+                  {/* Bank + country */}
+                  <div className="relative mt-4 space-y-1.5 border-t border-border/50 pt-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Globe2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      <CountryFlag value={card.country_code ?? card.country} width={20} />
+                      <span className="truncate font-mono text-xs uppercase tracking-wide text-foreground">
+                        {card.country ?? card.country_code ?? "Unknown"}{card.state ? ` · ${card.state}` : ""}
+                      </span>
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      <span className="font-mono uppercase tracking-widest text-muted-foreground/70">Bank · </span>
+                      <span className="font-medium text-foreground">{card.bank ?? "—"}</span>
+                    </div>
+                    {card.extras && (
+                      <div className="truncate font-mono text-[11px] text-accent/90">{card.extras}</div>
+                    )}
+                  </div>
+
+                  {/* Footer: price + CTA */}
+                  <div className="relative mt-4 flex items-center justify-between border-t border-border/50 pt-4">
+                    <div>
+                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Price</div>
+                      <div className="font-display text-2xl font-black text-primary text-glow">${Number(card.price).toFixed(2)}</div>
+                    </div>
                     <Button
                       size="sm"
                       variant={inCart ? "secondary" : "default"}
                       onClick={() => addCard(card)}
                       disabled={inCart}
-                      className="rounded-full"
+                      className="rounded-full glow-primary"
                     >
-                      <ShoppingCart className="h-4 w-4" /> {inCart ? "Added" : "Add to cart"}
+                      <ShoppingCart className="h-4 w-4" /> {inCart ? "Added" : "Add"}
                     </Button>
-                    {card.extras && (
-                      <span className="font-mono text-xs text-accent">{card.extras}</span>
-                    )}
-                    {card.tag && (
-                      <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-accent">
-                        <ShieldCheck className="h-3 w-3" /> {card.tag}
-                      </span>
-                    )}
                   </div>
                 </article>
               );
@@ -288,9 +246,18 @@ export const Cards = () => {
   );
 };
 
-const Field = ({ label, valueClass, children }: { label: string; valueClass?: string; children: React.ReactNode }) => (
-  <div className="min-w-0">
-    <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground lg:hidden">{label}</div>
-    <div className={`truncate ${valueClass ?? ""}`}>{children}</div>
+const Stat = ({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: "success" | "warning" }) => (
+  <div className="rounded-md border border-border/60 bg-background/40 px-2 py-1.5">
+    <div className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-widest text-muted-foreground">
+      {icon}{label}
+    </div>
+    <div className={`mt-0.5 truncate font-mono text-xs font-bold ${accent === "success" ? "text-success" : accent === "warning" ? "text-warning" : "text-foreground"}`}>
+      {value}
+    </div>
   </div>
 );
+
+export const Logs = () => (
+  <SectionPage title="Logs" tagline="Fresh stealer logs · cookies, autofills, wallet artifacts. Updated daily." Icon={ScrollText} category="logs" />
+);
+
