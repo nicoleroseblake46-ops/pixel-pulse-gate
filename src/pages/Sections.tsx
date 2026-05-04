@@ -151,94 +151,102 @@ export const Cards = () => {
             No cards match the current filters.
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {availableCards.map((card, idx) => {
-              const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
-              const scheme = (card.scheme ?? card.brand ?? "").toUpperCase();
-              return (
-                <article
-                  key={card.id}
-                  className="group relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-card via-card to-secondary/40 p-5 shadow-sm transition-smooth hover:-translate-y-1 hover:border-primary/60 hover:shadow-[var(--shadow-elevated)] animate-fade-up"
-                  style={{ animationDelay: `${idx * 40}ms` }}
-                >
-                  {/* Top accent bar */}
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-primary opacity-70 transition-smooth group-hover:opacity-100" />
-                  {/* Decorative chip glow */}
-                  <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/10 blur-3xl transition-smooth group-hover:bg-primary/20" />
-
-                  {/* Header: scheme + tag */}
-                  <div className="relative flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="flex h-10 w-14 items-center justify-center rounded-md bg-gradient-to-br from-primary/30 to-accent/20 ring-1 ring-primary/30">
-                        <CreditCard className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <div className="font-mono text-[9px] uppercase tracking-[0.25em] text-muted-foreground">Scheme</div>
-                        <div className="font-display text-sm font-black tracking-wide text-foreground">{scheme || "—"}</div>
-                      </div>
-                    </div>
-                    {card.tag && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-accent">
-                        <ShieldCheck className="h-3 w-3" /> {card.tag}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* BIN feature */}
-                  <div className="relative mt-4">
-                    <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">BIN</div>
-                    <div className="font-mono text-2xl font-black tracking-widest text-primary text-glow">
-                      {card.bin ?? "••••••"} <span className="text-muted-foreground">•• ••</span>
-                    </div>
-                  </div>
-
-                  {/* Mini grid */}
-                  <div className="relative mt-4 grid grid-cols-3 gap-2 text-xs">
-                    <Stat icon={<Calendar className="h-3 w-3" />} label="Exp" value={card.exp ?? "—"} />
-                    <Stat icon={<BadgeCheck className="h-3 w-3" />} label="Valid" value={card.valid ?? "—"} accent="success" />
-                    <Stat icon={<CreditCard className="h-3 w-3" />} label="Type" value={card.card_type ?? "—"} />
-                    <Stat icon={<ScrollText className="h-3 w-3" />} label="Level" value={card.level ?? "—"} />
-                    <Stat icon={<Tag className="h-3 w-3" />} label="ZIP" value={card.zip ?? "—"} accent="warning" />
-                    <Stat icon={<ShieldCheck className="h-3 w-3" />} label="Seller" value={card.seller ?? "—"} accent="success" />
-                  </div>
-
-                  {/* Bank + country */}
-                  <div className="relative mt-4 space-y-1.5 border-t border-border/50 pt-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      <CountryFlag value={card.country_code ?? card.country} width={20} />
-                      <span className="truncate font-mono text-xs uppercase tracking-wide text-foreground">
-                        {card.country ?? card.country_code ?? "Unknown"}{card.state ? ` · ${card.state}` : ""}
-                      </span>
-                    </div>
-                    <div className="truncate text-xs text-muted-foreground">
-                      <span className="font-mono uppercase tracking-widest text-muted-foreground/70">Bank · </span>
-                      <span className="font-medium text-foreground">{card.bank ?? "—"}</span>
-                    </div>
-                    {card.extras && (
-                      <div className="truncate font-mono text-[11px] text-accent/90">{card.extras}</div>
-                    )}
-                  </div>
-
-                  {/* Footer: price + CTA */}
-                  <div className="relative mt-4 flex items-center justify-between border-t border-border/50 pt-4">
-                    <div>
-                      <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-muted-foreground">Price</div>
-                      <div className="font-display text-2xl font-black text-primary text-glow">${Number(card.price).toFixed(2)}</div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant={inCart ? "secondary" : "default"}
-                      onClick={() => addCard(card)}
-                      disabled={inCart}
-                      className="rounded-full glow-primary"
-                    >
-                      <ShoppingCart className="h-4 w-4" /> {inCart ? "Added" : "Add"}
-                    </Button>
-                  </div>
-                </article>
-              );
-            })}
+          <div className="overflow-x-auto rounded-xl border border-border bg-card">
+            <table className="w-full min-w-[1400px] border-collapse text-xs">
+              <thead className="bg-muted/40">
+                <tr className="text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <Th>Base</Th>
+                  <Th>Seller</Th>
+                  <Th>Base Quality</Th>
+                  <Th>Bin</Th>
+                  <Th>Level</Th>
+                  <Th>Credit/Debit</Th>
+                  <Th>ExpDate</Th>
+                  <Th>Address Details</Th>
+                  <Th>Email/Phone/DOB/SSN</Th>
+                  <Th>Special Info</Th>
+                  <Th>Bank Name</Th>
+                  <Th>Refundable</Th>
+                  <Th>Price</Th>
+                  <Th>Action</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {availableCards.map((card) => {
+                  const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
+                  const scheme = (card.scheme ?? card.brand ?? "").toUpperCase();
+                  return (
+                    <tr key={card.id} className="border-t border-border/60 align-top transition-colors hover:bg-muted/20">
+                      <Td>
+                        <div className="font-mono text-[11px] text-foreground">{card.name || "04MAY_95VR_EMAIL_PHONE_IP_FIRSTHAND2"}</div>
+                        {card.tag && (
+                          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-primary">
+                            ◆ {card.tag}
+                          </span>
+                        )}
+                      </Td>
+                      <Td><span className="font-mono text-[11px] text-destructive">{card.seller ?? "—"}</span></Td>
+                      <Td>
+                        {card.valid ? (
+                          <span className="inline-block rounded-full border border-success/40 bg-success/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-success">
+                            {card.valid}
+                          </span>
+                        ) : "—"}
+                      </Td>
+                      <Td>
+                        <div className="font-mono text-[12px] font-semibold text-foreground">{card.bin ?? "—"}</div>
+                        {scheme && <div className="mt-1 font-mono text-[10px] font-bold uppercase text-primary">{scheme}</div>}
+                      </Td>
+                      <Td><span className="font-mono text-[11px] uppercase text-foreground">{card.level ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] uppercase text-foreground">{card.card_type ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] text-foreground">{card.exp ?? "—"}</span></Td>
+                      <Td>
+                        <div className="space-y-0.5 font-mono text-[11px] text-foreground">
+                          <Row label="Address" ok />
+                          <div>City : {(card.extras?.split("|")[0] ?? "—").trim()}</div>
+                          <div>State : {card.state ?? "—"}</div>
+                          <div>Zip : {card.zip ?? "—"}</div>
+                          <div className="flex items-center gap-1">
+                            Country : {card.country_code?.toUpperCase() ?? card.country ?? "—"}
+                            <CountryFlag value={card.country_code ?? card.country} width={16} />
+                          </div>
+                        </div>
+                      </Td>
+                      <Td>
+                        <div className="space-y-1 font-mono text-[11px]">
+                          <Row label="Email" ok />
+                          <Row label="Phone" ok />
+                          <Row label="DOB" ok={false} />
+                          <Row label="SSN" ok={false} />
+                        </div>
+                      </Td>
+                      <Td>
+                        <div className="space-y-1 font-mono text-[11px]">
+                          <Row label="IP" ok />
+                          <Row label="UA" ok={false} />
+                          <Row label="DL" ok={false} />
+                          <Row label="MMN" ok={false} />
+                        </div>
+                      </Td>
+                      <Td><span className="font-mono text-[11px] uppercase text-foreground">{card.bank ?? "—"}</span></Td>
+                      <Td><span className="text-destructive">✕</span></Td>
+                      <Td><span className="font-mono text-[12px] font-bold text-success">${Number(card.price).toFixed(2)}</span></Td>
+                      <Td>
+                        <Button
+                          size="sm"
+                          variant={inCart ? "secondary" : "destructive"}
+                          onClick={() => addCard(card)}
+                          disabled={inCart}
+                          className="rounded-md px-3 py-1 text-[11px] font-semibold"
+                        >
+                          {inCart ? "Added" : "AddCart"}
+                        </Button>
+                      </Td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </section>
@@ -246,14 +254,18 @@ export const Cards = () => {
   );
 };
 
-const Stat = ({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: "success" | "warning" }) => (
-  <div className="rounded-md border border-border/60 bg-background/40 px-2 py-1.5">
-    <div className="flex items-center gap-1 font-mono text-[8px] uppercase tracking-widest text-muted-foreground">
-      {icon}{label}
-    </div>
-    <div className={`mt-0.5 truncate font-mono text-xs font-bold ${accent === "success" ? "text-success" : accent === "warning" ? "text-warning" : "text-foreground"}`}>
-      {value}
-    </div>
+const Th = ({ children }: { children: React.ReactNode }) => (
+  <th className="border-r border-border/60 px-3 py-3 font-medium last:border-r-0">{children}</th>
+);
+
+const Td = ({ children }: { children: React.ReactNode }) => (
+  <td className="border-r border-border/40 px-3 py-3 last:border-r-0">{children}</td>
+);
+
+const Row = ({ label, ok }: { label: string; ok: boolean }) => (
+  <div className="flex items-center gap-1">
+    <span className="text-foreground">{label} :</span>
+    <span className={ok ? "text-success" : "text-destructive"}>{ok ? "✓" : "✕"}</span>
   </div>
 );
 
