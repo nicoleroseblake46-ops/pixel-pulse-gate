@@ -33,33 +33,12 @@ export const RDP = () => (
 
 export const Cards = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const { products, loading } = useProducts("cards");
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [filters, setFilters] = useState(emptyFilters);
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [appliedPriceRange, setAppliedPriceRange] = useState([0, 500]);
-  const [depositTotal, setDepositTotal] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (!user) {
-      setDepositTotal(0);
-      return;
-    }
-    supabase
-      .from("payments")
-      .select("total_credit, coin, status")
-      .eq("user_id", user.id)
-      .eq("status", "confirmed")
-      .neq("coin", "BALANCE")
-      .then(({ data }) => {
-        const sum = (data ?? []).reduce((acc, row: any) => acc + Number(row.total_credit ?? 0), 0);
-        setDepositTotal(sum);
-      });
-  }, [user?.id]);
-
-  const hasAccess = (depositTotal ?? 0) >= CARDS_MIN_DEPOSIT;
 
   const availableCards = useMemo(
     () =>
@@ -109,41 +88,6 @@ export const Cards = () => {
     );
     toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
   };
-
-  if (depositTotal === null) {
-    return (
-      <AppLayout>
-        <Loader />
-      </AppLayout>
-    );
-  }
-
-  if (!hasAccess) {
-    return (
-      <AppLayout>
-        <div className="mx-auto mt-10 max-w-xl animate-fade-up">
-          <div className="glass rounded-2xl p-8 text-center">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary glow-primary">
-              <Lock className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">/ Locked</div>
-            <h1 className="mt-2 font-display text-3xl font-black tracking-tight md:text-4xl">
-              <span className="neon-text">Cards Access Restricted</span>
-            </h1>
-            <p className="mt-4 text-muted-foreground">
-              You must deposit at least <span className="font-mono font-bold text-primary">${CARDS_MIN_DEPOSIT}</span> in total to unlock the Cards inventory.
-            </p>
-            <p className="mt-2 font-mono text-xs text-muted-foreground">
-              Your lifetime deposits: <span className="text-accent">${(depositTotal ?? 0).toFixed(2)}</span> / ${CARDS_MIN_DEPOSIT}
-            </p>
-            <Button onClick={() => navigate("/payments")} className="mt-6 glow-primary">
-              <Plus /> Top Up Balance
-            </Button>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
 
   return (
     <AppLayout>
