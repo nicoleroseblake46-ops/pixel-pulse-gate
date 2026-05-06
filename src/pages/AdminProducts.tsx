@@ -248,7 +248,14 @@ const AdminProducts = () => {
                           if (upErr) { toast.error("Upload failed", { description: upErr.message }); return; }
                           const { data } = supabase.storage.from("product-images").getPublicUrl(path);
                           setForm((f) => ({ ...f, image_url: data.publicUrl }));
-                          toast.success("Image uploaded");
+                          if (editingId) {
+                            const { error: updErr } = await supabase.from("products").update({ image_url: data.publicUrl }).eq("id", editingId);
+                            if (updErr) { toast.error("Could not attach image to product", { description: updErr.message }); return; }
+                            await load();
+                            toast.success("Image uploaded & attached");
+                          } else {
+                            toast.success("Image uploaded — click Publish to save the item");
+                          }
                         }}
                         className="text-sm text-muted-foreground"
                       />
