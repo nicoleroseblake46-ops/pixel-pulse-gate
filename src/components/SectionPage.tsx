@@ -58,9 +58,14 @@ export const SectionPage = ({ title, tagline, Icon, category }: Props) => {
               >
                 <div className="absolute inset-x-0 top-0 h-px bg-gradient-primary opacity-0 transition-smooth group-hover:opacity-100" />
                 {item.tag && (
-                  <span className="absolute right-4 top-4 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-accent">
+                  <span className="absolute right-4 top-4 z-10 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-accent">
                     {item.tag}
                   </span>
+                )}
+                {item.image_url && (
+                  <div className="mb-4 -mx-5 -mt-5 overflow-hidden border-b border-border/50">
+                    <img src={item.image_url} alt={item.name} loading="lazy" className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  </div>
                 )}
                 <h3 className="font-display text-lg font-bold">{item.name}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{item.meta}</p>

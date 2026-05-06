@@ -45,6 +45,7 @@ const emptyForm = {
   level: "",
   country_code: "",
   extras: "",
+  image_url: "",
 };
 
 const AdminProducts = () => {
@@ -116,6 +117,7 @@ const AdminProducts = () => {
       level: isCards ? form.level.trim() || null : null,
       country_code: isCards ? form.country_code.trim() || null : null,
       extras: isCards ? form.extras.trim() || null : null,
+      image_url: form.image_url.trim() || null,
     };
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
@@ -151,6 +153,7 @@ const AdminProducts = () => {
       level: p.level ?? "",
       country_code: p.country_code ?? "",
       extras: p.extras ?? "",
+      image_url: p.image_url ?? "",
     });
   };
 
@@ -225,6 +228,37 @@ const AdminProducts = () => {
                   <div className="grid gap-3 md:grid-cols-2">
                     <Input placeholder="Tag (e.g. HOT, NEW) — optional" value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} />
                     <Input placeholder="Sort order" type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
+                  </div>
+
+                  <div className="rounded-lg border border-border/60 bg-secondary/30 p-3">
+                    <div className="mb-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">Product image</div>
+                    <div className="flex flex-wrap items-center gap-3">
+                      {form.image_url && (
+                        <img src={form.image_url} alt="preview" className="h-20 w-20 rounded-md border border-border object-cover" />
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const ext = file.name.split(".").pop() || "png";
+                          const path = `${active}/${crypto.randomUUID()}.${ext}`;
+                          const { error: upErr } = await supabase.storage.from("product-images").upload(path, file, { upsert: false });
+                          if (upErr) { toast.error("Upload failed", { description: upErr.message }); return; }
+                          const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+                          setForm((f) => ({ ...f, image_url: data.publicUrl }));
+                          toast.success("Image uploaded");
+                        }}
+                        className="text-sm text-muted-foreground"
+                      />
+                      {form.image_url && (
+                        <Button type="button" variant="ghost" size="sm" onClick={() => setForm({ ...form, image_url: "" })}>
+                          <X className="h-4 w-4" /> Remove
+                        </Button>
+                      )}
+                    </div>
+                    <Input placeholder="Or paste image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} className="mt-2" />
                   </div>
 
                   {isCards && (

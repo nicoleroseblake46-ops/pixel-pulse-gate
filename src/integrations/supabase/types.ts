@@ -75,6 +75,7 @@ export type Database = {
           exp: string | null
           extras: string | null
           id: string
+          image_url: string | null
           is_active: boolean
           level: string | null
           meta: string
@@ -101,6 +102,7 @@ export type Database = {
           exp?: string | null
           extras?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           level?: string | null
           meta?: string
@@ -127,6 +129,7 @@ export type Database = {
           exp?: string | null
           extras?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           level?: string | null
           meta?: string

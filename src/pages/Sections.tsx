@@ -151,10 +151,13 @@ export const Cards = () => {
             No cards match the current filters.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-border bg-card">
+          <div className="relative overflow-hidden rounded-2xl border border-primary/40 shadow-[0_0_60px_-10px_hsl(var(--primary)/0.45)]">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/15 via-accent/10 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.22),transparent_60%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.18),transparent_60%)]" />
+            <div className="relative overflow-x-auto">
             <table className="w-full min-w-[1400px] border-collapse text-xs">
-              <thead className="bg-muted/40">
-                <tr className="text-left font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              <thead className="bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 backdrop-blur">
+                <tr className="text-left font-mono text-[11px] uppercase tracking-wider">
                   <Th>Base</Th>
                   <Th>Seller</Th>
                   <Th>Base Quality</Th>
@@ -176,16 +179,16 @@ export const Cards = () => {
                   const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
                   const scheme = (card.scheme ?? card.brand ?? "").toUpperCase();
                   return (
-                    <tr key={card.id} className="border-t border-border/60 align-top transition-colors hover:bg-muted/20">
+                    <tr key={card.id} className="border-t border-primary/20 align-top transition-colors hover:bg-primary/10">
                       <Td>
-                        <div className="font-mono text-[11px] text-foreground">{card.name || "04MAY_95VR_EMAIL_PHONE_IP_FIRSTHAND2"}</div>
+                        <div className="font-mono text-[11px] font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{card.name || "04MAY_95VR_EMAIL_PHONE_IP_FIRSTHAND2"}</div>
                         {card.tag && (
-                          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-primary">
+                          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-primary">
                             ◆ {card.tag}
                           </span>
                         )}
                       </Td>
-                      <Td><span className="font-mono text-[11px] text-destructive">{card.seller ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] text-accent">{card.seller ?? "—"}</span></Td>
                       <Td>
                         {card.valid ? (
                           <span className="inline-block rounded-full border border-success/40 bg-success/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-success">
@@ -194,14 +197,14 @@ export const Cards = () => {
                         ) : "—"}
                       </Td>
                       <Td>
-                        <div className="font-mono text-[12px] font-semibold text-foreground">{card.bin ?? "—"}</div>
-                        {scheme && <div className="mt-1 font-mono text-[10px] font-bold uppercase text-primary">{scheme}</div>}
+                        <div className="font-mono text-[12px] font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">{card.bin ?? "—"}</div>
+                        {scheme && <div className="mt-1 font-mono text-[10px] font-bold uppercase text-accent">{scheme}</div>}
                       </Td>
-                      <Td><span className="font-mono text-[11px] uppercase text-foreground">{card.level ?? "—"}</span></Td>
-                      <Td><span className="font-mono text-[11px] uppercase text-foreground">{card.card_type ?? "—"}</span></Td>
-                      <Td><span className="font-mono text-[11px] text-foreground">{card.exp ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] uppercase text-foreground/90">{card.level ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] uppercase text-foreground/90">{card.card_type ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] text-foreground/90">{card.exp ?? "—"}</span></Td>
                       <Td>
-                        <div className="space-y-0.5 font-mono text-[11px] text-foreground">
+                        <div className="space-y-0.5 font-mono text-[11px] text-foreground/90">
                           <Row label="Address" ok />
                           <div>City : {(card.extras?.split("|")[0] ?? "—").trim()}</div>
                           <div>State : {card.state ?? "—"}</div>
@@ -228,16 +231,15 @@ export const Cards = () => {
                           <Row label="MMN" ok={false} />
                         </div>
                       </Td>
-                      <Td><span className="font-mono text-[11px] uppercase text-foreground">{card.bank ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] uppercase text-foreground/90">{card.bank ?? "—"}</span></Td>
                       <Td><span className="text-destructive">✕</span></Td>
-                      <Td><span className="font-mono text-[12px] font-bold text-success">${Number(card.price).toFixed(2)}</span></Td>
+                      <Td><span className="font-mono text-[12px] font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">${Number(card.price).toFixed(2)}</span></Td>
                       <Td>
                         <Button
                           size="sm"
-                          variant={inCart ? "secondary" : "destructive"}
                           onClick={() => addCard(card)}
                           disabled={inCart}
-                          className="rounded-md px-3 py-1 text-[11px] font-semibold"
+                          className="rounded-md bg-gradient-to-r from-primary to-accent px-3 py-1 text-[11px] font-semibold text-primary-foreground shadow-[0_0_20px_hsl(var(--primary)/0.5)] hover:opacity-90"
                         >
                           {inCart ? "Added" : "AddCart"}
                         </Button>
@@ -247,6 +249,7 @@ export const Cards = () => {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </section>
