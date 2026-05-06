@@ -45,6 +45,7 @@ const emptyForm = {
   level: "",
   country_code: "",
   extras: "",
+  image_url: "",
 };
 
 const AdminProducts = () => {
@@ -116,6 +117,7 @@ const AdminProducts = () => {
       level: isCards ? form.level.trim() || null : null,
       country_code: isCards ? form.country_code.trim() || null : null,
       extras: isCards ? form.extras.trim() || null : null,
+      image_url: form.image_url.trim() || null,
     };
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
@@ -151,6 +153,7 @@ const AdminProducts = () => {
       level: p.level ?? "",
       country_code: p.country_code ?? "",
       extras: p.extras ?? "",
+      image_url: p.image_url ?? "",
     });
   };
 
