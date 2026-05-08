@@ -28,6 +28,7 @@ export const AccountTopBar = () => {
   return (
     <div className="sticky top-0 z-30 hidden bg-gradient-primary px-8 py-3 text-primary-foreground shadow-[var(--shadow-elevated)] md:block">
       <div className="mx-auto flex max-w-7xl items-center justify-end gap-3">
+        <ThemeToggle />
         <NavLink to="/tickets" className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground transition-smooth hover:bg-primary-foreground/25" aria-label="Tickets">
           <MessageSquareText className="h-5 w-5" />
         </NavLink>
