@@ -6,6 +6,7 @@ import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/use-admin";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "./ThemeToggle";
 
 const items = [
   { title: "News", url: "/", icon: Newspaper },
@@ -54,6 +55,7 @@ export const MobileNav = () => {
           ${balance.toFixed(2)}{cartItems.length ? ` · ${cartItems.length}` : ""}
         </NavLink>
         <div className="flex items-center gap-2">
+          <ThemeToggle className="h-10 w-10" />
           <NavLink to="/tickets" className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-foreground/15 text-primary-foreground">
             <MessageSquareText className="h-5 w-5" />
           </NavLink>
