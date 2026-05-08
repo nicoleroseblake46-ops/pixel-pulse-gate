@@ -4,6 +4,7 @@ import { MessageSquareText, ShoppingCart, User, Wallet } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "./ThemeToggle";
 
 export const AccountTopBar = () => {
   const { user } = useAuth();
