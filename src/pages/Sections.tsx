@@ -65,7 +65,14 @@ export const Cards = () => {
   const runSearch = () => {
     setFilters(draftFilters);
     setAppliedPriceRange(priceRange);
+    setPage(1);
   };
+
+  const totalPages = Math.max(1, Math.ceil(availableCards.length / pageSize));
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+  const pagedCards = availableCards.slice((page - 1) * pageSize, page * pageSize);
 
   const cartIdFor = (id: string) => `cards-${id}`;
 
