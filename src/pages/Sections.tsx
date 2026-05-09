@@ -184,7 +184,7 @@ export const Cards = () => {
                 </tr>
               </thead>
               <tbody>
-                {availableCards.map((card) => {
+                {pagedCards.map((card) => {
                   const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
                   const scheme = (card.scheme ?? card.brand ?? "").toUpperCase();
                   return (
