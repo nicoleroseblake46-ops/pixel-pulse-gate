@@ -261,6 +261,39 @@ export const Cards = () => {
             </div>
           </div>
         )}
+
+        {!loading && availableCards.length > 0 && (
+          <div className="glass mt-4 flex flex-col items-center justify-between gap-3 rounded-xl px-4 py-3 sm:flex-row">
+            <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+              Page {page} of {totalPages} · Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, availableCards.length)} of {availableCards.length}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="secondary" onClick={() => setPage(1)} disabled={page === 1}>First</Button>
+              <Button size="sm" variant="secondary" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
+                <ChevronLeft className="h-4 w-4" /> Prev
+              </Button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                .map((p, idx, arr) => (
+                  <span key={p} className="flex items-center gap-2">
+                    {idx > 0 && p - arr[idx - 1] > 1 && <span className="font-mono text-xs text-muted-foreground">…</span>}
+                    <Button
+                      size="sm"
+                      variant={p === page ? "default" : "secondary"}
+                      onClick={() => setPage(p)}
+                      className={p === page ? "glow-primary" : ""}
+                    >
+                      {p}
+                    </Button>
+                  </span>
+                ))}
+              <Button size="sm" variant="secondary" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+                Next <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => setPage(totalPages)} disabled={page === totalPages}>Last</Button>
+            </div>
+          </div>
+        )}
       </section>
     </AppLayout>
   );
