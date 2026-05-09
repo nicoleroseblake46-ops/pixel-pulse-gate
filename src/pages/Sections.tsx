@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ShieldCheck, ScrollText, Globe2, FileArchive, Calendar, BadgeCheck } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ShieldCheck, ScrollText, Globe2, FileArchive, Calendar, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
