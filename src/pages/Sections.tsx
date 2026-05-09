@@ -39,6 +39,8 @@ export const Cards = () => {
   const [filters, setFilters] = useState(emptyFilters);
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [appliedPriceRange, setAppliedPriceRange] = useState([0, 500]);
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   const availableCards = useMemo(
     () =>
