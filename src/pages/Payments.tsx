@@ -186,10 +186,11 @@ const Payments = () => {
           <label className="font-display text-lg font-bold">Top up amount (USD)</label>
           <Input
             type="number"
-            min={100}
+            min={1}
+            step="0.01"
             value={amount}
             onChange={(event) => { setAmount(event.target.value); setSelected(null); }}
-            placeholder="Minimum $100"
+            placeholder="Any amount — no minimum"
             className="mt-3 h-12 rounded-lg border-2 border-border bg-input/70 px-4 text-base font-semibold focus-visible:ring-primary"
           />
 
