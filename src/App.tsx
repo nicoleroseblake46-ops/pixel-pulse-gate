@@ -21,6 +21,13 @@ import Tools from "./pages/Tools";
 import MyOrders from "./pages/MyOrders";
 import Tickets from "./pages/Tickets";
 import NotFound from "./pages/NotFound.tsx";
+import AdminVisitors from "./pages/AdminVisitors";
+import { useVisitorTracking } from "./hooks/use-visitor-tracking";
+
+const VisitorTracker = () => {
+  useVisitorTracking();
+  return null;
+};
 
 const queryClient = new QueryClient();
 const productionUrl = "https://nexuscc.vercel.app";
@@ -63,6 +70,7 @@ const App = () => (
         <PasswordRecoveryRedirect>
           <AuthProvider>
             <CommerceProvider>
+              <VisitorTracker />
               <Routes>
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
@@ -81,6 +89,7 @@ const App = () => (
                 <Route path="/admin/tickets" element={<ProtectedRoute><AdminTickets /></ProtectedRoute>} />
                 <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
                 <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
+                <Route path="/admin/visitors" element={<ProtectedRoute><AdminVisitors /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
