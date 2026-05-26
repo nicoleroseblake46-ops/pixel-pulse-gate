@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ShieldCheck, ScrollText, Globe2, FileArchive, Calendar, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ShieldCheck, ScrollText, Globe2, FileArchive, Calendar, BadgeCheck, ChevronLeft, ChevronRight, Lock, Sparkles, Wallet } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,110 @@ export const RDP = () => (
   <SectionPage title="RDP" tagline="Private remote desktops · Windows · admin access · global regions." Icon={MonitorSmartphone} category="rdp" />
 );
 
+const CARDS_MIN_BALANCE = 50;
+
+const CardsLockedGate = ({ balance }: { balance: number }) => {
+  const navigate = useNavigate();
+  const progress = Math.min(100, Math.round((balance / CARDS_MIN_BALANCE) * 100));
+  const remaining = Math.max(0, CARDS_MIN_BALANCE - balance);
+
+  return (
+    <AppLayout>
+      <div className="relative mx-auto flex min-h-[80vh] max-w-3xl items-center justify-center px-4 py-12">
+        {/* Ambient orbs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-primary/30 blur-[120px] animate-pulse-glow" />
+          <div className="absolute -right-24 bottom-10 h-96 w-96 rounded-full bg-accent/25 blur-[140px] animate-pulse-glow" style={{ animationDelay: "1.2s" }} />
+          <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-warning/15 blur-[100px]" />
+        </div>
+
+        <div className="relative w-full animate-fade-up">
+          <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-card/60 p-8 shadow-[0_0_80px_-15px_hsl(var(--primary)/0.55)] backdrop-blur-xl md:p-12">
+            {/* Animated gradient sheen */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/15" />
+            <div className="pointer-events-none absolute -top-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-primary/80 to-transparent" />
+            <div className="pointer-events-none absolute -bottom-px left-10 right-10 h-px bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
+
+            {/* Vault icon */}
+            <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
+              <div className="absolute inset-0 rounded-2xl bg-gradient-primary opacity-30 blur-2xl animate-pulse-glow" />
+              <div className="relative flex h-full w-full items-center justify-center rounded-2xl border border-primary/50 bg-gradient-primary shadow-[0_0_40px_hsl(var(--primary)/0.6)]">
+                <Lock className="h-10 w-10 text-primary-foreground" strokeWidth={2.4} />
+                <Sparkles className="absolute -right-2 -top-2 h-5 w-5 text-warning animate-pulse" />
+              </div>
+            </div>
+
+            <div className="relative text-center">
+              <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Vault · Restricted</div>
+              <h1 className="mt-3 font-display text-4xl font-black tracking-tight md:text-5xl">
+                <span className="neon-text">Cards Locked</span>
+              </h1>
+              <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
+                Access to the live card inventory requires a minimum balance of{" "}
+                <span className="font-bold text-warning">${CARDS_MIN_BALANCE}</span>. Top up to unlock the vault.
+              </p>
+            </div>
+
+            {/* Balance progress */}
+            <div className="relative mx-auto mt-8 max-w-lg">
+              <div className="mb-2 flex items-center justify-between font-mono text-[11px] uppercase tracking-widest">
+                <span className="text-muted-foreground">Balance</span>
+                <span className="text-primary">${balance.toFixed(2)} / ${CARDS_MIN_BALANCE}</span>
+              </div>
+              <div className="relative h-3 overflow-hidden rounded-full border border-primary/30 bg-background/60">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-warning shadow-[0_0_20px_hsl(var(--primary)/0.8)] transition-all duration-700"
+                  style={{ width: `${progress}%` }}
+                />
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent,hsl(var(--primary-foreground)/0.25),transparent)] bg-[length:200%_100%] animate-[shimmer_2.4s_infinite]" />
+              </div>
+              <div className="mt-2 text-center font-mono text-[11px] text-muted-foreground">
+                {remaining > 0 ? <>${remaining.toFixed(2)} more to unlock</> : <>Vault ready — refresh to enter</>}
+              </div>
+            </div>
+
+            {/* Feature grid */}
+            <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
+              {[
+                { icon: ShieldCheck, label: "Verified Bases" },
+                { icon: BadgeCheck, label: "Daily Refresh" },
+                { icon: Globe2, label: "Global Coverage" },
+              ].map(({ icon: Icon, label }) => (
+                <div key={label} className="glass flex items-center gap-2 rounded-xl px-3 py-3 text-xs">
+                  <Icon className="h-4 w-4 text-primary" />
+                  <span className="font-mono uppercase tracking-wider text-muted-foreground">{label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div className="relative mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Button
+                onClick={() => navigate("/payments")}
+                className="group relative h-12 w-full overflow-hidden bg-gradient-primary px-8 font-display text-base font-bold text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.5)] hover:shadow-[0_0_50px_hsl(var(--primary)/0.8)] sm:w-auto"
+              >
+                <Wallet className="mr-2 h-5 w-5" />
+                Top Up Balance
+                <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate("/sales")}
+                className="h-12 w-full border-primary/40 px-6 font-mono text-xs uppercase tracking-widest sm:w-auto"
+              >
+                Browse Sales Instead
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </AppLayout>
+  );
+};
+
 export const Cards = () => {
   const navigate = useNavigate();
-  const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
+  const { cartItems, cartTotal, addToCart, addManyToCart, balance } = useCommerce();
   const { products, loading } = useProducts("cards");
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [filters, setFilters] = useState(emptyFilters);
@@ -97,6 +198,10 @@ export const Cards = () => {
     );
     toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
   };
+
+  if (balance < CARDS_MIN_BALANCE) {
+    return <CardsLockedGate balance={balance} />;
+  }
 
   return (
     <AppLayout>
