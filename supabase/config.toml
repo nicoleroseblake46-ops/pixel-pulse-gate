@@ -1,1 +1,4 @@
 project_id = "xxrkfaccutwrvsvyccps"
+
+[functions.log-visit]
+verify_jwt = false
