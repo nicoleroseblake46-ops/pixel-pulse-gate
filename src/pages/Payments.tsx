@@ -50,8 +50,8 @@ const Payments = () => {
   };
 
   const checkout = async () => {
-    if (!checkoutAmount || checkoutAmount < 100) {
-      toast.error("Minimum top up is $100");
+    if (!checkoutAmount || checkoutAmount <= 0) {
+      toast.error("Enter an amount greater than $0");
       return;
     }
     setSubmitting(true);
@@ -186,10 +186,11 @@ const Payments = () => {
           <label className="font-display text-lg font-bold">Top up amount (USD)</label>
           <Input
             type="number"
-            min={100}
+            min={1}
+            step="0.01"
             value={amount}
             onChange={(event) => { setAmount(event.target.value); setSelected(null); }}
-            placeholder="Minimum $100"
+            placeholder="Any amount — no minimum"
             className="mt-3 h-12 rounded-lg border-2 border-border bg-input/70 px-4 text-base font-semibold focus-visible:ring-primary"
           />
 
