@@ -199,6 +199,10 @@ export const Cards = () => {
     toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
   };
 
+  if (balance < CARDS_MIN_BALANCE) {
+    return <CardsLockedGate balance={balance} />;
+  }
+
   return (
     <AppLayout>
       <div className="mb-8 animate-fade-up">
