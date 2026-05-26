@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText, Globe } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
@@ -141,6 +141,18 @@ export const AppSidebar = () => {
             >
               <MessageSquareText className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
               <span className="text-sm tracking-wide">Tickets Admin</span>
+            </NavLink>
+            <NavLink
+              to="/admin/visitors"
+              className={({ isActive }) =>
+                cn(
+                  "group flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium transition-smooth hover:bg-sidebar-accent hover:translate-x-1",
+                  isActive && "bg-sidebar-accent text-foreground"
+                )
+              }
+            >
+              <Globe className="h-5 w-5 text-muted-foreground group-hover:text-accent transition-smooth" />
+              <span className="text-sm tracking-wide">Visitor IPs</span>
             </NavLink>
           </>
         )}
