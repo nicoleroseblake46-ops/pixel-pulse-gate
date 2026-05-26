@@ -50,8 +50,8 @@ const Payments = () => {
   };
 
   const checkout = async () => {
-    if (!checkoutAmount || checkoutAmount < 100) {
-      toast.error("Minimum top up is $100");
+    if (!checkoutAmount || checkoutAmount <= 0) {
+      toast.error("Enter an amount greater than $0");
       return;
     }
     setSubmitting(true);
