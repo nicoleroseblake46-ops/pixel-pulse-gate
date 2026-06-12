@@ -1,8 +1,0 @@
-# Tor hidden service snippet
-# Append to /etc/tor/torrc (or drop into /etc/tor/torrc.d/nexuscc.conf)
-# Then: sudo systemctl restart tor
-# Your .onion address appears at: /var/lib/tor/nexuscc/hostname
-
-HiddenServiceDir /var/lib/tor/nexuscc/
-HiddenServiceVersion 3
-HiddenServicePort 80 127.0.0.1:8080
