@@ -210,6 +210,22 @@ const AdminProducts = () => {
           </Button>
         </div>
 
+        {/* Site-wide toggles */}
+        <section className="glass rounded-xl border border-border p-4 md:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/40">
+                <EyeOff className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <div className="font-display text-base font-bold">Hide Sales section</div>
+                <p className="text-xs text-muted-foreground">When ON, the Sales page and sidebar link are hidden for regular users. Admins still see it.</p>
+              </div>
+            </div>
+            <Switch checked={salesHidden} onCheckedChange={(checked) => setSetting("sales_hidden", checked)} />
+          </div>
+        </section>
+
         <Tabs value={active} onValueChange={(v) => setActive(v as ProductCategory)}>
           <TabsList className="flex w-full flex-wrap justify-start gap-1 bg-card/60 p-1">
             {categories.map(({ value, label, Icon }) => (
