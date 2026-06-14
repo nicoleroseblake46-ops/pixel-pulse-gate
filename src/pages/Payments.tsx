@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useCryptoRates, formatCrypto } from "@/hooks/use-crypto-rates";
+import { copyToClipboard } from "@/lib/clipboard";
 import { toast } from "sonner";
 
 const wallets = {
@@ -35,18 +36,26 @@ const Payments = () => {
   const cryptoDisplay = formatCrypto(cryptoAmount, coin);
 
   const copyWallet = async () => {
-    await navigator.clipboard.writeText(walletAddress);
-    setCopied(true);
-    toast.success("Wallet copied");
-    setTimeout(() => setCopied(false), 1600);
+    const ok = await copyToClipboard(walletAddress);
+    if (ok) {
+      setCopied(true);
+      toast.success("Wallet copied");
+      setTimeout(() => setCopied(false), 1600);
+    } else {
+      toast.error("Copy failed — long-press to copy");
+    }
   };
 
   const copyCryptoAmount = async () => {
     if (!cryptoAmount) return;
-    await navigator.clipboard.writeText(cryptoDisplay);
-    setCopiedAmount(true);
-    toast.success(`${cryptoDisplay} ${coin.split("/")[0]} copied`);
-    setTimeout(() => setCopiedAmount(false), 1600);
+    const ok = await copyToClipboard(cryptoDisplay);
+    if (ok) {
+      setCopiedAmount(true);
+      toast.success(`${cryptoDisplay} ${coin.split("/")[0]} copied`);
+      setTimeout(() => setCopiedAmount(false), 1600);
+    } else {
+      toast.error("Copy failed — long-press to copy");
+    }
   };
 
   const checkout = async () => {
@@ -240,19 +249,25 @@ const Payments = () => {
           )}
 
           <div className="mt-5 flex flex-col gap-4 rounded-xl border border-border bg-secondary/20 p-4 sm:flex-row sm:items-center">
-            <div className="rounded-lg bg-foreground p-3">
+            <div className="mx-auto rounded-lg bg-foreground p-3 sm:mx-0">
               <QRCodeSVG value={walletAddress} size={108} bgColor="#fafafa" fgColor="#0a0a0f" level="M" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground"><Wallet className="h-4 w-4" /> {coin} deposit address</div>
-              <code className="block truncate rounded-md bg-background/70 px-3 py-2 font-mono text-xs">{walletAddress}</code>
+              <code
+                className="block w-full break-all rounded-md bg-background/70 px-3 py-2 font-mono text-[11px] leading-relaxed select-all sm:text-xs"
+                onClick={copyWallet}
+                title="Tap to copy"
+              >
+                {walletAddress}
+              </code>
+              <Button variant="secondary" onClick={copyWallet} className="mt-2 w-full sm:w-auto">
+                {copied ? <Check /> : <Copy />} {copied ? "Copied" : "Copy address"}
+              </Button>
             </div>
-            <Button variant="secondary" onClick={copyWallet} className="shrink-0">
-              {copied ? <Check /> : <Copy />} Copy
-            </Button>
           </div>
 
-          <div className="mt-5 flex items-center justify-end gap-4">
+          <div className="mt-5 flex flex-col-reverse items-stretch justify-end gap-3 sm:flex-row sm:items-center sm:gap-4">
             <Button variant="ghost" onClick={() => { setAmount(""); setSelected(null); }}>Cancel</Button>
             <Button onClick={checkout} disabled={submitting} className="h-11 bg-gradient-primary px-8 font-display font-bold text-background glow-primary hover:opacity-90">
               {submitting ? "Submitting..." : "Submit Top Up"}
