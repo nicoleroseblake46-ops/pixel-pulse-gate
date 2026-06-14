@@ -131,6 +131,7 @@ const AdminProducts = () => {
       country_code: isCards ? form.country_code.trim() || null : null,
       extras: isCards ? form.extras.trim() || null : null,
       image_url: form.image_url.trim() || null,
+      vendor_id: form.vendor_id || null,
     };
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
@@ -167,6 +168,7 @@ const AdminProducts = () => {
       country_code: p.country_code ?? "",
       extras: p.extras ?? "",
       image_url: p.image_url ?? "",
+      vendor_id: (p as any).vendor_id ?? "",
     });
   };
 
