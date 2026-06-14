@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap, ScrollText } from "lucide-react";
+import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap, ScrollText, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { Loader } from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAdmin } from "@/hooks/use-admin";
+import { useAppSettings } from "@/hooks/use-app-settings";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductCategory } from "@/hooks/use-products";
 import { COUNTRIES, findCountry } from "@/lib/countries";
@@ -46,16 +48,27 @@ const emptyForm = {
   country_code: "",
   extras: "",
   image_url: "",
+  vendor_id: "",
 };
+
+type VendorOpt = { id: string; handle: string; name: string };
 
 const AdminProducts = () => {
   const { isAdmin, loading: adminLoading } = useAdmin();
+  const { salesHidden, setSetting } = useAppSettings();
   const [active, setActive] = useState<ProductCategory>("sales");
   const [items, setItems] = useState<Product[]>([]);
+  const [vendors, setVendors] = useState<VendorOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase.from("vendors").select("id,handle,name").order("name").then(({ data }) => {
+      setVendors((data ?? []) as VendorOpt[]);
+    });
+  }, []);
 
   const isCards = active === "cards";
 
