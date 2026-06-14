@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Wrench, ShoppingCart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import { Wrench, ShoppingCart, Sparkles, RefreshCcw } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
