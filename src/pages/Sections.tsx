@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ShieldCheck, ScrollText, Globe2, FileArchive, Calendar, BadgeCheck, ChevronLeft, ChevronRight, Lock, Sparkles, Wallet } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ScrollText, ChevronLeft, ChevronRight, Store } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
@@ -10,13 +10,23 @@ import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
 import { CountryFlag } from "@/components/CountryFlag";
+import { useAppSettings } from "@/hooks/use-app-settings";
+import { useAdmin } from "@/hooks/use-admin";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
 
-export const Sales = () => (
-  <SectionPage title="Sales" tagline="Limited-time deals refreshed every hour. Lock in before they vanish." Icon={Tag} category="sales" />
-);
+export const Sales = () => {
+  const { salesHidden } = useAppSettings();
+  const { isAdmin } = useAdmin();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (salesHidden && !isAdmin) navigate("/", { replace: true });
+  }, [salesHidden, isAdmin, navigate]);
+  if (salesHidden && !isAdmin) return null;
+  return <SectionPage title="Sales" tagline="Limited-time deals refreshed every hour. Lock in before they vanish." Icon={Tag} category="sales" />;
+};
 
 export const Socks = () => (
   <SectionPage title="Socks" tagline="Fresh residential SOCKS5 from a 3.5K+ pool, refreshed daily." Icon={Zap} category="socks" />
@@ -31,7 +41,9 @@ export const RDP = () => (
   <SectionPage title="RDP" tagline="Private remote desktops · Windows · admin access · global regions." Icon={MonitorSmartphone} category="rdp" />
 );
 
-const CARDS_MIN_BALANCE = 50;
+// Cards section is unlocked for all signed-in users (no minimum balance).
+// The locked-vault gate component is kept only as a legacy export and is no longer rendered.
+const CARDS_MIN_BALANCE = 0;
 
 const CardsLockedGate = ({ balance }: { balance: number }) => {
   const navigate = useNavigate();
@@ -132,10 +144,18 @@ const CardsLockedGate = ({ balance }: { balance: number }) => {
   );
 };
 
+type VendorMini = { id: string; handle: string; name: string };
+
 export const Cards = () => {
   const navigate = useNavigate();
-  const { cartItems, cartTotal, addToCart, addManyToCart, balance } = useCommerce();
+  const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const { products, loading } = useProducts("cards");
+  const [vendorMap, setVendorMap] = useState<Record<string, VendorMini>>({});
+  useEffect(() => {
+    supabase.from("vendors").select("id,handle,name").then(({ data }) => {
+      setVendorMap(Object.fromEntries((data ?? []).map((v: VendorMini) => [v.id, v])));
+    });
+  }, []);
   const [draftFilters, setDraftFilters] = useState(emptyFilters);
   const [filters, setFilters] = useState(emptyFilters);
   const [priceRange, setPriceRange] = useState([0, 500]);
@@ -198,10 +218,6 @@ export const Cards = () => {
     );
     toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
   };
-
-  if (balance < CARDS_MIN_BALANCE) {
-    return <CardsLockedGate balance={balance} />;
-  }
 
   return (
     <AppLayout>
@@ -295,14 +311,30 @@ export const Cards = () => {
                   return (
                     <tr key={card.id} className="border-t border-primary/20 align-top transition-colors hover:bg-primary/10">
                       <Td>
-                        <div className="font-mono text-[11px] font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{card.name || "04MAY_95VR_EMAIL_PHONE_IP_FIRSTHAND2"}</div>
+                        {(card as any).vendor_id && vendorMap[(card as any).vendor_id] ? (
+                          <button
+                            type="button"
+                            onClick={() => navigate(`/vendors/${vendorMap[(card as any).vendor_id].handle}`)}
+                            className="group block max-w-[220px] text-left"
+                            title={`Open ${vendorMap[(card as any).vendor_id].name}'s bases`}
+                          >
+                            <div className="font-mono text-[11px] font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent underline-offset-2 group-hover:underline truncate">
+                              {card.name}
+                            </div>
+                            <div className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] text-accent">
+                              <Store className="h-3 w-3" /> @{vendorMap[(card as any).vendor_id].handle}
+                            </div>
+                          </button>
+                        ) : (
+                          <div className="font-mono text-[11px] font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{card.name}</div>
+                        )}
                         {card.tag && (
                           <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-primary">
                             ◆ {card.tag}
                           </span>
                         )}
                       </Td>
-                      <Td><span className="font-mono text-[11px] text-accent">{card.seller ?? "—"}</span></Td>
+                      <Td><span className="font-mono text-[11px] text-accent">{card.seller ?? (vendorMap[(card as any).vendor_id]?.name ?? "—")}</span></Td>
                       <Td>
                         {card.valid ? (
                           <span className="inline-block rounded-full border border-success/40 bg-success/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-success">
