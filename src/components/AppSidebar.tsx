@@ -1,14 +1,16 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText, Globe } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText, Globe, Trophy } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useAdmin } from "@/hooks/use-admin";
+import { useAppSettings } from "@/hooks/use-app-settings";
 import { cn } from "@/lib/utils";
 
-const items = [
+const baseItems = [
   { title: "News", url: "/", icon: Newspaper, accent: "primary" },
-  { title: "Sales", url: "/sales", icon: Tag, accent: "accent" },
+  { title: "Sales", url: "/sales", icon: Tag, accent: "accent", key: "sales" as const },
   { title: "Cards", url: "/cards", icon: CreditCard, accent: "primary" },
+  { title: "Vendors", url: "/vendors", icon: Trophy, accent: "accent" },
   { title: "Proxy", url: "/proxy", icon: Network, accent: "primary" },
   { title: "Tools", url: "/tools", icon: Wrench, accent: "accent" },
   { title: "RDP", url: "/rdp", icon: MonitorSmartphone, accent: "primary" },
@@ -21,7 +23,9 @@ export const AppSidebar = () => {
   const { signOut, user } = useAuth();
   const { balance, cartItems } = useCommerce();
   const { isAdmin } = useAdmin();
+  const { salesHidden } = useAppSettings();
   const loc = useLocation();
+  const items = baseItems.filter((it) => !((it as any).key === "sales" && salesHidden && !isAdmin));
 
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar shadow-[var(--shadow-elevated)] md:flex">

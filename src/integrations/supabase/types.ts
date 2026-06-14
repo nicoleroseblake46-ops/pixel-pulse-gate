@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -88,6 +106,7 @@ export type Database = {
           tag: string | null
           updated_at: string
           valid: string | null
+          vendor_id: string | null
           zip: string | null
         }
         Insert: {
@@ -115,6 +134,7 @@ export type Database = {
           tag?: string | null
           updated_at?: string
           valid?: string | null
+          vendor_id?: string | null
           zip?: string | null
         }
         Update: {
@@ -142,9 +162,18 @@ export type Database = {
           tag?: string | null
           updated_at?: string
           valid?: string | null
+          vendor_id?: string | null
           zip?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -254,6 +283,51 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          handle: string
+          id: string
+          is_active: boolean
+          name: string
+          rating: number
+          sales_count: number
+          sales_total: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          handle: string
+          id?: string
+          is_active?: boolean
+          name: string
+          rating?: number
+          sales_count?: number
+          sales_total?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          handle?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          rating?: number
+          sales_count?: number
+          sales_total?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       visitor_logs: {
         Row: {
           country: string | null
@@ -309,6 +383,10 @@ export type Database = {
       purchase_cart: {
         Args: { _cart_total: number; _items: Json }
         Returns: string
+      }
+      refund_checker_fee: {
+        Args: { _count: number; _price_per_check: number }
+        Returns: number
       }
       reject_payment: { Args: { _payment_id: string }; Returns: undefined }
     }

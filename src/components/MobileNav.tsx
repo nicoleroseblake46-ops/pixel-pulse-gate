@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText } from "lucide-react";
+import { Newspaper, Tag, CreditCard, Network, Wrench, Wallet, User, LogOut, ShoppingBag, Menu, X, ShieldCheck, FilePenLine, MessageSquareText, MonitorSmartphone, Package, ScrollText, Trophy } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/use-admin";
+import { useAppSettings } from "@/hooks/use-app-settings";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "./ThemeToggle";
 
-const items = [
+const baseItems = [
   { title: "News", url: "/", icon: Newspaper },
-  { title: "Sales", url: "/sales", icon: Tag },
+  { title: "Sales", url: "/sales", icon: Tag, key: "sales" as const },
   { title: "Cards", url: "/cards", icon: CreditCard },
+  { title: "Vendors", url: "/vendors", icon: Trophy },
   { title: "Proxy", url: "/proxy", icon: Network },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "RDP", url: "/rdp", icon: MonitorSmartphone },
@@ -28,7 +30,9 @@ export const MobileNav = () => {
   const { signOut, user } = useAuth();
   const { balance, cartItems } = useCommerce();
   const { isAdmin } = useAdmin();
+  const { salesHidden } = useAppSettings();
   const loc = useLocation();
+  const items = baseItems.filter((it) => !((it as any).key === "sales" && salesHidden && !isAdmin));
   const visibleItems = isAdmin
     ? [...items, { title: "News Admin", url: "/admin/news", icon: FilePenLine }, { title: "Inventory Admin", url: "/admin/products", icon: Package }, { title: "Tickets Admin", url: "/admin/tickets", icon: MessageSquareText }, { title: "Payments Admin", url: "/admin/payments", icon: ShieldCheck }]
     : items;

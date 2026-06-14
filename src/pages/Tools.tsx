@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Wrench, ShoppingCart, ShieldCheck, Sparkles, Wallet } from "lucide-react";
+import { Wrench, ShoppingCart, Sparkles, RefreshCcw } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,6 +45,7 @@ const Tools = () => {
   const [alive, setAlive] = useState<string[]>([]);
   const [dead, setDead] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
+  const [refunded, setRefunded] = useState(0);
 
   const lines = useMemo(
     () => input.split(/\r?\n/).map(parseLine).filter((l): l is Parsed => l !== null),
@@ -54,21 +55,16 @@ const Tools = () => {
   const insufficient = totalCost > balance;
 
   const runCheck = async () => {
-    if (!lines.length) {
-      toast.error("Add at least one card to check");
-      return;
-    }
+    if (!lines.length) { toast.error("Add at least one card"); return; }
     if (insufficient) {
-      toast.error("Insufficient balance", {
-        description: `You need $${totalCost.toFixed(2)} to run this check. Top up your balance first.`,
-      });
+      toast.error("Insufficient balance", { description: `Need $${totalCost.toFixed(2)}.` });
       return;
     }
     setRunning(true);
     setAlive([]);
     setDead([]);
+    setRefunded(0);
 
-    // Charge the user's main balance atomically server-side BEFORE running checks.
     const { error: chargeError } = await supabase.rpc("charge_checker_fee", {
       _count: lines.length,
       _price_per_check: PRICE_PER_CHECK,
@@ -80,110 +76,97 @@ const Tools = () => {
     }
     await refreshBalance();
 
-    // Simulated streaming check — ~90% Live, ~10% Dead, randomized per card.
+    let deadCount = 0;
     for (let i = 0; i < lines.length; i++) {
       const l = lines[i];
       await new Promise((r) => setTimeout(r, 220));
       const isLive = Math.random() < LIVE_RATE;
       if (isLive) setAlive((prev) => [...prev, l.raw]);
-      else setDead((prev) => [...prev, l.raw]);
+      else { setDead((prev) => [...prev, l.raw]); deadCount++; }
+    }
+
+    if (deadCount > 0) {
+      const { error: refundErr } = await supabase.rpc("refund_checker_fee", {
+        _count: deadCount,
+        _price_per_check: PRICE_PER_CHECK,
+      });
+      if (!refundErr) {
+        const amount = deadCount * PRICE_PER_CHECK;
+        setRefunded(amount);
+        await refreshBalance();
+        toast.success(`Refunded $${amount.toFixed(2)} for ${deadCount} dead`);
+      }
     }
     setRunning(false);
-    toast.success("Check complete", {
-      description: `${lines.length} cards processed · $${totalCost.toFixed(2)} charged from balance.`,
-    });
   };
 
   const addItem = (item: typeof products[number]) => {
     addToCart({ id: `tools-${item.id}`, name: item.name, meta: item.meta, price: Number(item.price) });
-    toast.success("Added to cart", { description: `${item.name} ready for checkout.` });
+    toast.success("Added to cart");
   };
 
   return (
     <AppLayout>
-      {/* Header */}
-      <div className="mb-8 animate-fade-up">
+      {/* Compact header */}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate-fade-up">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary glow-primary">
-            <Wrench className="h-6 w-6 text-primary-foreground" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary glow-primary">
+            <Wrench className="h-5 w-5 text-primary-foreground" />
           </div>
-          <div>
-            <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">/ Tools</div>
-            <h1 className="font-display text-4xl font-black tracking-tight md:text-5xl">
-              <span className="neon-text">Tools</span>
-            </h1>
-          </div>
+          <h1 className="font-display text-2xl font-black tracking-tight md:text-3xl">
+            <span className="neon-text">CC Checker</span>
+          </h1>
         </div>
-        <p className="mt-3 text-muted-foreground">Pro-grade utilities. Built for speed, accuracy, and volume.</p>
+        <div className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[11px] text-primary">
+          ${PRICE_PER_CHECK.toFixed(2)}/card · dead auto-refund
+        </div>
       </div>
 
       {/* CC Checker */}
-      <section className="glass mb-10 rounded-2xl p-5 md:p-6 animate-fade-up">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">Premium Utility</div>
-            <h2 className="mt-1 font-display text-3xl font-black tracking-tight">CC Checker</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              You can use this checker to check the status of your card. We will charge{" "}
-              <span className="font-mono font-bold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span> for this service per card.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div
-              className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest ${
-                insufficient && lines.length
-                  ? "border-destructive/40 bg-destructive/10 text-destructive"
-                  : "border-primary/40 bg-primary/10 text-primary"
-              }`}
-            >
-              <Wallet className="h-3.5 w-3.5" /> Balance · ${balance.toFixed(2)}
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-success/40 bg-success/10 px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest text-success">
-              <ShieldCheck className="h-3.5 w-3.5" /> Secure · Encrypted
-            </div>
-          </div>
-        </div>
-
+      <section className="glass mb-10 rounded-2xl p-4 md:p-6 animate-fade-up">
         <div className="grid gap-5 lg:grid-cols-2">
           {/* Input panel */}
-          <div className="rounded-xl border border-border bg-card/70 p-4">
-            <div className="mb-2 font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Examples</div>
-            <pre className="mb-3 select-none rounded-md bg-muted/40 px-3 py-2 font-mono text-xs leading-6 text-muted-foreground">
-{`1234123412341234|12/34|123
-1234123412341234|12/34|123
-....
-....`}
-            </pre>
+          <div className="rounded-xl border border-border bg-card/70 p-3 md:p-4">
             <Textarea
-              placeholder="Paste your cards here, one per line"
+              placeholder={`Paste cards, one per line\n1234123412341234|12/34|123`}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="min-h-[260px] resize-y bg-background font-mono text-sm"
+              className="min-h-[220px] resize-y bg-background font-mono text-sm"
             />
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span className="font-mono">
-                {lines.length} valid line{lines.length === 1 ? "" : "s"} parsed
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span className="font-mono text-muted-foreground">
+                {lines.length} line{lines.length === 1 ? "" : "s"} · Balance ${balance.toFixed(2)}
               </span>
-              <span className="font-mono font-bold text-foreground">
-                Total: ${totalCost.toFixed(2)}
-              </span>
+              <span className="font-mono font-bold text-foreground">Total ${totalCost.toFixed(2)}</span>
             </div>
             <Button
               onClick={runCheck}
               disabled={running || !lines.length || insufficient}
-              className="mt-4 h-12 w-full rounded-xl bg-destructive font-display text-base font-black uppercase tracking-widest text-destructive-foreground hover:bg-destructive/90"
+              className="mt-3 h-12 w-full rounded-xl bg-gradient-primary font-display text-base font-black uppercase tracking-widest text-primary-foreground glow-primary hover:opacity-90"
             >
               {running
                 ? "Checking..."
                 : insufficient && lines.length
-                  ? `Insufficient balance · need $${totalCost.toFixed(2)}`
-                  : "Check"}
+                  ? `Need $${totalCost.toFixed(2)}`
+                  : "Start Check"}
             </Button>
-            {insufficient && lines.length > 0 && (
-              <p className="mt-2 text-center font-mono text-[11px] uppercase tracking-widest text-destructive">
-                Top up your balance to run this check
-              </p>
-            )}
+
+            {/* Refund banner */}
+            <div className="mt-3 rounded-lg border border-success/40 bg-success/5 p-3">
+              <div className="flex items-start gap-2">
+                <RefreshCcw className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                <div className="text-xs leading-relaxed text-muted-foreground">
+                  <span className="font-bold text-success">Auto-refund:</span> every dead card returns its{" "}
+                  <span className="font-mono font-bold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span> fee
+                  to your balance the moment the check completes — no ticket needed.
+                  {refunded > 0 && (
+                    <div className="mt-1 font-mono text-success">
+                      Last check refunded ${refunded.toFixed(2)}.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Results panels */}
@@ -193,6 +176,7 @@ const Tools = () => {
           </div>
         </div>
       </section>
+
 
       {/* Other tools (admin-managed inventory) */}
       <section className="animate-fade-up" style={{ animationDelay: "80ms" }}>

@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap, ScrollText } from "lucide-react";
+import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap, ScrollText, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/AppLayout";
 import { Loader } from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAdmin } from "@/hooks/use-admin";
+import { useAppSettings } from "@/hooks/use-app-settings";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductCategory } from "@/hooks/use-products";
 import { COUNTRIES, findCountry } from "@/lib/countries";
@@ -46,16 +48,27 @@ const emptyForm = {
   country_code: "",
   extras: "",
   image_url: "",
+  vendor_id: "",
 };
+
+type VendorOpt = { id: string; handle: string; name: string };
 
 const AdminProducts = () => {
   const { isAdmin, loading: adminLoading } = useAdmin();
+  const { salesHidden, setSetting } = useAppSettings();
   const [active, setActive] = useState<ProductCategory>("sales");
   const [items, setItems] = useState<Product[]>([]);
+  const [vendors, setVendors] = useState<VendorOpt[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    supabase.from("vendors").select("id,handle,name").order("name").then(({ data }) => {
+      setVendors((data ?? []) as VendorOpt[]);
+    });
+  }, []);
 
   const isCards = active === "cards";
 
@@ -118,6 +131,7 @@ const AdminProducts = () => {
       country_code: isCards ? form.country_code.trim() || null : null,
       extras: isCards ? form.extras.trim() || null : null,
       image_url: form.image_url.trim() || null,
+      vendor_id: form.vendor_id || null,
     };
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
@@ -154,6 +168,7 @@ const AdminProducts = () => {
       country_code: p.country_code ?? "",
       extras: p.extras ?? "",
       image_url: p.image_url ?? "",
+      vendor_id: (p as any).vendor_id ?? "",
     });
   };
 
@@ -195,6 +210,22 @@ const AdminProducts = () => {
           </Button>
         </div>
 
+        {/* Site-wide toggles */}
+        <section className="glass rounded-xl border border-border p-4 md:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/40">
+                <EyeOff className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <div className="font-display text-base font-bold">Hide Sales section</div>
+                <p className="text-xs text-muted-foreground">When ON, the Sales page and sidebar link are hidden for regular users. Admins still see it.</p>
+              </div>
+            </div>
+            <Switch checked={salesHidden} onCheckedChange={(checked) => setSetting("sales_hidden", checked)} />
+          </div>
+        </section>
+
         <Tabs value={active} onValueChange={(v) => setActive(v as ProductCategory)}>
           <TabsList className="flex w-full flex-wrap justify-start gap-1 bg-card/60 p-1">
             {categories.map(({ value, label, Icon }) => (
@@ -225,6 +256,22 @@ const AdminProducts = () => {
                     <Input placeholder="Price (USD)" type="number" min={0} step="0.01" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} />
                   </div>
                   <Textarea placeholder="Meta description / details" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} className="min-h-20" />
+
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Vendor (optional)</div>
+                      <Select value={form.vendor_id || "none"} onValueChange={(v) => setForm({ ...form, vendor_id: v === "none" ? "" : v })}>
+                        <SelectTrigger><SelectValue placeholder="No vendor" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No vendor</SelectItem>
+                          {vendors.map((v) => (
+                            <SelectItem key={v.id} value={v.id}>{v.name} <span className="text-muted-foreground">· @{v.handle}</span></SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
                   <div className="grid gap-3 md:grid-cols-2">
                     <Input placeholder="Tag (e.g. HOT, NEW) — optional" value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} />
                     <Input placeholder="Sort order" type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
