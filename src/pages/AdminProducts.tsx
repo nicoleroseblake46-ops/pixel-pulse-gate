@@ -418,3 +418,109 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
+
+type Stat = { label: string; value: string; icon: string };
+type Panel = { accent?: string; title?: string; body: string };
+
+const DEFAULT_STATS: Stat[] = [
+  { label: "Total CVVs", value: "auto:cards", icon: "CreditCard" },
+  { label: "Total RDPs", value: "auto:rdp", icon: "MonitorSmartphone" },
+  { label: "Total SOCKS", value: "auto:socks", icon: "Zap" },
+  { label: "Total LOGS", value: "auto:logs", icon: "ScrollText" },
+  { label: "CVV Update Time", value: "Soon", icon: "History" },
+];
+
+const DEFAULT_PANELS: Panel[] = [
+  { accent: "danger", body: "Always save our main url..." },
+  { accent: "danger", body: "Payments possible in < BTC, LTC, DOGE, USDT TRC20 + ERC20, ETH, XMR >" },
+  { accent: "info", body: "Refund method for HQ cards: ..." },
+];
+
+const ICON_OPTIONS = ["CreditCard","MonitorSmartphone","Zap","ScrollText","History","Database","Server","Network","Shield","Globe","Wrench"];
+const ACCENT_OPTIONS = [
+  { value: "danger", label: "Red (danger)" },
+  { value: "info", label: "Green (info)" },
+  { value: "warning", label: "Yellow (warning)" },
+];
+
+const DashboardEditor = () => {
+  const { settings, setSetting } = useAppSettings();
+  const initialStats = (Array.isArray(settings.dashboard_stats) ? settings.dashboard_stats : DEFAULT_STATS) as Stat[];
+  const initialPanels = (Array.isArray(settings.dashboard_important) ? settings.dashboard_important : DEFAULT_PANELS) as Panel[];
+  const [stats, setStats] = useState<Stat[]>(initialStats);
+  const [panels, setPanels] = useState<Panel[]>(initialPanels);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { setStats(initialStats); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [JSON.stringify(initialStats)]);
+  useEffect(() => { setPanels(initialPanels); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [JSON.stringify(initialPanels)]);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await Promise.all([
+        setSetting("dashboard_stats", stats),
+        setSetting("dashboard_important", panels),
+      ]);
+      toast.success("Dashboard updated");
+    } catch (e: any) {
+      toast.error("Save failed", { description: e?.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <section className="glass space-y-6 rounded-xl border border-border p-4 md:p-5">
+      <div>
+        <h2 className="font-display text-xl font-black">Dashboard — Stats row</h2>
+        <p className="text-xs text-muted-foreground">Use <code>auto:cards</code>, <code>auto:rdp</code>, <code>auto:socks</code>, <code>auto:proxy</code>, <code>auto:logs</code>, <code>auto:tools</code>, <code>auto:sales</code> as the value to auto-count active products. Otherwise type any text.</p>
+      </div>
+      <div className="space-y-3">
+        {stats.map((s, i) => (
+          <div key={i} className="grid gap-2 rounded-lg border border-border bg-secondary/30 p-3 md:grid-cols-[1fr_1fr_180px_auto]">
+            <Input placeholder="Label" value={s.label} onChange={(e) => setStats((arr) => arr.map((x, idx) => idx === i ? { ...x, label: e.target.value } : x))} />
+            <Input placeholder="Value (or auto:cards)" value={s.value} onChange={(e) => setStats((arr) => arr.map((x, idx) => idx === i ? { ...x, value: e.target.value } : x))} />
+            <Select value={s.icon} onValueChange={(v) => setStats((arr) => arr.map((x, idx) => idx === i ? { ...x, icon: v } : x))}>
+              <SelectTrigger><SelectValue placeholder="Icon" /></SelectTrigger>
+              <SelectContent>{ICON_OPTIONS.map((n) => <SelectItem key={n} value={n}>{n}</SelectItem>)}</SelectContent>
+            </Select>
+            <Button type="button" variant="destructive" size="sm" onClick={() => setStats((arr) => arr.filter((_, idx) => idx !== i))}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
+        ))}
+        <Button type="button" variant="secondary" onClick={() => setStats((arr) => [...arr, { label: "New stat", value: "0", icon: "CreditCard" }])}>
+          <Plus className="h-4 w-4" /> Add stat
+        </Button>
+      </div>
+
+      <div>
+        <h2 className="font-display text-xl font-black">Dashboard — Important panels</h2>
+        <p className="text-xs text-muted-foreground">Shown on the right column of the homepage.</p>
+      </div>
+      <div className="space-y-3">
+        {panels.map((p, i) => (
+          <div key={i} className="space-y-2 rounded-lg border border-border bg-secondary/30 p-3">
+            <div className="grid gap-2 md:grid-cols-[1fr_220px_auto]">
+              <Input placeholder="Title (optional)" value={p.title ?? ""} onChange={(e) => setPanels((arr) => arr.map((x, idx) => idx === i ? { ...x, title: e.target.value } : x))} />
+              <Select value={p.accent ?? "danger"} onValueChange={(v) => setPanels((arr) => arr.map((x, idx) => idx === i ? { ...x, accent: v } : x))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{ACCENT_OPTIONS.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+              </Select>
+              <Button type="button" variant="destructive" size="sm" onClick={() => setPanels((arr) => arr.filter((_, idx) => idx !== i))}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+            <Textarea placeholder="Body text (supports line breaks)" value={p.body} onChange={(e) => setPanels((arr) => arr.map((x, idx) => idx === i ? { ...x, body: e.target.value } : x))} className="min-h-24" />
+          </div>
+        ))}
+        <Button type="button" variant="secondary" onClick={() => setPanels((arr) => [...arr, { accent: "danger", body: "" }])}>
+          <Plus className="h-4 w-4" /> Add panel
+        </Button>
+      </div>
+
+      <Button onClick={save} disabled={saving}>{saving ? "Saving..." : "Save dashboard"}</Button>
+    </section>
+  );
+};
+
