@@ -87,7 +87,7 @@ const Dashboard = () => {
   // Auto live counts so stats with value "auto" pull from DB
   useEffect(() => {
     const run = async () => {
-      const cats = ["cards", "rdp", "socks", "proxy", "logs", "tools", "sales"];
+      const cats = ["cards", "rdp", "socks", "proxy", "logs", "tools", "sales"] as const;
       const entries = await Promise.all(
         cats.map(async (c) => {
           const { count } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("category", c).eq("is_active", true);
