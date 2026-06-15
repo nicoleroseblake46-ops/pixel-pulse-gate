@@ -226,6 +226,9 @@ const AdminProducts = () => {
           </div>
         </section>
 
+        <DashboardEditor />
+
+
         <Tabs value={active} onValueChange={(v) => setActive(v as ProductCategory)}>
           <TabsList className="flex w-full flex-wrap justify-start gap-1 bg-card/60 p-1">
             {categories.map(({ value, label, Icon }) => (
