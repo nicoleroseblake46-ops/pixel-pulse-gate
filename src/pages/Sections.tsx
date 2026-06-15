@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ScrollText, ChevronLeft, ChevronRight, Store } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
@@ -48,6 +48,8 @@ type VendorMini = { id: string; handle: string; name: string };
 
 export const Cards = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const baseFilter = searchParams.get("base") ?? "";
   const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const { products, loading } = useProducts("cards");
   const [vendorMap, setVendorMap] = useState<Record<string, VendorMini>>({});
@@ -74,10 +76,11 @@ export const Cards = () => {
           text(card.state, filters.state) &&
           text(card.brand, filters.brand) &&
           text(card.card_type, filters.type) &&
-          text(card.bank, filters.bank);
+          text(card.bank, filters.bank) &&
+          (!baseFilter || (card.name ?? "").toLowerCase() === baseFilter.toLowerCase());
         return matches && Number(card.price) >= appliedPriceRange[0] && Number(card.price) <= appliedPriceRange[1];
       }),
-    [appliedPriceRange, filters, products],
+    [appliedPriceRange, filters, products, baseFilter],
   );
 
   const updateFilter = (key: keyof typeof emptyFilters, value: string) =>
