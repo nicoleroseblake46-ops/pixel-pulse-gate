@@ -528,3 +528,94 @@ const DashboardEditor = () => {
   );
 };
 
+/**
+ * Bulk-paste cards in the format:
+ * BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY
+ * Columns separated by tab, comma, or " | ". One card per line.
+ * Header row (BIN/Brand/...) is auto-skipped.
+ */
+const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Promise<void> | void; defaultVendorId?: string }) => {
+  const [raw, setRaw] = useState("");
+  const [base, setBase] = useState("");
+  const [price, setPrice] = useState("5");
+  const [busy, setBusy] = useState(false);
+
+  const parse = (text: string) => {
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const rows: { bin: string; brand: string; card_type: string; level: string; bank: string; country: string }[] = [];
+    for (const line of lines) {
+      const parts = line.split(/\t|\s*\|\s*|,(?=\s)|,/).map((p) => p.trim()).filter(Boolean);
+      if (!parts.length) continue;
+      if (/^bin$/i.test(parts[0])) continue; // header
+      const [bin, brand = "", card_type = "", level = "", bank = "", country = ""] = parts;
+      if (!/^\d{4,}/.test(bin)) continue;
+      rows.push({ bin, brand, card_type, level, bank, country });
+    }
+    return rows;
+  };
+
+  const preview = useMemo(() => parse(raw), [raw]);
+
+  const importNow = async () => {
+    if (!preview.length) { toast.error("Nothing to import"); return; }
+    const priceN = Number(price);
+    if (!Number.isFinite(priceN) || priceN < 0) { toast.error("Enter a valid default price"); return; }
+    setBusy(true);
+    const payload = preview.map((r) => {
+      const c = findCountry(r.country) ?? findCountry(r.country.slice(0, 2));
+      return {
+        category: "cards" as const,
+        name: base.trim() || `Base ${new Date().toISOString().slice(0, 10)}`,
+        meta: "",
+        price: priceN,
+        bin: r.bin,
+        brand: r.brand || null,
+        scheme: r.brand || null,
+        card_type: r.card_type || null,
+        level: r.level || null,
+        bank: r.bank || null,
+        country: c?.name ?? r.country ?? null,
+        country_code: c?.code ?? null,
+        vendor_id: defaultVendorId || null,
+      };
+    });
+    const { error } = await supabase.from("products").insert(payload);
+    setBusy(false);
+    if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
+    toast.success(`Imported ${payload.length} cards`);
+    setRaw("");
+    await onImported();
+  };
+
+  return (
+    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div>
+          <div className="font-display text-sm font-bold">Bulk paste cards</div>
+          <div className="text-[11px] text-muted-foreground">
+            One per line: <code>BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY</code> (tab, comma or | separated)
+          </div>
+        </div>
+        <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary">{preview.length} parsed</span>
+      </div>
+      <div className="grid gap-2 md:grid-cols-[1fr_140px]">
+        <Input placeholder="Base name (applied to all rows)" value={base} onChange={(e) => setBase(e.target.value)} />
+        <Input placeholder="Price USD" type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
+      </div>
+      <Textarea
+        value={raw}
+        onChange={(e) => setRaw(e.target.value)}
+        placeholder={"440393\tVISA\tDEBIT\tPREPAID CLASSIC\tSUTTON BANK\tUNITED STATES"}
+        className="mt-2 min-h-32 font-mono text-xs"
+      />
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Button type="button" onClick={importNow} disabled={busy || !preview.length}>
+          <Plus className="h-4 w-4" /> {busy ? "Importing..." : `Import ${preview.length} cards`}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setRaw("")} disabled={!raw}>Clear</Button>
+      </div>
+    </div>
+  );
+};
+
+
