@@ -123,6 +123,17 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
+      {/* Hero */}
+      <section className="relative mb-8 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-card to-accent/10 p-6 md:p-8 animate-fade-up">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-10 h-64 w-64 rounded-full bg-accent/15 blur-3xl" />
+        <div className="relative">
+          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary">/ Dashboard</div>
+          <h1 className="mt-1 font-display text-3xl font-black tracking-tight md:text-4xl">Welcome back, agent.</h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">Live inventory, fresh bases, and important notices — all in one place.</p>
+        </div>
+      </section>
+
       {/* Stats */}
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 animate-fade-up">
         {stats.map((s, i) => {
@@ -130,22 +141,52 @@ const Dashboard = () => {
           return (
             <div
               key={i}
-              className="glass flex flex-col items-center justify-center rounded-xl border border-border bg-card px-4 py-5 text-center shadow-[var(--shadow-elevated)] transition-smooth hover:-translate-y-0.5 hover:border-primary/40"
+              className="group relative overflow-hidden rounded-xl border border-border bg-card p-4 shadow-sm transition-smooth hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-elevated)]"
             >
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Icon className="h-6 w-6" />
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-primary/0 via-primary to-accent opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <div className="truncate text-xs font-medium text-muted-foreground">{s.label}</div>
+                  <div className="mt-0.5 font-display text-xl font-black text-foreground">{resolveStatValue(s) || "—"}</div>
+                </div>
               </div>
-              <div className="font-display text-sm font-bold text-foreground">{s.label}</div>
-              <div className="mt-1 font-mono text-xs text-primary">{resolveStatValue(s) || "—"}</div>
             </div>
           );
         })}
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
+        {/* Important (first on mobile so it isn't pushed below bases) */}
+        <section className="order-1 lg:order-2">
+          <h2 className="mb-4 font-display text-xl font-bold tracking-tight md:text-2xl">Important</h2>
+          <div className="space-y-3">
+            {important.map((p, i) => {
+              const accent = p.accent === "info"
+                ? "border-emerald-500/40"
+                : p.accent === "warning"
+                  ? "border-amber-500/50"
+                  : "border-destructive/40";
+              return (
+                <article key={i} className={`rounded-xl border bg-card px-5 py-4 shadow-sm ${accent}`}>
+                  {p.title && <h3 className="mb-1 font-display text-base font-bold">{p.title}</h3>}
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">{p.body}</p>
+                </article>
+              );
+            })}
+            {!important.length && (
+              <div className="rounded-xl border border-dashed border-border bg-card px-5 py-10 text-center text-muted-foreground">
+                No notices configured.
+              </div>
+            )}
+          </div>
+        </section>
+
         {/* New Base Updates */}
-        <section>
-          <h2 className="mb-4 text-center font-display text-2xl font-black tracking-tight md:text-3xl">New Base Updates</h2>
+        <section className="order-2 lg:order-1">
+          <h2 className="mb-4 font-display text-xl font-bold tracking-tight md:text-2xl">New Base Updates</h2>
           <div className="space-y-4">
             {loading && !bases.length && (
               <div className="space-y-2">
@@ -182,31 +223,6 @@ const Dashboard = () => {
             {bases.length >= limit && (
               <div className="flex justify-center pt-2">
                 <Button variant="secondary" onClick={() => setLimit((n) => n + 30)}>Load more</Button>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Important */}
-        <section>
-          <h2 className="mb-4 text-center font-display text-2xl font-black tracking-tight md:text-3xl">Important</h2>
-          <div className="space-y-4">
-            {important.map((p, i) => {
-              const accent = p.accent === "info"
-                ? "border-success/40 text-foreground"
-                : p.accent === "warning"
-                  ? "border-warning/50 text-foreground"
-                  : "border-destructive/40 text-destructive";
-              return (
-                <article key={i} className={`rounded-xl border bg-card px-5 py-4 shadow-[var(--shadow-elevated)] ${accent}`}>
-                  {p.title && <h3 className="mb-2 font-display text-base font-bold">{p.title}</h3>}
-                  <p className="whitespace-pre-line text-sm leading-relaxed">{p.body}</p>
-                </article>
-              );
-            })}
-            {!important.length && (
-              <div className="rounded-xl border border-dashed border-border bg-card px-5 py-10 text-center text-muted-foreground">
-                No notices configured.
               </div>
             )}
           </div>
