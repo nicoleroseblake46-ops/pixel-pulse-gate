@@ -319,53 +319,57 @@ const AdminProducts = () => {
                   </div>
 
                   {isCards && (
-                    <div className="grid gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 md:grid-cols-3">
-                      <Input placeholder="Base (e.g. Galaxy:25-04)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                      <Input placeholder="Seller (e.g. 6369)" value={form.seller} onChange={(e) => setForm({ ...form, seller: e.target.value })} />
-                      <Input placeholder="BIN" value={form.bin} onChange={(e) => setForm({ ...form, bin: e.target.value })} />
-                      <Input placeholder="Exp (e.g. 2/27)" value={form.exp} onChange={(e) => setForm({ ...form, exp: e.target.value })} />
-                      <Input placeholder="ZIP" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
-                      <Input placeholder="Bank" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
-                      <Input placeholder="Valid % (e.g. 85%)" value={form.valid} onChange={(e) => setForm({ ...form, valid: e.target.value })} />
-                      <Input placeholder="Scheme (e.g. MASTERCARD)" value={form.scheme} onChange={(e) => setForm({ ...form, scheme: e.target.value })} />
-                      <Input placeholder="Type (e.g. Credit)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
-                      <Input placeholder="Level (e.g. STANDARD)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
-                      <div className="md:col-span-2">
-                        <Select
-                          value={findCountry(form.country_code)?.code ?? ""}
-                          onValueChange={(code) => {
-                            const c = COUNTRIES.find((x) => x.code === code);
-                            if (c) setForm({ ...form, country: c.name, country_code: c.code });
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Country (with real flag)">
-                              {form.country_code && (
-                                <span className="inline-flex items-center gap-2">
-                                  <CountryFlag value={form.country_code} width={22} />
-                                  <span>{form.country || findCountry(form.country_code)?.name}</span>
-                                </span>
-                              )}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-72">
-                            {COUNTRIES.map((c) => (
-                              <SelectItem key={c.code} value={c.code}>
-                                <span className="inline-flex items-center gap-2">
-                                  <CountryFlag value={c.code} width={22} />
-                                  <span>{c.name}</span>
-                                  <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                    <>
+                      <BulkCardsPaste onImported={load} defaultVendorId={form.vendor_id} />
+                      <div className="grid gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 md:grid-cols-3">
+                        <Input placeholder="Base (e.g. Galaxy:25-04)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                        <Input placeholder="Seller / Full name" value={form.seller} onChange={(e) => setForm({ ...form, seller: e.target.value })} />
+                        <Input placeholder="BIN" value={form.bin} onChange={(e) => setForm({ ...form, bin: e.target.value })} />
+                        <Input placeholder="Exp (e.g. 2/27)" value={form.exp} onChange={(e) => setForm({ ...form, exp: e.target.value })} />
+                        <Input placeholder="ZIP" value={form.zip} onChange={(e) => setForm({ ...form, zip: e.target.value })} />
+                        <Input placeholder="Bank" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
+                        <Input placeholder="Valid % (e.g. 85%)" value={form.valid} onChange={(e) => setForm({ ...form, valid: e.target.value })} />
+                        <Input placeholder="Scheme (e.g. MASTERCARD)" value={form.scheme} onChange={(e) => setForm({ ...form, scheme: e.target.value })} />
+                        <Input placeholder="Type (e.g. Credit)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
+                        <Input placeholder="Level (e.g. STANDARD)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
+                        <div className="md:col-span-2">
+                          <Select
+                            value={findCountry(form.country_code)?.code ?? ""}
+                            onValueChange={(code) => {
+                              const c = COUNTRIES.find((x) => x.code === code);
+                              if (c) setForm({ ...form, country: c.name, country_code: c.code });
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Country (with real flag)">
+                                {form.country_code && (
+                                  <span className="inline-flex items-center gap-2">
+                                    <CountryFlag value={form.country_code} width={22} />
+                                    <span>{form.country || findCountry(form.country_code)?.name}</span>
+                                  </span>
+                                )}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent className="max-h-72">
+                              {COUNTRIES.map((c) => (
+                                <SelectItem key={c.code} value={c.code}>
+                                  <span className="inline-flex items-center gap-2">
+                                    <CountryFlag value={c.code} width={22} />
+                                    <span>{c.name}</span>
+                                    <span className="font-mono text-xs text-muted-foreground">{c.code}</span>
+                                  </span>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+                        <Input placeholder="Brand (legacy)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
+                        <Input placeholder="Extras (e.g. City|FullName|...)" className="md:col-span-3" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} />
                       </div>
-                      <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-                      <Input placeholder="Brand (legacy)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-                      <Input placeholder="Extras (e.g. Full name + Address...)" className="md:col-span-3" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} />
-                    </div>
+                    </>
                   )}
+
 
                   <Button type="submit" disabled={saving}>
                     <Plus className="h-4 w-4" /> {saving ? "Saving..." : editingId ? "Save changes" : "Publish item"}
@@ -523,4 +527,95 @@ const DashboardEditor = () => {
     </section>
   );
 };
+
+/**
+ * Bulk-paste cards in the format:
+ * BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY
+ * Columns separated by tab, comma, or " | ". One card per line.
+ * Header row (BIN/Brand/...) is auto-skipped.
+ */
+const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Promise<void> | void; defaultVendorId?: string }) => {
+  const [raw, setRaw] = useState("");
+  const [base, setBase] = useState("");
+  const [price, setPrice] = useState("5");
+  const [busy, setBusy] = useState(false);
+
+  const parse = (text: string) => {
+    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const rows: { bin: string; brand: string; card_type: string; level: string; bank: string; country: string }[] = [];
+    for (const line of lines) {
+      const parts = line.split(/\t|\s*\|\s*|,(?=\s)|,/).map((p) => p.trim()).filter(Boolean);
+      if (!parts.length) continue;
+      if (/^bin$/i.test(parts[0])) continue; // header
+      const [bin, brand = "", card_type = "", level = "", bank = "", country = ""] = parts;
+      if (!/^\d{4,}/.test(bin)) continue;
+      rows.push({ bin, brand, card_type, level, bank, country });
+    }
+    return rows;
+  };
+
+  const preview = useMemo(() => parse(raw), [raw]);
+
+  const importNow = async () => {
+    if (!preview.length) { toast.error("Nothing to import"); return; }
+    const priceN = Number(price);
+    if (!Number.isFinite(priceN) || priceN < 0) { toast.error("Enter a valid default price"); return; }
+    setBusy(true);
+    const payload = preview.map((r) => {
+      const c = findCountry(r.country) ?? findCountry(r.country.slice(0, 2));
+      return {
+        category: "cards" as const,
+        name: base.trim() || `Base ${new Date().toISOString().slice(0, 10)}`,
+        meta: "",
+        price: priceN,
+        bin: r.bin,
+        brand: r.brand || null,
+        scheme: r.brand || null,
+        card_type: r.card_type || null,
+        level: r.level || null,
+        bank: r.bank || null,
+        country: c?.name ?? r.country ?? null,
+        country_code: c?.code ?? null,
+        vendor_id: defaultVendorId || null,
+      };
+    });
+    const { error } = await supabase.from("products").insert(payload);
+    setBusy(false);
+    if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
+    toast.success(`Imported ${payload.length} cards`);
+    setRaw("");
+    await onImported();
+  };
+
+  return (
+    <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div>
+          <div className="font-display text-sm font-bold">Bulk paste cards</div>
+          <div className="text-[11px] text-muted-foreground">
+            One per line: <code>BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY</code> (tab, comma or | separated)
+          </div>
+        </div>
+        <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary">{preview.length} parsed</span>
+      </div>
+      <div className="grid gap-2 md:grid-cols-[1fr_140px]">
+        <Input placeholder="Base name (applied to all rows)" value={base} onChange={(e) => setBase(e.target.value)} />
+        <Input placeholder="Price USD" type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
+      </div>
+      <Textarea
+        value={raw}
+        onChange={(e) => setRaw(e.target.value)}
+        placeholder={"440393\tVISA\tDEBIT\tPREPAID CLASSIC\tSUTTON BANK\tUNITED STATES"}
+        className="mt-2 min-h-32 font-mono text-xs"
+      />
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <Button type="button" onClick={importNow} disabled={busy || !preview.length}>
+          <Plus className="h-4 w-4" /> {busy ? "Importing..." : `Import ${preview.length} cards`}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={() => setRaw("")} disabled={!raw}>Clear</Button>
+      </div>
+    </div>
+  );
+};
+
 

@@ -1,21 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ScrollText, ChevronLeft, ChevronRight, Store } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useCommerce } from "@/contexts/CommerceContext";
-import { useProducts } from "@/hooks/use-products";
+import { useProducts, type Product } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
 import { CountryFlag } from "@/components/CountryFlag";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useAdmin } from "@/hooks/use-admin";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-const emptyFilters = { bin: "", country: "", state: "", brand: "", type: "", bank: "" };
 
 export const Sales = () => {
   const { salesHidden } = useAppSettings();
@@ -25,272 +23,194 @@ export const Sales = () => {
     if (salesHidden && !isAdmin) navigate("/", { replace: true });
   }, [salesHidden, isAdmin, navigate]);
   if (salesHidden && !isAdmin) return null;
-  return <SectionPage title="Sales" tagline="Limited-time deals refreshed every hour. Lock in before they vanish." Icon={Tag} category="sales" />;
+  return <SectionPage title="Sales" Icon={Tag} category="sales" />;
 };
 
-export const Socks = () => (
-  <SectionPage title="Socks" tagline="Fresh residential SOCKS5 from a 3.5K+ pool, refreshed daily." Icon={Zap} category="socks" />
-);
+export const Socks = () => <SectionPage title="Socks" Icon={Zap} category="socks" />;
+export const Proxy = () => <SectionPage title="Proxy" Icon={Network} category="proxy" />;
+export const Logs = () => <SectionPage title="Logs" Icon={ScrollText} category="logs" />;
 
-export const Proxy = () => (
-  <SectionPage title="Proxy" tagline="Datacenter, residential, mobile — choose your battlefield." Icon={Network} category="proxy" />
-);
+/* ---------------- CARDS ---------------- */
 
-
-export const RDP = () => (
-  <SectionPage title="RDP" tagline="Private remote desktops · Windows · admin access · global regions." Icon={MonitorSmartphone} category="rdp" />
-);
-
-// Cards section is fully unlocked for all signed-in users (no minimum balance).
-
-
-type VendorMini = { id: string; handle: string; name: string };
+const emptyCardFilters = { bin: "", country: "", state: "", base: "", expYear: "", cardType: "", bank: "" };
 
 export const Cards = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const baseFilter = searchParams.get("base") ?? "";
   const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
   const { products, loading } = useProducts("cards");
-  const [vendorMap, setVendorMap] = useState<Record<string, VendorMini>>({});
-  useEffect(() => {
-    supabase.from("vendors").select("id,handle,name").then(({ data }) => {
-      setVendorMap(Object.fromEntries((data ?? []).map((v: VendorMini) => [v.id, v])));
-    });
-  }, []);
-  const [draftFilters, setDraftFilters] = useState(emptyFilters);
-  const [filters, setFilters] = useState(emptyFilters);
+
+  const [draft, setDraft] = useState({ ...emptyCardFilters, base: baseFilter });
+  const [filters, setFilters] = useState({ ...emptyCardFilters, base: baseFilter });
   const [priceRange, setPriceRange] = useState([0, 500]);
-  const [appliedPriceRange, setAppliedPriceRange] = useState([0, 500]);
+  const [appliedPrice, setAppliedPrice] = useState([0, 500]);
   const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
   const pageSize = 20;
 
-  const availableCards = useMemo(
-    () =>
-      products.filter((card) => {
-        const text = (val: string | null, search: string) =>
-          (val ?? "").toLowerCase().includes(search.trim().toLowerCase());
-        const matches =
-          (card.bin ?? "").includes(filters.bin.trim()) &&
-          text(card.country, filters.country) &&
-          text(card.state, filters.state) &&
-          text(card.brand, filters.brand) &&
-          text(card.card_type, filters.type) &&
-          text(card.bank, filters.bank) &&
-          (!baseFilter || (card.name ?? "").toLowerCase() === baseFilter.toLowerCase());
-        return matches && Number(card.price) >= appliedPriceRange[0] && Number(card.price) <= appliedPriceRange[1];
-      }),
-    [appliedPriceRange, filters, products, baseFilter],
-  );
-
-  const updateFilter = (key: keyof typeof emptyFilters, value: string) =>
-    setDraftFilters((current) => ({ ...current, [key]: value }));
-
-  const runSearch = () => {
-    setFilters(draftFilters);
-    setAppliedPriceRange(priceRange);
-    setPage(1);
-  };
-
-  const totalPages = Math.max(1, Math.ceil(availableCards.length / pageSize));
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-  const pagedCards = availableCards.slice((page - 1) * pageSize, page * pageSize);
+    if (baseFilter) {
+      setDraft((d) => ({ ...d, base: baseFilter }));
+      setFilters((f) => ({ ...f, base: baseFilter }));
+    }
+  }, [baseFilter]);
+
+  const filtered = useMemo(() => {
+    const t = (v: string | null, q: string) => (v ?? "").toLowerCase().includes(q.trim().toLowerCase());
+    return products.filter((c) => {
+      const expYearMatch = !filters.expYear || (c.exp ?? "").includes(filters.expYear.trim());
+      return (
+        (c.bin ?? "").includes(filters.bin.trim()) &&
+        t(c.country, filters.country) &&
+        t(c.state, filters.state) &&
+        t(c.name, filters.base) &&
+        expYearMatch &&
+        t(c.card_type, filters.cardType) &&
+        t(c.bank, filters.bank) &&
+        Number(c.price) >= appliedPrice[0] &&
+        Number(c.price) <= appliedPrice[1]
+      );
+    });
+  }, [products, filters, appliedPrice]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const cartIdFor = (id: string) => `cards-${id}`;
+  const buildItem = (c: Product) => ({
+    id: cartIdFor(c.id),
+    name: `${c.brand ?? c.scheme ?? "CARD"} ${c.bin ?? ""}`.trim(),
+    meta: `${c.country ?? ""} · ${c.bank ?? ""}`,
+    price: Number(c.price),
+  });
 
-  const addCard = (card: typeof products[number]) => {
-    addToCart({
-      id: cartIdFor(card.id),
-      name: `${card.brand ?? card.name} ${card.card_type ?? ""}`.trim(),
-      meta: `${card.country ?? ""} · ${card.bank ?? ""}`,
-      price: Number(card.price),
-    });
-    toast.success("Added to cart", { description: `${card.bin ? `BIN ${card.bin}` : card.name} ready.` });
+  const addCard = (c: Product) => {
+    addToCart(buildItem(c));
+    toast.success("Added to cart");
   };
 
-  const addAll = () => {
-    addManyToCart(
-      availableCards.map((card) => ({
-        id: cartIdFor(card.id),
-        name: `${card.brand ?? card.name} ${card.card_type ?? ""}`.trim(),
-        meta: `${card.country ?? ""} · ${card.bank ?? ""}`,
-        price: Number(card.price),
-      })),
-    );
-    toast.success("Cart updated", { description: `${availableCards.length} matching cards added.` });
+  const addSelected = () => {
+    const items = filtered.filter((c) => selected[c.id]).map(buildItem);
+    if (!items.length) { toast.error("Nothing selected"); return; }
+    addManyToCart(items);
+    toast.success(`${items.length} cards added`);
+    setSelected({});
   };
+
+  const runSearch = () => { setFilters(draft); setAppliedPrice(priceRange); setPage(1); };
 
   return (
     <AppLayout>
-      <div className="mb-8 animate-fade-up">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary glow-primary">
-              <CreditCard className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <div className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">/ Cards</div>
-              <h1 className="font-display text-4xl font-black tracking-tight md:text-5xl">
-                <span className="neon-text">Cards</span>
-              </h1>
-            </div>
-          </div>
-          <button
-            onClick={() => navigate("/payments")}
-            className="glass flex items-center gap-2 rounded-xl px-4 py-3 font-mono text-sm text-primary transition-smooth hover:border-primary/50 hover:text-accent"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            {cartItems.length} IN CART · ${cartTotal.toFixed(2)}
-          </button>
+      {/* Search panel */}
+      <section className="mb-5 rounded-xl border border-border bg-card p-4 md:p-5 animate-fade-up">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
+          <Field label="Bin"><Input placeholder="xxx,xxx,xxx" value={draft.bin} onChange={(e) => setDraft({ ...draft, bin: e.target.value })} /></Field>
+          <Field label="Country"><Input placeholder="Choose Country" value={draft.country} onChange={(e) => setDraft({ ...draft, country: e.target.value })} /></Field>
+          <Field label="State"><Input placeholder="Please Select" value={draft.state} onChange={(e) => setDraft({ ...draft, state: e.target.value })} /></Field>
+          <Field label="Base"><Input placeholder="Please Select" value={draft.base} onChange={(e) => setDraft({ ...draft, base: e.target.value })} /></Field>
+          <Field label="Exp Year"><Input placeholder="e.g. 29" value={draft.expYear} onChange={(e) => setDraft({ ...draft, expYear: e.target.value })} /></Field>
+          <Field label="Card Type"><Input placeholder="Credit / Debit" value={draft.cardType} onChange={(e) => setDraft({ ...draft, cardType: e.target.value })} /></Field>
+          <Field label="Bank"><Input placeholder="Please Select" value={draft.bank} onChange={(e) => setDraft({ ...draft, bank: e.target.value })} /></Field>
         </div>
-        <p className="mt-3 text-muted-foreground">Filter verified card inventory and add matches to your cart.</p>
-      </div>
 
-      <section className="glass mb-6 rounded-xl p-4 animate-fade-up md:p-5">
-        <div className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-primary">Top Filters</div>
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <Input placeholder="BINs" value={draftFilters.bin} onChange={(e) => updateFilter("bin", e.target.value)} />
-          <Input placeholder="Country" value={draftFilters.country} onChange={(e) => updateFilter("country", e.target.value)} />
-          <Input placeholder="State" value={draftFilters.state} onChange={(e) => updateFilter("state", e.target.value)} />
-          <Input placeholder="Brand" value={draftFilters.brand} onChange={(e) => updateFilter("brand", e.target.value)} />
-          <Input placeholder="Card Type" value={draftFilters.type} onChange={(e) => updateFilter("type", e.target.value)} />
-          <Input placeholder="Bank" value={draftFilters.bank} onChange={(e) => updateFilter("bank", e.target.value)} />
-        </div>
-        <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto_auto] lg:items-end">
+        <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
           <div>
-            <div className="mb-3 flex items-center justify-between font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              <span>Price Range</span>
-              <span className="text-primary">${priceRange[0]} - ${priceRange[1]}</span>
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <span className="font-medium text-muted-foreground">Price</span>
+              <span className="font-mono text-primary">${priceRange[0]} - ${priceRange[1]}</span>
             </div>
             <Slider min={0} max={500} step={1} value={priceRange} onValueChange={setPriceRange} />
           </div>
-          <Button onClick={runSearch} className="glow-primary"><Search /> Search</Button>
-          <Button variant="secondary" onClick={addAll} disabled={!availableCards.length}><ShoppingCart /> Add All</Button>
+          <Button onClick={runSearch} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Search className="h-4 w-4" /> Search
+          </Button>
         </div>
       </section>
 
-      <section className="space-y-3 animate-fade-up" style={{ animationDelay: "80ms" }}>
-        <div className="flex items-center justify-between">
-          <div className="font-mono text-xs uppercase tracking-[0.3em] text-primary">Available Cards</div>
-          <div className="font-mono text-xs text-muted-foreground">{availableCards.length} MATCHES</div>
+      {/* Results */}
+      <section className="rounded-xl border border-border bg-card animate-fade-up">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={addSelected} className="bg-emerald-500 text-white hover:bg-emerald-600">
+              + Add Cart
+            </Button>
+            <Button variant="secondary" onClick={() => navigate("/payments")} className="bg-emerald-700 text-white hover:bg-emerald-800">
+              <ShoppingCart className="h-4 w-4" /> Checkout · ${cartTotal.toFixed(2)} ({cartItems.length})
+            </Button>
+          </div>
+          <div className="font-mono text-xs text-muted-foreground">{filtered.length} matches</div>
         </div>
 
         {loading ? (
-          <Loader />
-        ) : !availableCards.length ? (
-          <div className="glass rounded-xl px-6 py-12 text-center text-muted-foreground">
-            No cards match the current filters.
-          </div>
+          <div className="p-10"><Loader /></div>
+        ) : !filtered.length ? (
+          <div className="px-6 py-12 text-center text-muted-foreground">No cards match the current filters.</div>
         ) : (
-          <div className="relative overflow-hidden rounded-2xl border border-primary/40 shadow-[0_0_60px_-10px_hsl(var(--primary)/0.45)]">
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/15 via-accent/10 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.22),transparent_60%),radial-gradient(circle_at_bottom_right,hsl(var(--accent)/0.18),transparent_60%)]" />
-            <div className="relative overflow-x-auto">
-            <table className="w-full min-w-[1400px] border-collapse text-xs">
-              <thead className="bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 backdrop-blur">
-                <tr className="text-left font-mono text-[11px] uppercase tracking-wider">
-                  <Th>Base</Th>
-                  <Th>Seller</Th>
-                  <Th>Base Quality</Th>
-                  <Th>Bin</Th>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1200px] text-sm">
+              <thead className="bg-secondary/40 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <Th className="w-10"></Th>
+                  <Th>Card Bin</Th>
+                  <Th>Full Name</Th>
+                  <Th>Country</Th>
+                  <Th>City</Th>
+                  <Th>State</Th>
+                  <Th>Type</Th>
+                  <Th>Schema</Th>
+                  <Th>Bank</Th>
                   <Th>Level</Th>
-                  <Th>Credit/Debit</Th>
-                  <Th>ExpDate</Th>
-                  <Th>Address Details</Th>
-                  <Th>Email/Phone/DOB/SSN</Th>
-                  <Th>Special Info</Th>
-                  <Th>Bank Name</Th>
-                  <Th>Refundable</Th>
+                  <Th>Exp Date</Th>
+                  <Th>Zipcode</Th>
+                  <Th>Base Name</Th>
                   <Th>Price</Th>
                   <Th>Action</Th>
                 </tr>
               </thead>
               <tbody>
-                {pagedCards.map((card) => {
-                  const inCart = cartItems.some((i) => i.id === cartIdFor(card.id));
-                  const scheme = (card.scheme ?? card.brand ?? "").toUpperCase();
+                {paged.map((c) => {
+                  const inCart = cartItems.some((i) => i.id === cartIdFor(c.id));
+                  const scheme = (c.scheme ?? c.brand ?? "").toUpperCase();
+                  const type = (c.card_type ?? "").toUpperCase();
+                  const fullName = c.seller ?? (c.extras?.split("|")[1] ?? "—").trim();
+                  const city = (c.extras?.split("|")[0] ?? "").trim() || "—";
                   return (
-                    <tr key={card.id} className="border-t border-primary/20 align-top transition-colors hover:bg-primary/10">
+                    <tr key={c.id} className="border-t border-border hover:bg-secondary/30">
                       <Td>
-                        {(card as any).vendor_id && vendorMap[(card as any).vendor_id] ? (
-                          <button
-                            type="button"
-                            onClick={() => navigate(`/vendors/${vendorMap[(card as any).vendor_id].handle}`)}
-                            className="group block max-w-[220px] text-left"
-                            title={`Open ${vendorMap[(card as any).vendor_id].name}'s bases`}
-                          >
-                            <div className="font-mono text-[11px] font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent underline-offset-2 group-hover:underline truncate">
-                              {card.name}
-                            </div>
-                            <div className="mt-1 inline-flex items-center gap-1 font-mono text-[10px] text-accent">
-                              <Store className="h-3 w-3" /> @{vendorMap[(card as any).vendor_id].handle}
-                            </div>
-                          </button>
-                        ) : (
-                          <div className="font-mono text-[11px] font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{card.name}</div>
-                        )}
-                        {card.tag && (
-                          <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary/20 px-2.5 py-0.5 font-mono text-[10px] font-semibold uppercase text-primary">
-                            ◆ {card.tag}
-                          </span>
-                        )}
+                        <Checkbox
+                          checked={!!selected[c.id]}
+                          onCheckedChange={(v) => setSelected((s) => ({ ...s, [c.id]: !!v }))}
+                        />
                       </Td>
-                      <Td><span className="font-mono text-[11px] text-accent">{card.seller ?? (vendorMap[(card as any).vendor_id]?.name ?? "—")}</span></Td>
+                      <Td className="font-mono text-foreground">{c.bin ? `${c.bin}***` : "—"}</Td>
+                      <Td>{fullName}</Td>
                       <Td>
-                        {card.valid ? (
-                          <span className="inline-block rounded-full border border-success/40 bg-success/10 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-success">
-                            {card.valid}
-                          </span>
-                        ) : "—"}
+                        <span className="inline-flex items-center gap-1.5">
+                          <CountryFlag value={c.country_code ?? c.country} width={18} />
+                          <span className="text-xs font-medium">{(c.country_code ?? "").toUpperCase() || c.country || "—"}</span>
+                        </span>
                       </Td>
-                      <Td>
-                        <div className="font-mono text-[12px] font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">{card.bin ?? "—"}</div>
-                        {scheme && <div className="mt-1 font-mono text-[10px] font-bold uppercase text-accent">{scheme}</div>}
-                      </Td>
-                      <Td><span className="font-mono text-[11px] uppercase text-foreground/90">{card.level ?? "—"}</span></Td>
-                      <Td><span className="font-mono text-[11px] uppercase text-foreground/90">{card.card_type ?? "—"}</span></Td>
-                      <Td><span className="font-mono text-[11px] text-foreground/90">{card.exp ?? "—"}</span></Td>
-                      <Td>
-                        <div className="space-y-0.5 font-mono text-[11px] text-foreground/90">
-                          <Row label="Address" ok />
-                          <div>City : {(card.extras?.split("|")[0] ?? "—").trim()}</div>
-                          <div>State : {card.state ?? "—"}</div>
-                          <div>Zip : {card.zip ?? "—"}</div>
-                          <div className="flex items-center gap-1">
-                            Country : {card.country_code?.toUpperCase() ?? card.country ?? "—"}
-                            <CountryFlag value={card.country_code ?? card.country} width={16} />
-                          </div>
-                        </div>
-                      </Td>
-                      <Td>
-                        <div className="space-y-1 font-mono text-[11px]">
-                          <Row label="Email" ok />
-                          <Row label="Phone" ok />
-                          <Row label="DOB" ok={false} />
-                          <Row label="SSN" ok={false} />
-                        </div>
-                      </Td>
-                      <Td>
-                        <div className="space-y-1 font-mono text-[11px]">
-                          <Row label="IP" ok />
-                          <Row label="UA" ok={false} />
-                          <Row label="DL" ok={false} />
-                          <Row label="MMN" ok={false} />
-                        </div>
-                      </Td>
-                      <Td><span className="font-mono text-[11px] uppercase text-foreground/90">{card.bank ?? "—"}</span></Td>
-                      <Td><span className="text-destructive">✕</span></Td>
-                      <Td><span className="font-mono text-[12px] font-bold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">${Number(card.price).toFixed(2)}</span></Td>
+                      <Td>{city}</Td>
+                      <Td>{c.state ?? "—"}</Td>
+                      <Td>{type ? <Pill tone="muted">{type}</Pill> : "—"}</Td>
+                      <Td>{scheme ? <Pill tone="emerald">{scheme}</Pill> : "—"}</Td>
+                      <Td className="max-w-[160px] truncate" title={c.bank ?? ""}>{c.bank ?? "—"}</Td>
+                      <Td className="max-w-[140px] truncate" title={c.level ?? ""}>{c.level ?? "—"}</Td>
+                      <Td className="font-mono">{c.exp ?? "—"}</Td>
+                      <Td className="font-mono">{c.zip ?? "—"}</Td>
+                      <Td className="max-w-[180px] truncate text-amber-600" title={c.name}>{c.name}</Td>
+                      <Td className="font-mono font-semibold">${Number(c.price).toFixed(2)}</Td>
                       <Td>
                         <Button
                           size="sm"
-                          onClick={() => addCard(card)}
+                          onClick={() => addCard(c)}
                           disabled={inCart}
-                          className="rounded-md bg-gradient-to-r from-primary to-accent px-3 py-1 text-[11px] font-semibold text-primary-foreground shadow-[0_0_20px_hsl(var(--primary)/0.5)] hover:opacity-90"
+                          className="h-8 w-8 rounded-md bg-emerald-700 p-0 text-white hover:bg-emerald-800"
+                          title={inCart ? "In cart" : "Add to cart"}
                         >
-                          {inCart ? "Added" : "AddCart"}
+                          <ShoppingCart className="h-3.5 w-3.5" />
                         </Button>
                       </Td>
                     </tr>
@@ -298,63 +218,182 @@ export const Cards = () => {
                 })}
               </tbody>
             </table>
-            </div>
           </div>
         )}
 
-        {!loading && availableCards.length > 0 && (
-          <div className="glass mt-4 flex flex-col items-center justify-between gap-3 rounded-xl px-4 py-3 sm:flex-row">
-            <div className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-              Page {page} of {totalPages} · Showing {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, availableCards.length)} of {availableCards.length}
-            </div>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="secondary" onClick={() => setPage(1)} disabled={page === 1}>First</Button>
-              <Button size="sm" variant="secondary" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-                <ChevronLeft className="h-4 w-4" /> Prev
-              </Button>
-              {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
-                .map((p, idx, arr) => (
-                  <span key={p} className="flex items-center gap-2">
-                    {idx > 0 && p - arr[idx - 1] > 1 && <span className="font-mono text-xs text-muted-foreground">…</span>}
-                    <Button
-                      size="sm"
-                      variant={p === page ? "default" : "secondary"}
-                      onClick={() => setPage(p)}
-                      className={p === page ? "glow-primary" : ""}
-                    >
-                      {p}
-                    </Button>
-                  </span>
-                ))}
-              <Button size="sm" variant="secondary" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-                Next <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="secondary" onClick={() => setPage(totalPages)} disabled={page === totalPages}>Last</Button>
-            </div>
-          </div>
+        {!loading && filtered.length > 0 && (
+          <Pagination page={page} totalPages={totalPages} setPage={setPage} total={filtered.length} pageSize={pageSize} />
         )}
       </section>
     </AppLayout>
   );
 };
 
-const Th = ({ children }: { children: React.ReactNode }) => (
-  <th className="border-r border-border/60 px-3 py-3 font-medium last:border-r-0">{children}</th>
-);
+/* ---------------- RDP ---------------- */
 
-const Td = ({ children }: { children: React.ReactNode }) => (
-  <td className="border-r border-border/40 px-3 py-3 last:border-r-0">{children}</td>
-);
+export const RDP = () => {
+  const { cartItems, cartTotal, addToCart } = useCommerce();
+  const { products, loading } = useProducts("rdp");
+  const navigate = useNavigate();
 
-const Row = ({ label, ok }: { label: string; ok: boolean }) => (
-  <div className="flex items-center gap-1">
-    <span className="text-foreground">{label} :</span>
-    <span className={ok ? "text-success" : "text-destructive"}>{ok ? "✓" : "✕"}</span>
+  const [draft, setDraft] = useState({ hostedBy: "", system: "", ram: "", country: "", hdd: "" });
+  const [filters, setFilters] = useState({ hostedBy: "", system: "", ram: "", country: "", hdd: "" });
+  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [appliedPrice, setAppliedPrice] = useState([0, 500]);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const filtered = useMemo(() => {
+    const t = (v: string | null, q: string) => (v ?? "").toLowerCase().includes(q.trim().toLowerCase());
+    return products.filter((p) =>
+      t(p.bank, filters.hostedBy) &&
+      t(p.brand, filters.system) &&
+      t(p.level, filters.ram) &&
+      t(p.country, filters.country) &&
+      t(p.card_type, filters.hdd) &&
+      Number(p.price) >= appliedPrice[0] &&
+      Number(p.price) <= appliedPrice[1]
+    );
+  }, [products, filters, appliedPrice]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  const runSearch = () => { setFilters(draft); setAppliedPrice(priceRange); setPage(1); };
+
+  const add = (p: Product) => {
+    addToCart({ id: `rdp-${p.id}`, name: p.name, meta: `${p.brand ?? ""} · ${p.country ?? ""}`, price: Number(p.price) });
+    toast.success("Added to cart");
+  };
+
+  return (
+    <AppLayout>
+      <section className="mb-5 rounded-xl border border-border bg-card p-4 md:p-5 animate-fade-up">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Field label="Hosted By"><Input placeholder="All" value={draft.hostedBy} onChange={(e) => setDraft({ ...draft, hostedBy: e.target.value })} /></Field>
+          <Field label="System"><Input placeholder="All" value={draft.system} onChange={(e) => setDraft({ ...draft, system: e.target.value })} /></Field>
+          <Field label="Ram"><Input placeholder="All" value={draft.ram} onChange={(e) => setDraft({ ...draft, ram: e.target.value })} /></Field>
+          <Field label="Price Range">
+            <div className="px-1 pt-2">
+              <Slider min={0} max={500} step={1} value={priceRange} onValueChange={setPriceRange} />
+              <div className="mt-1 font-mono text-xs text-muted-foreground">${priceRange[0]} - ${priceRange[1]}</div>
+            </div>
+          </Field>
+          <Field label="Country"><Input placeholder="All" value={draft.country} onChange={(e) => setDraft({ ...draft, country: e.target.value })} /></Field>
+          <Field label="HDD"><Input placeholder="All" value={draft.hdd} onChange={(e) => setDraft({ ...draft, hdd: e.target.value })} /></Field>
+        </div>
+        <div className="mt-4">
+          <Button onClick={runSearch} className="bg-indigo-900 text-white hover:bg-indigo-800">
+            SEARCH
+          </Button>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card animate-fade-up">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground">Show</span>
+            <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }} className="rounded-md border border-border bg-background px-2 py-1 text-sm">
+              {[10, 25, 50, 100].map((n) => <option key={n} value={n}>{n}</option>)}
+            </select>
+            <span className="text-muted-foreground">Entries</span>
+          </div>
+          <Button variant="secondary" onClick={() => navigate("/payments")}>
+            <ShoppingCart className="h-4 w-4" /> ${cartTotal.toFixed(2)} ({cartItems.length})
+          </Button>
+        </div>
+
+        {loading ? (
+          <div className="p-10"><Loader /></div>
+        ) : !filtered.length ? (
+          <div className="px-6 py-12 text-center text-muted-foreground">No RDPs available.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-sm">
+              <thead className="bg-secondary/40 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <Th>Host - IP</Th>
+                  <Th>Country</Th>
+                  <Th>Hosted By</Th>
+                  <Th>System</Th>
+                  <Th>RAM</Th>
+                  <Th>HDD SIZE</Th>
+                  <Th>Price</Th>
+                  <Th>Action</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.map((p) => (
+                  <tr key={p.id} className="border-t border-border hover:bg-secondary/30">
+                    <Td className="font-mono">**********</Td>
+                    <Td>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="text-xs font-medium">{(p.country_code ?? "").toUpperCase() || p.country || "—"}</span>
+                        <CountryFlag value={p.country_code ?? p.country} width={18} />
+                      </span>
+                    </Td>
+                    <Td>{p.bank ?? "Unknown"}</Td>
+                    <Td className="uppercase">{p.brand ?? "—"}</Td>
+                    <Td>{p.level ?? "—"}</Td>
+                    <Td>{p.card_type ?? "—"}</Td>
+                    <Td className="font-mono font-semibold text-emerald-600">${Number(p.price).toFixed(0)}</Td>
+                    <Td>
+                      <Button onClick={() => add(p)} className="h-8 rounded-md bg-indigo-900 px-3 text-white hover:bg-indigo-800">
+                        <ShoppingCart className="h-3.5 w-3.5" /> CART
+                      </Button>
+                    </Td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
+          <Pagination page={page} totalPages={totalPages} setPage={setPage} total={filtered.length} pageSize={pageSize} />
+        )}
+      </section>
+    </AppLayout>
+  );
+};
+
+/* ---------------- shared bits ---------------- */
+
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div>
+    <div className="mb-1.5 text-xs font-semibold text-foreground/80">{label}</div>
+    {children}
   </div>
 );
 
-export const Logs = () => (
-  <SectionPage title="Logs" tagline="Fresh stealer logs · cookies, autofills, wallet artifacts. Updated daily." Icon={ScrollText} category="logs" />
+const Th = ({ children, className = "" }: { children?: React.ReactNode; className?: string }) => (
+  <th className={`px-3 py-3 ${className}`}>{children}</th>
 );
 
+const Td = ({ children, className = "", title }: { children: React.ReactNode; className?: string; title?: string }) => (
+  <td className={`px-3 py-3 align-middle ${className}`} title={title}>{children}</td>
+);
+
+const Pill = ({ children, tone }: { children: React.ReactNode; tone: "muted" | "emerald" }) => (
+  <span className={`inline-block rounded-md border px-2 py-0.5 text-[10px] font-bold uppercase ${
+    tone === "emerald" ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-border bg-secondary text-foreground/80"
+  }`}>{children}</span>
+);
+
+const Pagination = ({ page, totalPages, setPage, total, pageSize }: { page: number; totalPages: number; setPage: (p: number) => void; total: number; pageSize: number }) => (
+  <div className="flex flex-col items-center justify-between gap-3 border-t border-border px-4 py-3 sm:flex-row">
+    <div className="font-mono text-xs text-muted-foreground">
+      {(page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} of {total}
+    </div>
+    <div className="flex items-center gap-1">
+      <Button size="sm" variant="secondary" onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
+        <ChevronLeft className="h-4 w-4" /> Previous
+      </Button>
+      <span className="rounded-md bg-indigo-900 px-3 py-1 text-xs font-bold text-white">{page}</span>
+      <Button size="sm" variant="secondary" onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}>
+        Next <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
+  </div>
+);
