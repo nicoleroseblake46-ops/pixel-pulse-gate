@@ -107,72 +107,90 @@ const Tools = () => {
 
   return (
     <AppLayout>
-      {/* Compact header */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 animate-fade-up">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-primary glow-primary">
-            <Wrench className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <h1 className="font-display text-2xl font-black tracking-tight md:text-3xl">
-            <span className="neon-text">CC Checker</span>
-          </h1>
+      {/* Header */}
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3 animate-fade-up">
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">Inventory tools</div>
+          <h1 className="mt-1 font-display text-2xl font-black tracking-tight md:text-3xl">CC Checker</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Validate cards in bulk. Dead hits are refunded automatically.</p>
         </div>
-        <div className="rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 font-mono text-[11px] text-primary">
-          ${PRICE_PER_CHECK.toFixed(2)}/card · dead auto-refund
+        <div className="flex items-center gap-2">
+          <div className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs">
+            <span className="text-muted-foreground">Rate</span>{" "}
+            <span className="font-mono font-bold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span>
+            <span className="text-muted-foreground"> / card</span>
+          </div>
+          <div className="rounded-lg border border-border bg-card px-3 py-1.5 text-xs">
+            <span className="text-muted-foreground">Balance</span>{" "}
+            <span className="font-mono font-bold text-foreground">${balance.toFixed(2)}</span>
+          </div>
         </div>
       </div>
 
       {/* CC Checker */}
-      <section className="glass mb-10 rounded-2xl p-4 md:p-6 animate-fade-up">
-        <div className="grid gap-5 lg:grid-cols-2">
-          {/* Input panel */}
-          <div className="rounded-xl border border-border bg-card/70 p-3 md:p-4">
-            <Textarea
-              placeholder={`Paste cards, one per line\n1234123412341234|12/34|123`}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              className="min-h-[220px] resize-y bg-background font-mono text-sm"
-            />
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span className="font-mono text-muted-foreground">
-                {lines.length} line{lines.length === 1 ? "" : "s"} · Balance ${balance.toFixed(2)}
+      <section className="mb-10 animate-fade-up">
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          {/* Toolbar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted/30 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+                <Wrench className="h-4 w-4" />
               </span>
-              <span className="font-mono font-bold text-foreground">Total ${totalCost.toFixed(2)}</span>
-            </div>
-            <Button
-              onClick={runCheck}
-              disabled={running || !lines.length || insufficient}
-              className="mt-3 h-12 w-full rounded-xl bg-gradient-primary font-display text-base font-black uppercase tracking-widest text-primary-foreground glow-primary hover:opacity-90"
-            >
-              {running
-                ? "Checking..."
-                : insufficient && lines.length
-                  ? `Need $${totalCost.toFixed(2)}`
-                  : "Start Check"}
-            </Button>
-
-            {/* Refund banner */}
-            <div className="mt-3 rounded-lg border border-success/40 bg-success/5 p-3">
-              <div className="flex items-start gap-2">
-                <RefreshCcw className="mt-0.5 h-4 w-4 shrink-0 text-success" />
-                <div className="text-xs leading-relaxed text-muted-foreground">
-                  <span className="font-bold text-success">Auto-refund:</span> every dead card returns its{" "}
-                  <span className="font-mono font-bold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span> fee
-                  to your balance the moment the check completes — no ticket needed.
-                  {refunded > 0 && (
-                    <div className="mt-1 font-mono text-success">
-                      Last check refunded ${refunded.toFixed(2)}.
-                    </div>
-                  )}
-                </div>
+              <div>
+                <div className="text-sm font-semibold leading-none">Bulk validator</div>
+                <div className="mt-1 font-mono text-[11px] text-muted-foreground">Format: PAN|MM/YY|CVV</div>
               </div>
+            </div>
+            <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground">
+              <span>{lines.length} valid line{lines.length === 1 ? "" : "s"}</span>
+              <span className="text-foreground">Total <span className="font-bold">${totalCost.toFixed(2)}</span></span>
             </div>
           </div>
 
-          {/* Results panels */}
-          <div className="grid gap-4">
-            <ResultPanel label="Alive" tone="success" items={alive} />
-            <ResultPanel label="Dead" tone="destructive" items={dead} />
+          <div className="grid gap-0 md:grid-cols-2">
+            {/* Input */}
+            <div className="border-b border-border p-4 md:border-b-0 md:border-r">
+              <Textarea
+                placeholder={`1234123412341234|12/34|123\n5678567856785678|07/29|456`}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="min-h-[260px] resize-y rounded-lg border-border bg-background font-mono text-sm leading-6"
+              />
+              <div className="mt-3 flex items-center gap-2">
+                <Button
+                  onClick={runCheck}
+                  disabled={running || !lines.length || insufficient}
+                  className="h-11 flex-1 rounded-lg font-semibold"
+                >
+                  {running
+                    ? "Checking…"
+                    : insufficient && lines.length
+                      ? `Need $${totalCost.toFixed(2)}`
+                      : `Run check · $${totalCost.toFixed(2)}`}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => { setInput(""); setAlive([]); setDead([]); setRefunded(0); }}
+                  disabled={running}
+                  className="h-11"
+                >
+                  Clear
+                </Button>
+              </div>
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-success/30 bg-success/5 p-3 text-xs leading-relaxed text-muted-foreground">
+                <RefreshCcw className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
+                <span>
+                  Dead cards auto-refund <span className="font-mono font-semibold text-foreground">${PRICE_PER_CHECK.toFixed(2)}</span> each on completion.
+                  {refunded > 0 && <span className="ml-1 font-mono text-success">Last run: +${refunded.toFixed(2)}</span>}
+                </span>
+              </div>
+            </div>
+
+            {/* Results */}
+            <div className="grid gap-3 p-4">
+              <ResultPanel label="Alive" tone="success" items={alive} />
+              <ResultPanel label="Dead" tone="destructive" items={dead} />
+            </div>
           </div>
         </div>
       </section>
@@ -235,18 +253,22 @@ const ResultPanel = ({
 }) => {
   const toneClasses =
     tone === "success"
-      ? "border-success/40 bg-success/5"
-      : "border-destructive/40 bg-destructive/5";
+      ? "border-success/30"
+      : "border-destructive/30";
+  const dotClass = tone === "success" ? "bg-success" : "bg-destructive";
   const headingClass = tone === "success" ? "text-success" : "text-destructive";
   return (
-    <div className={`rounded-xl border ${toneClasses} p-4`}>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className={`font-display text-xl font-black ${headingClass}`}>{label}</h3>
-        <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-          {items.length} {items.length === 1 ? "result" : "results"}
+    <div className={`rounded-lg border bg-background ${toneClasses}`}>
+      <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${dotClass}`} />
+          <h3 className="text-sm font-semibold">{label}</h3>
+        </div>
+        <span className="font-mono text-[11px] text-muted-foreground">
+          {items.length} {items.length === 1 ? "hit" : "hits"}
         </span>
       </div>
-      <div className="min-h-[200px] rounded-md bg-background/60 p-2 font-mono text-xs leading-6">
+      <div className="min-h-[120px] max-h-[200px] overflow-auto p-2 font-mono text-xs leading-6">
         {items.length ? (
           items.map((line, i) => (
             <div key={`${i}-${line}`} className={`truncate ${headingClass}`}>
@@ -254,8 +276,8 @@ const ResultPanel = ({
             </div>
           ))
         ) : (
-          <div className="flex h-full min-h-[180px] items-center justify-center text-muted-foreground">
-            Awaiting results...
+          <div className="flex h-full min-h-[100px] items-center justify-center text-muted-foreground">
+            Awaiting results…
           </div>
         )}
       </div>
