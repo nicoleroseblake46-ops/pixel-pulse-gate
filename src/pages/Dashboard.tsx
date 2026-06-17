@@ -106,7 +106,7 @@ const Dashboard = () => {
     const seen = new Set<string>();
     const uniq: BaseItem[] = [];
     for (const b of bases) {
-      const key = (b.name ?? "").trim().toLowerCase();
+      const key = `${b.category}:${(b.name ?? "").trim().toLowerCase()}`;
       if (!key || seen.has(key)) continue;
       seen.add(key);
       uniq.push(b);
