@@ -201,18 +201,25 @@ const Dashboard = () => {
               <div key={`${g.label}-${gi}`}>
                 <div className="mb-2 font-mono text-xs text-muted-foreground">{g.label}</div>
                 <div className="space-y-2">
-                  {g.items.map((b) => (
-                    <Link
-                      key={b.id}
-                      to={`/cards?base=${encodeURIComponent(b.name)}`}
-                      className="group flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 shadow-sm transition-smooth hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elevated)]"
-                    >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground">
-                        <Plus className="h-3.5 w-3.5" />
-                      </span>
-                      <span className="truncate font-mono text-xs uppercase tracking-wider text-foreground">{b.name}</span>
-                    </Link>
-                  ))}
+                  {g.items.map((b) => {
+                    const isSale = b.category === "sales";
+                    const to = isSale ? `/sales?base=${encodeURIComponent(b.name)}` : `/cards?base=${encodeURIComponent(b.name)}`;
+                    return (
+                      <Link
+                        key={b.id}
+                        to={to}
+                        className="group flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-2.5 shadow-sm transition-smooth hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-[var(--shadow-elevated)]"
+                      >
+                        <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isSale ? "bg-accent/15 text-accent group-hover:bg-accent group-hover:text-accent-foreground" : "bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground"}`}>
+                          <Plus className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="truncate font-mono text-xs uppercase tracking-wider text-foreground">{b.name}</span>
+                        {isSale && (
+                          <span className="ml-auto shrink-0 rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-accent">Sale</span>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}
