@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useProducts, type Product } from "@/hooks/use-products";
 import { Loader } from "@/components/Loader";
@@ -14,6 +15,7 @@ import { CountryFlag } from "@/components/CountryFlag";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import { useAdmin } from "@/hooks/use-admin";
 import { toast } from "sonner";
+
 
 export const Sales = () => {
   const { salesHidden } = useAppSettings();
