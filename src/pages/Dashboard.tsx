@@ -42,7 +42,7 @@ const DEFAULT_IMPORTANT = [
 type Stat = { label: string; value: string; icon: string };
 type Panel = { accent?: string; title?: string; body: string };
 
-type BaseItem = { id: string; name: string; created_at: string };
+type BaseItem = { id: string; name: string; created_at: string; category: string };
 
 const bucketLabel = (iso: string) => {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
