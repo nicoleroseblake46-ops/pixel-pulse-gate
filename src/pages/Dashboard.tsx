@@ -123,16 +123,7 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      {/* Hero */}
-      <section className="relative mb-8 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-card to-accent/10 p-6 md:p-8 animate-fade-up">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-10 h-64 w-64 rounded-full bg-accent/15 blur-3xl" />
-        <div className="relative">
-          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary">/ Dashboard</div>
-          <h1 className="mt-1 font-display text-3xl font-black tracking-tight md:text-4xl">Welcome back, agent.</h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">Live inventory, fresh bases, and important notices — all in one place.</p>
-        </div>
-      </section>
+
 
       {/* Stats */}
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 animate-fade-up">
