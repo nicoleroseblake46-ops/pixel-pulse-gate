@@ -64,7 +64,7 @@ const Dashboard = () => {
   const [autoCounts, setAutoCounts] = useState<Record<string, number>>({});
 
   const load = async (n: number) => {
-    const cats = salesHidden ? ["cards"] : ["cards", "sales"];
+    const cats = (salesHidden ? ["cards"] : ["cards", "sales"]) as ("cards" | "sales")[];
     const { data } = await supabase
       .from("products")
       .select("id,name,created_at,category")
