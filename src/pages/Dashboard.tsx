@@ -100,8 +100,17 @@ const Dashboard = () => {
   }, []);
 
   const grouped = useMemo(() => {
-    const out: { label: string; items: BaseItem[] }[] = [];
+    // Dedupe by base name — newest occurrence wins (bases already sorted desc by created_at)
+    const seen = new Set<string>();
+    const uniq: BaseItem[] = [];
     for (const b of bases) {
+      const key = (b.name ?? "").trim().toLowerCase();
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      uniq.push(b);
+    }
+    const out: { label: string; items: BaseItem[] }[] = [];
+    for (const b of uniq) {
       const lbl = bucketLabel(b.created_at);
       const last = out[out.length - 1];
       if (last && last.label === lbl) last.items.push(b);
@@ -109,6 +118,7 @@ const Dashboard = () => {
     }
     return out;
   }, [bases]);
+
 
   const resolveStatValue = (s: Stat) => {
     const v = String(s.value ?? "").trim().toLowerCase();
