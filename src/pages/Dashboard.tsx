@@ -54,7 +54,7 @@ const bucketLabel = (iso: string) => {
 };
 
 const Dashboard = () => {
-  const { settings } = useAppSettings();
+  const { settings, salesHidden } = useAppSettings();
   const stats = (Array.isArray(settings.dashboard_stats) ? settings.dashboard_stats : DEFAULT_STATS) as Stat[];
   const important = (Array.isArray(settings.dashboard_important) ? settings.dashboard_important : DEFAULT_IMPORTANT) as Panel[];
 
@@ -64,10 +64,11 @@ const Dashboard = () => {
   const [autoCounts, setAutoCounts] = useState<Record<string, number>>({});
 
   const load = async (n: number) => {
+    const cats = salesHidden ? ["cards"] : ["cards", "sales"];
     const { data } = await supabase
       .from("products")
-      .select("id,name,created_at")
-      .eq("category", "cards")
+      .select("id,name,created_at,category")
+      .in("category", cats)
       .eq("is_active", true)
       .order("created_at", { ascending: false })
       .limit(n);
@@ -82,7 +83,8 @@ const Dashboard = () => {
       .on("postgres_changes", { event: "*", schema: "public", table: "products" }, () => load(limit))
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [limit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [limit, salesHidden]);
 
   // Auto live counts so stats with value "auto" pull from DB
   useEffect(() => {
