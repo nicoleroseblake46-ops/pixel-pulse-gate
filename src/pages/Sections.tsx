@@ -384,6 +384,27 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </div>
 );
 
+const ANY_VALUE = "__any__";
+const FilterSelect = ({
+  value,
+  options,
+  onChange,
+  placeholder,
+}: {
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+  placeholder: string;
+}) => (
+  <Select value={value || ANY_VALUE} onValueChange={(v) => onChange(v === ANY_VALUE ? "" : v)}>
+    <SelectTrigger className="h-10"><SelectValue placeholder={placeholder} /></SelectTrigger>
+    <SelectContent className="max-h-72">
+      <SelectItem value={ANY_VALUE}>{placeholder}</SelectItem>
+      {options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+    </SelectContent>
+  </Select>
+);
+
 const Th = ({ children, className = "" }: { children?: React.ReactNode; className?: string }) => (
   <th className={`px-3 py-3 ${className}`}>{children}</th>
 );
