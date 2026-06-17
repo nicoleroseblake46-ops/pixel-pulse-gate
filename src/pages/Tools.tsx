@@ -253,18 +253,22 @@ const ResultPanel = ({
 }) => {
   const toneClasses =
     tone === "success"
-      ? "border-success/40 bg-success/5"
-      : "border-destructive/40 bg-destructive/5";
+      ? "border-success/30"
+      : "border-destructive/30";
+  const dotClass = tone === "success" ? "bg-success" : "bg-destructive";
   const headingClass = tone === "success" ? "text-success" : "text-destructive";
   return (
-    <div className={`rounded-xl border ${toneClasses} p-4`}>
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className={`font-display text-xl font-black ${headingClass}`}>{label}</h3>
-        <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-          {items.length} {items.length === 1 ? "result" : "results"}
+    <div className={`rounded-lg border bg-background ${toneClasses}`}>
+      <div className="flex items-center justify-between border-b border-border/60 px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className={`h-2 w-2 rounded-full ${dotClass}`} />
+          <h3 className="text-sm font-semibold">{label}</h3>
+        </div>
+        <span className="font-mono text-[11px] text-muted-foreground">
+          {items.length} {items.length === 1 ? "hit" : "hits"}
         </span>
       </div>
-      <div className="min-h-[200px] rounded-md bg-background/60 p-2 font-mono text-xs leading-6">
+      <div className="min-h-[120px] max-h-[200px] overflow-auto p-2 font-mono text-xs leading-6">
         {items.length ? (
           items.map((line, i) => (
             <div key={`${i}-${line}`} className={`truncate ${headingClass}`}>
@@ -272,8 +276,8 @@ const ResultPanel = ({
             </div>
           ))
         ) : (
-          <div className="flex h-full min-h-[180px] items-center justify-center text-muted-foreground">
-            Awaiting results...
+          <div className="flex h-full min-h-[100px] items-center justify-center text-muted-foreground">
+            Awaiting results…
           </div>
         )}
       </div>
