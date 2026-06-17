@@ -61,10 +61,11 @@ const Payments = () => {
   };
 
   const checkout = async () => {
-    if (!checkoutAmount || checkoutAmount <= 0) {
-      toast.error("Enter an amount greater than $0");
+    if (!checkoutAmount || checkoutAmount < MIN_DEPOSIT) {
+      toast.error(`Minimum deposit is $${MIN_DEPOSIT}`);
       return;
     }
+
     setSubmitting(true);
     try {
       const paymentId = await createPendingPayment(checkoutAmount, bonus, coin, walletAddress);
