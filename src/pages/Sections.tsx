@@ -103,19 +103,34 @@ export const Cards = () => {
 
   const runSearch = () => { setFilters(draft); setAppliedPrice(priceRange); setPage(1); };
 
+  // Distinct option lists derived from available products
+  const opts = useMemo(() => {
+    const uniq = (arr: (string | null | undefined)[]) =>
+      Array.from(new Set(arr.map((v) => (v ?? "").trim()).filter(Boolean))).sort();
+    return {
+      country: uniq(products.map((p) => p.country)),
+      state: uniq(products.map((p) => p.state)),
+      base: uniq(products.map((p) => p.name)),
+      cardType: uniq(products.map((p) => p.card_type)),
+      bank: uniq(products.map((p) => p.bank)),
+      expYear: uniq(products.map((p) => (p.exp ?? "").split("/").pop() ?? null)),
+    };
+  }, [products]);
+
   return (
     <AppLayout>
       {/* Search panel */}
       <section className="mb-5 rounded-xl border border-border bg-card p-4 md:p-5 animate-fade-up">
         <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7">
           <Field label="Bin"><Input placeholder="xxx,xxx,xxx" value={draft.bin} onChange={(e) => setDraft({ ...draft, bin: e.target.value })} /></Field>
-          <Field label="Country"><Input placeholder="Choose Country" value={draft.country} onChange={(e) => setDraft({ ...draft, country: e.target.value })} /></Field>
-          <Field label="State"><Input placeholder="Please Select" value={draft.state} onChange={(e) => setDraft({ ...draft, state: e.target.value })} /></Field>
-          <Field label="Base"><Input placeholder="Please Select" value={draft.base} onChange={(e) => setDraft({ ...draft, base: e.target.value })} /></Field>
-          <Field label="Exp Year"><Input placeholder="e.g. 29" value={draft.expYear} onChange={(e) => setDraft({ ...draft, expYear: e.target.value })} /></Field>
-          <Field label="Card Type"><Input placeholder="Credit / Debit" value={draft.cardType} onChange={(e) => setDraft({ ...draft, cardType: e.target.value })} /></Field>
-          <Field label="Bank"><Input placeholder="Please Select" value={draft.bank} onChange={(e) => setDraft({ ...draft, bank: e.target.value })} /></Field>
+          <Field label="Country"><FilterSelect placeholder="Any country" value={draft.country} options={opts.country} onChange={(v) => setDraft({ ...draft, country: v })} /></Field>
+          <Field label="State"><FilterSelect placeholder="Any state" value={draft.state} options={opts.state} onChange={(v) => setDraft({ ...draft, state: v })} /></Field>
+          <Field label="Base"><FilterSelect placeholder="Any base" value={draft.base} options={opts.base} onChange={(v) => setDraft({ ...draft, base: v })} /></Field>
+          <Field label="Exp Year"><FilterSelect placeholder="Any year" value={draft.expYear} options={opts.expYear} onChange={(v) => setDraft({ ...draft, expYear: v })} /></Field>
+          <Field label="Card Type"><FilterSelect placeholder="Any type" value={draft.cardType} options={opts.cardType} onChange={(v) => setDraft({ ...draft, cardType: v })} /></Field>
+          <Field label="Bank"><FilterSelect placeholder="Any bank" value={draft.bank} options={opts.bank} onChange={(v) => setDraft({ ...draft, bank: v })} /></Field>
         </div>
+
 
         <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
           <div>
