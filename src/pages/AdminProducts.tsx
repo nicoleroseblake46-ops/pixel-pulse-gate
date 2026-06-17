@@ -352,8 +352,7 @@ const AdminProducts = () => {
                           </Select>
                         </div>
                         <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-                        <Input placeholder="Brand (legacy)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-                        <Input placeholder="Extras (e.g. City|FullName|...)" className="md:col-span-3" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} />
+
                       </div>
                     </>
                   )}
