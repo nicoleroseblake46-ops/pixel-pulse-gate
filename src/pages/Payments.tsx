@@ -14,8 +14,10 @@ const wallets = {
   LTC: "ltc1qu78zvrz0u6n0z4cxn34280p9fag6qrjxunz442",
   "USDT/TRC20": "TBTM7mbjaptqK2sKr8hxqDSMdmaQawd2t8",
 };
-const presetAmounts = [100, 200, 500, 1000];
-const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65 };
+const MIN_DEPOSIT = 50;
+const presetAmounts = [50, 100, 200, 500, 1000];
+const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65, 1000: 150 };
+
 
 const Payments = () => {
   const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
@@ -59,10 +61,11 @@ const Payments = () => {
   };
 
   const checkout = async () => {
-    if (!checkoutAmount || checkoutAmount <= 0) {
-      toast.error("Enter an amount greater than $0");
+    if (!checkoutAmount || checkoutAmount < MIN_DEPOSIT) {
+      toast.error(`Minimum deposit is $${MIN_DEPOSIT}`);
       return;
     }
+
     setSubmitting(true);
     try {
       const paymentId = await createPendingPayment(checkoutAmount, bonus, coin, walletAddress);
@@ -95,16 +98,14 @@ const Payments = () => {
   return (
     <AppLayout>
       <div className="mx-auto max-w-3xl animate-fade-up">
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="font-mono text-xs uppercase tracking-[0.3em] text-primary">Crypto Wallet</div>
-            <h1 className="mt-2 font-display text-4xl font-black tracking-tight neon-text">Add money to your account</h1>
-          </div>
-          <div className="glass rounded-xl px-4 py-3 text-right">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h1 className="font-display text-2xl font-black tracking-tight md:text-3xl">Wallet</h1>
+          <div className="rounded-xl border border-border bg-card px-4 py-2 text-right shadow-sm">
             <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Balance</div>
-            <div className="font-display text-2xl font-black text-primary text-glow">${balance.toFixed(2)}</div>
+            <div className="font-display text-xl font-black text-primary">${balance.toFixed(2)}</div>
           </div>
         </div>
+
 
         {hasCart && (
           <section className="glass-strong mb-5 rounded-2xl border border-primary/40 p-5 shadow-2xl md:p-6">
@@ -171,36 +172,28 @@ const Payments = () => {
           </section>
         )}
 
-        <section className="glass-strong rounded-2xl border border-border p-5 shadow-2xl md:p-8">
-          <div className="mb-5 flex items-start justify-between gap-4">
-            <div>
-              <div className="font-mono text-xs uppercase tracking-widest text-primary">Crypto top up</div>
-              <h2 className="mt-1 font-display text-2xl font-black">Add money to your account</h2>
-            </div>
-            <X className="h-5 w-5 text-muted-foreground" />
+        <section className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-7">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="font-display text-xl font-black tracking-tight">Top up with crypto</h2>
+            <span className="rounded-full bg-primary/10 px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-primary">Min ${MIN_DEPOSIT}</span>
           </div>
 
-          <div className="mb-5 rounded-xl border border-border bg-secondary/20 p-4">
-            <div className="flex gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-foreground" />
-              <div>
-                <div className="font-bold">Caution</div>
-                <p className="mt-1 text-sm font-semibold leading-relaxed text-muted-foreground">
-                  We are not responsible for any loss of funds. Make sure to use the right currency, address, and amount.
-                </p>
-              </div>
-            </div>
+          <div className="mb-5 flex gap-3 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Use the right currency, address, and amount. Lost funds cannot be recovered.
+            </p>
           </div>
 
-          <label className="font-display text-lg font-bold">Top up amount (USD)</label>
+          <label className="text-sm font-semibold">Amount (USD)</label>
           <Input
             type="number"
-            min={1}
+            min={MIN_DEPOSIT}
             step="0.01"
             value={amount}
             onChange={(event) => { setAmount(event.target.value); setSelected(null); }}
-            placeholder="Any amount — no minimum"
-            className="mt-3 h-12 rounded-lg border-2 border-border bg-input/70 px-4 text-base font-semibold focus-visible:ring-primary"
+            placeholder={`Minimum $${MIN_DEPOSIT}`}
+            className="mt-2 h-11 rounded-lg border border-border bg-background px-3 text-base font-semibold focus-visible:ring-primary"
           />
 
           <div className="mt-4 grid grid-cols-3 gap-3">

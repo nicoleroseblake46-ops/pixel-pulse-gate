@@ -260,20 +260,8 @@ const AdminProducts = () => {
                   </div>
                   <Textarea placeholder="Meta description / details" value={form.meta} onChange={(e) => setForm({ ...form, meta: e.target.value })} className="min-h-20" />
 
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <div>
-                      <div className="mb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Vendor (optional)</div>
-                      <Select value={form.vendor_id || "none"} onValueChange={(v) => setForm({ ...form, vendor_id: v === "none" ? "" : v })}>
-                        <SelectTrigger><SelectValue placeholder="No vendor" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">No vendor</SelectItem>
-                          {vendors.map((v) => (
-                            <SelectItem key={v.id} value={v.id}>{v.name} <span className="text-muted-foreground">· @{v.handle}</span></SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+                  {/* Vendor selector removed — vendors no longer used in storefront */}
+
 
                   <div className="grid gap-3 md:grid-cols-2">
                     <Input placeholder="Tag (e.g. HOT, NEW) — optional" value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} />
@@ -364,8 +352,7 @@ const AdminProducts = () => {
                           </Select>
                         </div>
                         <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-                        <Input placeholder="Brand (legacy)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-                        <Input placeholder="Extras (e.g. City|FullName|...)" className="md:col-span-3" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} />
+
                       </div>
                     </>
                   )}
