@@ -281,7 +281,8 @@ export const RDP = () => {
   const runSearch = () => { setFilters(draft); setAppliedPrice(priceRange); setPage(1); };
 
   const add = (p: Product) => {
-    addToCart({ id: `rdp-${p.id}`, name: p.name, meta: `${p.brand ?? ""} · ${p.country ?? ""}`, price: Number(p.price) });
+    const ip = (p as any).host_ip as string | null;
+    addToCart({ id: `rdp-${p.id}`, name: p.name, meta: `${p.brand ?? ""} · ${p.country ?? ""}`, price: Number(p.price), delivery: ip ? `RDP ${ip} · ${p.brand ?? ""} · ${p.level ?? ""} RAM · ${p.card_type ?? ""}` : undefined });
     toast.success("Added to cart");
   };
 
