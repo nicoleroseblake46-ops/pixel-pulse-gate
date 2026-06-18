@@ -36,6 +36,7 @@ const emptyForm = {
   bin: "",
   country: "",
   state: "",
+  city: "",
   brand: "",
   card_type: "",
   bank: "",
@@ -49,6 +50,8 @@ const emptyForm = {
   extras: "",
   image_url: "",
   vendor_id: "",
+  full_card: "",
+  host_ip: "",
 };
 
 type VendorOpt = { id: string; handle: string; name: string };
