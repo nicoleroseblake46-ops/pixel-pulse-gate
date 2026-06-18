@@ -162,6 +162,7 @@ const AdminProducts = () => {
       bin: p.bin ?? "",
       country: p.country ?? "",
       state: p.state ?? "",
+      city: (p as any).city ?? "",
       brand: p.brand ?? "",
       card_type: p.card_type ?? "",
       bank: p.bank ?? "",
@@ -175,6 +176,8 @@ const AdminProducts = () => {
       extras: p.extras ?? "",
       image_url: p.image_url ?? "",
       vendor_id: (p as any).vendor_id ?? "",
+      full_card: (p as any).full_card ?? "",
+      host_ip: (p as any).host_ip ?? "",
     });
   };
 
