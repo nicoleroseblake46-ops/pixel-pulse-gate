@@ -586,6 +586,7 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     setBusy(true);
     const payload = preview.map((r) => {
       const c = findCountry(r.country) ?? findCountry(r.country.slice(0, 2));
+      const mock = mockCardDetails(r.bin, c?.code ?? null);
       return {
         category: "cards" as const,
         name: base.trim() || `Base ${new Date().toISOString().slice(0, 10)}`,
@@ -600,12 +601,19 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         country: c?.name ?? r.country ?? null,
         country_code: c?.code ?? null,
         vendor_id: defaultVendorId || null,
-      };
+        seller: mock.name,
+        city: mock.city,
+        state: mock.state,
+        zip: mock.zip,
+        exp: mock.exp,
+        valid: "85%",
+        full_card: mock.full_card,
+      } as any;
     });
     const { error } = await supabase.from("products").insert(payload);
     setBusy(false);
     if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
-    toast.success(`Imported ${payload.length} cards`);
+    toast.success(`Imported ${payload.length} cards with auto-filled details`);
     setRaw("");
     await onImported();
   };
