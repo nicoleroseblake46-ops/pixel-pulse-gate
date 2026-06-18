@@ -78,6 +78,14 @@ const AdminPayments = () => {
     setWorkingId(null);
   };
 
+  const reviewRefund = async (paymentId: string, approve: boolean) => {
+    setWorkingId(paymentId);
+    const { error } = await adminClient.rpc("review_refund", { _payment_id: paymentId, _approve: approve });
+    if (error) toast.error("Refund review failed", { description: error.message });
+    else { toast.success(approve ? "Refund approved & credited" : "Refund denied"); await loadPayments(); }
+    setWorkingId(null);
+  };
+
   const assignAdminRole = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const email = adminEmail.trim().toLowerCase();
