@@ -120,22 +120,25 @@ const AdminProducts = () => {
       tag: form.tag.trim() || null,
       sort_order: Number(form.sort_order) || 0,
       bin: isCards ? form.bin.trim() || null : null,
-      country: isCards ? form.country.trim() || null : null,
-      state: isCards ? form.state.trim() || null : null,
-      brand: isCards ? form.brand.trim() || null : null,
-      card_type: isCards ? form.card_type.trim() || null : null,
-      bank: isCards ? form.bank.trim() || null : null,
+      country: form.country.trim() || null,
+      state: form.state.trim() || null,
+      city: isCards ? form.city.trim() || null : null,
+      brand: form.brand.trim() || null,
+      card_type: form.card_type.trim() || null,
+      bank: form.bank.trim() || null,
       seller: isCards ? form.seller.trim() || null : null,
       exp: isCards ? form.exp.trim() || null : null,
       zip: isCards ? form.zip.trim() || null : null,
       valid: isCards ? form.valid.trim() || null : null,
       scheme: isCards ? form.scheme.trim() || null : null,
-      level: isCards ? form.level.trim() || null : null,
-      country_code: isCards ? form.country_code.trim() || null : null,
+      level: form.level.trim() || null,
+      country_code: form.country_code.trim() || null,
       extras: isCards ? form.extras.trim() || null : null,
       image_url: form.image_url.trim() || null,
       vendor_id: form.vendor_id || null,
-    };
+      full_card: isCards ? form.full_card.trim() || null : null,
+      host_ip: active === "rdp" ? form.host_ip.trim() || null : null,
+    } as any;
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
       : await supabase.from("products").insert(payload);
