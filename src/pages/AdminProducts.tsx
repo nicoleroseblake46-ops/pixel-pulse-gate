@@ -556,7 +556,50 @@ const DashboardEditor = () => {
  * BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY
  * Columns separated by tab, comma, or " | ". One card per line.
  * Header row (BIN/Brand/...) is auto-skipped.
+ * Auto-fills mock seller name, city, state, zip, exp, and full PAN|MM/YY|CVV.
  */
+const FIRST_NAMES = ["James","Mary","John","Patricia","Robert","Jennifer","Michael","Linda","William","Elizabeth","David","Barbara","Richard","Susan","Joseph","Jessica","Thomas","Sarah","Charles","Karen","Daniel","Nancy","Matthew","Lisa","Christopher","Margaret","Anthony","Sandra","Mark","Ashley"];
+const LAST_NAMES = ["Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Rodriguez","Martinez","Hernandez","Lopez","Wilson","Anderson","Taylor","Thomas","Moore","Jackson","Martin","Lee","Perez","Thompson","White","Harris","Sanchez","Clark","Ramirez","Lewis","Robinson","Walker"];
+const US_LOCATIONS = [
+  { city: "New York", state: "NY", zip: "10001" }, { city: "Los Angeles", state: "CA", zip: "90001" },
+  { city: "Chicago", state: "IL", zip: "60601" }, { city: "Houston", state: "TX", zip: "77001" },
+  { city: "Phoenix", state: "AZ", zip: "85001" }, { city: "Philadelphia", state: "PA", zip: "19101" },
+  { city: "San Antonio", state: "TX", zip: "78201" }, { city: "Miami", state: "FL", zip: "33101" },
+  { city: "Atlanta", state: "GA", zip: "30301" }, { city: "Boston", state: "MA", zip: "02101" },
+  { city: "Seattle", state: "WA", zip: "98101" }, { city: "Denver", state: "CO", zip: "80201" },
+];
+const LOC_BY_CC: Record<string, { city: string; state: string; zip: string }[]> = {
+  US: US_LOCATIONS,
+  CA: [{ city: "Toronto", state: "ON", zip: "M5H 2N2" }, { city: "Vancouver", state: "BC", zip: "V6B 1A1" }, { city: "Montreal", state: "QC", zip: "H3B 4W5" }],
+  GB: [{ city: "London", state: "ENG", zip: "EC1A 1BB" }, { city: "Manchester", state: "ENG", zip: "M1 1AE" }],
+  AU: [{ city: "Sydney", state: "NSW", zip: "2000" }, { city: "Melbourne", state: "VIC", zip: "3000" }],
+  DE: [{ city: "Berlin", state: "BE", zip: "10115" }, { city: "Munich", state: "BY", zip: "80331" }],
+};
+const pick = <T,>(arr: T[], seed: number) => arr[Math.abs(seed) % arr.length];
+const seedFromString = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
+
+const mockCardDetails = (bin: string, cc: string | null) => {
+  const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
+  const fn = pick(FIRST_NAMES, seed);
+  const ln = pick(LAST_NAMES, seed >> 3);
+  const locs = LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
+  const loc = pick(locs, seed >> 5);
+  const month = String(((Math.abs(seed) % 12) + 1)).padStart(2, "0");
+  const year = String(26 + (Math.abs(seed >> 7) % 4));
+  const trailing = String(Math.floor(1000000000 + Math.abs(seed * 2654435761) % 9000000000)).slice(0, 10);
+  const pan = (bin + trailing).slice(0, 16);
+  const cvv = String(100 + (Math.abs(seed >> 11) % 900));
+  return {
+    name: `${fn} ${ln}`,
+    city: loc.city,
+    state: loc.state,
+    zip: loc.zip,
+    exp: `${month}/${year}`,
+    full_card: `${pan}|${month}/${year}|${cvv}`,
+  };
+};
+
+
 const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Promise<void> | void; defaultVendorId?: string }) => {
   const [raw, setRaw] = useState("");
   const [base, setBase] = useState("");
