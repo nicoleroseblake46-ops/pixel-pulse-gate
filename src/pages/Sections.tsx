@@ -345,7 +345,7 @@ export const RDP = () => {
               <tbody>
                 {paged.map((p) => (
                   <tr key={p.id} className="border-t border-border hover:bg-secondary/30">
-                    <Td className="font-mono">**********</Td>
+                    <Td className="font-mono">{(p as any).host_ip ? `${String((p as any).host_ip).split(".").slice(0,2).join(".")}.***.***` : "**********"}</Td>
                     <Td>
                       <span className="inline-flex items-center gap-1.5">
                         <span className="text-xs font-medium">{(p.country_code ?? "").toUpperCase() || p.country || "—"}</span>
