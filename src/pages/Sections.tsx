@@ -86,6 +86,7 @@ export const Cards = () => {
     name: `${c.brand ?? c.scheme ?? "CARD"} ${c.bin ?? ""}`.trim(),
     meta: `${c.country ?? ""} · ${c.bank ?? ""}`,
     price: Number(c.price),
+    delivery: (c as any).full_card ?? undefined,
   });
 
   const addCard = (c: Product) => {
