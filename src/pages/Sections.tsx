@@ -192,8 +192,8 @@ export const Cards = () => {
                   const inCart = cartItems.some((i) => i.id === cartIdFor(c.id));
                   const scheme = (c.scheme ?? c.brand ?? "").toUpperCase();
                   const type = (c.card_type ?? "").toUpperCase();
-                  const fullName = c.seller ?? (c.extras?.split("|")[1] ?? "—").trim();
-                  const city = (c.extras?.split("|")[0] ?? "").trim() || "—";
+                  const fullName = c.seller ?? "—";
+                  const city = (c as any).city ?? "—";
                   return (
                     <tr key={c.id} className="border-t border-border hover:bg-secondary/30">
                       <Td>
