@@ -21,6 +21,8 @@ type Payment = {
   coin: string;
   status: string;
   created_at: string;
+  refund_status?: string | null;
+  refund_reason?: string | null;
 };
 
 type Profile = { id: string; username: string | null; balance: number };
