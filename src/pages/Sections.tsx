@@ -86,6 +86,7 @@ export const Cards = () => {
     name: `${c.brand ?? c.scheme ?? "CARD"} ${c.bin ?? ""}`.trim(),
     meta: `${c.country ?? ""} · ${c.bank ?? ""}`,
     price: Number(c.price),
+    delivery: (c as any).full_card ?? undefined,
   });
 
   const addCard = (c: Product) => {
@@ -191,8 +192,8 @@ export const Cards = () => {
                   const inCart = cartItems.some((i) => i.id === cartIdFor(c.id));
                   const scheme = (c.scheme ?? c.brand ?? "").toUpperCase();
                   const type = (c.card_type ?? "").toUpperCase();
-                  const fullName = c.seller ?? (c.extras?.split("|")[1] ?? "—").trim();
-                  const city = (c.extras?.split("|")[0] ?? "").trim() || "—";
+                  const fullName = c.seller ?? "—";
+                  const city = (c as any).city ?? "—";
                   return (
                     <tr key={c.id} className="border-t border-border hover:bg-secondary/30">
                       <Td>
@@ -280,7 +281,8 @@ export const RDP = () => {
   const runSearch = () => { setFilters(draft); setAppliedPrice(priceRange); setPage(1); };
 
   const add = (p: Product) => {
-    addToCart({ id: `rdp-${p.id}`, name: p.name, meta: `${p.brand ?? ""} · ${p.country ?? ""}`, price: Number(p.price) });
+    const ip = (p as any).host_ip as string | null;
+    addToCart({ id: `rdp-${p.id}`, name: p.name, meta: `${p.brand ?? ""} · ${p.country ?? ""}`, price: Number(p.price), delivery: ip ? `RDP ${ip} · ${p.brand ?? ""} · ${p.level ?? ""} RAM · ${p.card_type ?? ""}` : undefined });
     toast.success("Added to cart");
   };
 
@@ -343,7 +345,7 @@ export const RDP = () => {
               <tbody>
                 {paged.map((p) => (
                   <tr key={p.id} className="border-t border-border hover:bg-secondary/30">
-                    <Td className="font-mono">**********</Td>
+                    <Td className="font-mono">{(p as any).host_ip ? `${String((p as any).host_ip).split(".").slice(0,2).join(".")}.***.***` : "**********"}</Td>
                     <Td>
                       <span className="inline-flex items-center gap-1.5">
                         <span className="text-xs font-medium">{(p.country_code ?? "").toUpperCase() || p.country || "—"}</span>

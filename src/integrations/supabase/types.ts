@@ -42,6 +42,9 @@ export type Database = {
           created_at: string
           id: string
           metadata: Json
+          refund_reason: string | null
+          refund_requested_at: string | null
+          refund_status: string | null
           status: string
           total_credit: number
           updated_at: string
@@ -57,6 +60,9 @@ export type Database = {
           created_at?: string
           id?: string
           metadata?: Json
+          refund_reason?: string | null
+          refund_requested_at?: string | null
+          refund_status?: string | null
           status?: string
           total_credit?: number
           updated_at?: string
@@ -72,6 +78,9 @@ export type Database = {
           created_at?: string
           id?: string
           metadata?: Json
+          refund_reason?: string | null
+          refund_requested_at?: string | null
+          refund_status?: string | null
           status?: string
           total_credit?: number
           updated_at?: string
@@ -87,11 +96,14 @@ export type Database = {
           brand: string | null
           card_type: string | null
           category: Database["public"]["Enums"]["product_category"]
+          city: string | null
           country: string | null
           country_code: string | null
           created_at: string
           exp: string | null
           extras: string | null
+          full_card: string | null
+          host_ip: string | null
           id: string
           image_url: string | null
           is_active: boolean
@@ -115,11 +127,14 @@ export type Database = {
           brand?: string | null
           card_type?: string | null
           category: Database["public"]["Enums"]["product_category"]
+          city?: string | null
           country?: string | null
           country_code?: string | null
           created_at?: string
           exp?: string | null
           extras?: string | null
+          full_card?: string | null
+          host_ip?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -143,11 +158,14 @@ export type Database = {
           brand?: string | null
           card_type?: string | null
           category?: Database["public"]["Enums"]["product_category"]
+          city?: string | null
           country?: string | null
           country_code?: string | null
           created_at?: string
           exp?: string | null
           extras?: string | null
+          full_card?: string | null
+          host_ip?: string | null
           id?: string
           image_url?: string | null
           is_active?: boolean
@@ -389,6 +407,14 @@ export type Database = {
         Returns: number
       }
       reject_payment: { Args: { _payment_id: string }; Returns: undefined }
+      request_refund: {
+        Args: { _payment_id: string; _reason: string }
+        Returns: undefined
+      }
+      review_refund: {
+        Args: { _approve: boolean; _payment_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

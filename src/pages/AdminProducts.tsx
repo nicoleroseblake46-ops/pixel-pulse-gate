@@ -36,6 +36,7 @@ const emptyForm = {
   bin: "",
   country: "",
   state: "",
+  city: "",
   brand: "",
   card_type: "",
   bank: "",
@@ -49,6 +50,8 @@ const emptyForm = {
   extras: "",
   image_url: "",
   vendor_id: "",
+  full_card: "",
+  host_ip: "",
 };
 
 type VendorOpt = { id: string; handle: string; name: string };
@@ -117,22 +120,25 @@ const AdminProducts = () => {
       tag: form.tag.trim() || null,
       sort_order: Number(form.sort_order) || 0,
       bin: isCards ? form.bin.trim() || null : null,
-      country: isCards ? form.country.trim() || null : null,
-      state: isCards ? form.state.trim() || null : null,
-      brand: isCards ? form.brand.trim() || null : null,
-      card_type: isCards ? form.card_type.trim() || null : null,
-      bank: isCards ? form.bank.trim() || null : null,
+      country: form.country.trim() || null,
+      state: form.state.trim() || null,
+      city: isCards ? form.city.trim() || null : null,
+      brand: form.brand.trim() || null,
+      card_type: form.card_type.trim() || null,
+      bank: form.bank.trim() || null,
       seller: isCards ? form.seller.trim() || null : null,
       exp: isCards ? form.exp.trim() || null : null,
       zip: isCards ? form.zip.trim() || null : null,
       valid: isCards ? form.valid.trim() || null : null,
       scheme: isCards ? form.scheme.trim() || null : null,
-      level: isCards ? form.level.trim() || null : null,
-      country_code: isCards ? form.country_code.trim() || null : null,
+      level: form.level.trim() || null,
+      country_code: form.country_code.trim() || null,
       extras: isCards ? form.extras.trim() || null : null,
       image_url: form.image_url.trim() || null,
       vendor_id: form.vendor_id || null,
-    };
+      full_card: isCards ? form.full_card.trim() || null : null,
+      host_ip: active === "rdp" ? form.host_ip.trim() || null : null,
+    } as any;
     const { error } = editingId
       ? await supabase.from("products").update(payload).eq("id", editingId)
       : await supabase.from("products").insert(payload);
@@ -156,6 +162,7 @@ const AdminProducts = () => {
       bin: p.bin ?? "",
       country: p.country ?? "",
       state: p.state ?? "",
+      city: (p as any).city ?? "",
       brand: p.brand ?? "",
       card_type: p.card_type ?? "",
       bank: p.bank ?? "",
@@ -169,6 +176,8 @@ const AdminProducts = () => {
       extras: p.extras ?? "",
       image_url: p.image_url ?? "",
       vendor_id: (p as any).vendor_id ?? "",
+      full_card: (p as any).full_card ?? "",
+      host_ip: (p as any).host_ip ?? "",
     });
   };
 
@@ -352,9 +361,36 @@ const AdminProducts = () => {
                           </Select>
                         </div>
                         <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-
+                        <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                        <Input placeholder="Full Card (PAN|MM/YY|CVV) — delivered after purchase" value={form.full_card} onChange={(e) => setForm({ ...form, full_card: e.target.value })} className="md:col-span-3 font-mono" />
                       </div>
                     </>
+                  )}
+
+                  {active === "rdp" && (
+                    <div className="grid gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 md:grid-cols-2">
+                      <Input placeholder="Name / Label" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                      <Input placeholder="Host - IP (e.g. 192.168.1.10)" value={form.host_ip} onChange={(e) => setForm({ ...form, host_ip: e.target.value })} className="font-mono" />
+                      <Input placeholder="Hosted By" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
+                      <Input placeholder="System (e.g. Windows 10)" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
+                      <Input placeholder="RAM (e.g. 8GB)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
+                      <Input placeholder="HDD Size (e.g. 500GB SSD)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
+                      <div className="md:col-span-2">
+                        <Select
+                          value={findCountry(form.country_code)?.code ?? ""}
+                          onValueChange={(code) => { const c = COUNTRIES.find((x) => x.code === code); if (c) setForm({ ...form, country: c.name, country_code: c.code }); }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Country">
+                              {form.country_code && (<span className="inline-flex items-center gap-2"><CountryFlag value={form.country_code} width={22} /><span>{form.country}</span></span>)}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            {COUNTRIES.map((c) => (<SelectItem key={c.code} value={c.code}><span className="inline-flex items-center gap-2"><CountryFlag value={c.code} width={22} /><span>{c.name}</span></span></SelectItem>))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   )}
 
 
@@ -520,7 +556,50 @@ const DashboardEditor = () => {
  * BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY
  * Columns separated by tab, comma, or " | ". One card per line.
  * Header row (BIN/Brand/...) is auto-skipped.
+ * Auto-fills mock seller name, city, state, zip, exp, and full PAN|MM/YY|CVV.
  */
+const FIRST_NAMES = ["James","Mary","John","Patricia","Robert","Jennifer","Michael","Linda","William","Elizabeth","David","Barbara","Richard","Susan","Joseph","Jessica","Thomas","Sarah","Charles","Karen","Daniel","Nancy","Matthew","Lisa","Christopher","Margaret","Anthony","Sandra","Mark","Ashley"];
+const LAST_NAMES = ["Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Rodriguez","Martinez","Hernandez","Lopez","Wilson","Anderson","Taylor","Thomas","Moore","Jackson","Martin","Lee","Perez","Thompson","White","Harris","Sanchez","Clark","Ramirez","Lewis","Robinson","Walker"];
+const US_LOCATIONS = [
+  { city: "New York", state: "NY", zip: "10001" }, { city: "Los Angeles", state: "CA", zip: "90001" },
+  { city: "Chicago", state: "IL", zip: "60601" }, { city: "Houston", state: "TX", zip: "77001" },
+  { city: "Phoenix", state: "AZ", zip: "85001" }, { city: "Philadelphia", state: "PA", zip: "19101" },
+  { city: "San Antonio", state: "TX", zip: "78201" }, { city: "Miami", state: "FL", zip: "33101" },
+  { city: "Atlanta", state: "GA", zip: "30301" }, { city: "Boston", state: "MA", zip: "02101" },
+  { city: "Seattle", state: "WA", zip: "98101" }, { city: "Denver", state: "CO", zip: "80201" },
+];
+const LOC_BY_CC: Record<string, { city: string; state: string; zip: string }[]> = {
+  US: US_LOCATIONS,
+  CA: [{ city: "Toronto", state: "ON", zip: "M5H 2N2" }, { city: "Vancouver", state: "BC", zip: "V6B 1A1" }, { city: "Montreal", state: "QC", zip: "H3B 4W5" }],
+  GB: [{ city: "London", state: "ENG", zip: "EC1A 1BB" }, { city: "Manchester", state: "ENG", zip: "M1 1AE" }],
+  AU: [{ city: "Sydney", state: "NSW", zip: "2000" }, { city: "Melbourne", state: "VIC", zip: "3000" }],
+  DE: [{ city: "Berlin", state: "BE", zip: "10115" }, { city: "Munich", state: "BY", zip: "80331" }],
+};
+const pick = <T,>(arr: T[], seed: number) => arr[Math.abs(seed) % arr.length];
+const seedFromString = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
+
+const mockCardDetails = (bin: string, cc: string | null) => {
+  const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
+  const fn = pick(FIRST_NAMES, seed);
+  const ln = pick(LAST_NAMES, seed >> 3);
+  const locs = LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
+  const loc = pick(locs, seed >> 5);
+  const month = String(((Math.abs(seed) % 12) + 1)).padStart(2, "0");
+  const year = String(26 + (Math.abs(seed >> 7) % 4));
+  const trailing = String(Math.floor(1000000000 + Math.abs(seed * 2654435761) % 9000000000)).slice(0, 10);
+  const pan = (bin + trailing).slice(0, 16);
+  const cvv = String(100 + (Math.abs(seed >> 11) % 900));
+  return {
+    name: `${fn} ${ln}`,
+    city: loc.city,
+    state: loc.state,
+    zip: loc.zip,
+    exp: `${month}/${year}`,
+    full_card: `${pan}|${month}/${year}|${cvv}`,
+  };
+};
+
+
 const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Promise<void> | void; defaultVendorId?: string }) => {
   const [raw, setRaw] = useState("");
   const [base, setBase] = useState("");
@@ -550,6 +629,7 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     setBusy(true);
     const payload = preview.map((r) => {
       const c = findCountry(r.country) ?? findCountry(r.country.slice(0, 2));
+      const mock = mockCardDetails(r.bin, c?.code ?? null);
       return {
         category: "cards" as const,
         name: base.trim() || `Base ${new Date().toISOString().slice(0, 10)}`,
@@ -564,12 +644,19 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         country: c?.name ?? r.country ?? null,
         country_code: c?.code ?? null,
         vendor_id: defaultVendorId || null,
-      };
+        seller: mock.name,
+        city: mock.city,
+        state: mock.state,
+        zip: mock.zip,
+        exp: mock.exp,
+        valid: "85%",
+        full_card: mock.full_card,
+      } as any;
     });
     const { error } = await supabase.from("products").insert(payload);
     setBusy(false);
     if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
-    toast.success(`Imported ${payload.length} cards`);
+    toast.success(`Imported ${payload.length} cards with auto-filled details`);
     setRaw("");
     await onImported();
   };

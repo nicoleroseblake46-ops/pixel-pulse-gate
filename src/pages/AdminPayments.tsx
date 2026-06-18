@@ -21,6 +21,8 @@ type Payment = {
   coin: string;
   status: string;
   created_at: string;
+  refund_status?: string | null;
+  refund_reason?: string | null;
 };
 
 type Profile = { id: string; username: string | null; balance: number };
@@ -76,6 +78,14 @@ const AdminPayments = () => {
     setWorkingId(null);
   };
 
+  const reviewRefund = async (paymentId: string, approve: boolean) => {
+    setWorkingId(paymentId);
+    const { error } = await adminClient.rpc("review_refund", { _payment_id: paymentId, _approve: approve });
+    if (error) toast.error("Refund review failed", { description: error.message });
+    else { toast.success(approve ? "Refund approved & credited" : "Refund denied"); await loadPayments(); }
+    setWorkingId(null);
+  };
+
   const assignAdminRole = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const email = adminEmail.trim().toLowerCase();
@@ -115,6 +125,33 @@ const AdminPayments = () => {
           <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Balance Impact</div><div className="mt-2 font-display text-3xl font-black text-primary">${pendingImpact.toFixed(2)}</div></div>
           <div className="glass rounded-xl p-4"><div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Reviewed</div><div className="mt-2 font-display text-3xl font-black text-primary">{payments.length - pendingCount}</div></div>
         </div>
+
+        {/* Refund queue */}
+        {payments.some((p) => p.refund_status === "requested") && (
+          <section className="glass rounded-xl border border-amber-500/30 p-4 md:p-5">
+            <h2 className="mb-3 font-display text-xl font-black">Refund requests</h2>
+            <Table>
+              <TableHeader><TableRow><TableHead>User</TableHead><TableHead>Order</TableHead><TableHead>Amount</TableHead><TableHead>Reason</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
+              <TableBody>
+                {payments.filter((p) => p.refund_status === "requested").map((payment) => (
+                  <TableRow key={`refund-${payment.id}`}>
+                    <TableCell>{profiles[payment.user_id]?.username ?? "Unknown"}</TableCell>
+                    <TableCell className="font-mono text-xs">#{payment.id.slice(0,8)}</TableCell>
+                    <TableCell className="font-mono text-primary">${Number(payment.cart_total).toFixed(2)}</TableCell>
+                    <TableCell className="max-w-[280px] truncate text-xs text-muted-foreground" title={payment.refund_reason ?? ""}>{payment.refund_reason ?? "—"}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" onClick={() => reviewRefund(payment.id, true)} disabled={workingId === payment.id}><Check /> Refund</Button>
+                        <Button size="sm" variant="destructive" onClick={() => reviewRefund(payment.id, false)} disabled={workingId === payment.id}><X /> Deny</Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </section>
+        )}
+
 
         <section className="glass rounded-xl p-4 md:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

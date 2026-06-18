@@ -8,6 +8,7 @@ export interface CartItem {
   name: string;
   meta: string;
   price: number;
+  delivery?: string;
 }
 
 interface CommerceContextValue {
