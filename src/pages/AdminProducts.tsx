@@ -625,12 +625,13 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     const rows: { bin: string; brand: string; card_type: string; level: string; bank: string; country: string }[] = [];
     for (const line of lines) {
-      const parts = line.split(/\t|\s*\|\s*|,(?=\s)|,/).map((p) => p.trim()).filter(Boolean);
+      if (/^bin\b/i.test(line) && /brand|type|bank|country/i.test(line)) continue; // header
+      // Split on tab, |, comma, or 2+ spaces. Preserves multi-word fields.
+      const parts = line.split(/\t|\s*\|\s*|,\s*|\s{2,}/).map((p) => p.trim()).filter(Boolean);
       if (!parts.length) continue;
-      if (/^bin$/i.test(parts[0])) continue; // header
       const [bin, brand = "", card_type = "", level = "", bank = "", country = ""] = parts;
       if (!/^\d{4,}/.test(bin)) continue;
-      rows.push({ bin, brand, card_type, level, bank, country });
+      rows.push({ bin: bin.replace(/\D/g, "").slice(0, 6), brand, card_type, level, bank, country });
     }
     return rows;
   };
@@ -643,7 +644,11 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     if (!Number.isFinite(priceN) || priceN < 0) { toast.error("Enter a valid default price"); return; }
     setBusy(true);
     const payload = preview.map((r) => {
-      const c = findCountry(r.country) ?? findCountry(r.country.slice(0, 2));
+      const brand = (r.brand || brandFromBin(r.bin) || "VISA").toUpperCase();
+      const card_type = (r.card_type || "CREDIT").toUpperCase();
+      const level = (r.level || "CLASSIC").toUpperCase();
+      const bank = (r.bank || "UNKNOWN BANK").toUpperCase();
+      const c = countryFromContext(r.country, bank, r.bin);
       const mock = mockCardDetails(r.bin, c?.code ?? null);
       return {
         category: "cards" as const,
@@ -651,13 +656,13 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         meta: "",
         price: priceN,
         bin: r.bin,
-        brand: r.brand || null,
-        scheme: r.brand || null,
-        card_type: r.card_type || null,
-        level: r.level || null,
-        bank: r.bank || null,
-        country: c?.name ?? r.country ?? null,
-        country_code: c?.code ?? null,
+        brand,
+        scheme: brand,
+        card_type,
+        level,
+        bank,
+        country: c?.name ?? r.country ?? "United States",
+        country_code: c?.code ?? "US",
         vendor_id: defaultVendorId || null,
         seller: mock.name,
         city: mock.city,
@@ -671,10 +676,11 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     const { error } = await supabase.from("products").insert(payload);
     setBusy(false);
     if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
-    toast.success(`Imported ${payload.length} cards with auto-filled details`);
+    toast.success(`Imported ${payload.length} cards — brand, country & flag auto-detected`);
     setRaw("");
     await onImported();
   };
+
 
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
