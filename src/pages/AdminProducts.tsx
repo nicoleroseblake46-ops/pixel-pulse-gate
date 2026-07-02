@@ -248,9 +248,10 @@ const AdminProducts = () => {
             ))}
           </TabsList>
 
-          {categories.map((c) => (
-            <TabsContent key={c.value} value={c.value} className="mt-6 space-y-6">
+          {categories.map((c) => {
+            const formSection = (
               <section className="glass rounded-xl p-4 md:p-5">
+
                 <form onSubmit={save} className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="font-display text-2xl font-black tracking-tight">
