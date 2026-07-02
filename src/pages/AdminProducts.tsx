@@ -608,30 +608,51 @@ const brandFromBin = (bin: string): string => {
 };
 
 const BANK_COUNTRY: { kw: string; cc: string }[] = [
-  ...["SUTTON","CHASE","JPMORGAN","WELLS FARGO","BANK OF AMERICA","CAPITAL ONE","CITI","CITIBANK","US BANK","PNC","NAVY FEDERAL","USAA","DISCOVER","AMERICAN EXPRESS","AMEX","REGIONS","FIFTH THIRD","HUNTINGTON","KEYBANK","BB&T","TRUIST","SYNCHRONY","GOLDMAN","METABANK","GREEN DOT","COMERICA","M&T","CITIZENS","ALLY","SOFI"].map(kw => ({ kw, cc: "US" })),
-  ...["BARCLAYS","LLOYDS","HSBC UK","NATWEST","MONZO","STARLING","HALIFAX","NATIONWIDE","SANTANDER UK","REVOLUT"].map(kw => ({ kw, cc: "GB" })),
-  ...["ROYAL BANK OF CANADA","RBC","TD CANADA","SCOTIABANK","BMO","CIBC","DESJARDINS","TANGERINE"].map(kw => ({ kw, cc: "CA" })),
-  ...["COMMONWEALTH","WESTPAC","ANZ","NAB","BENDIGO"].map(kw => ({ kw, cc: "AU" })),
-  ...["DEUTSCHE","COMMERZBANK","SPARKASSE","POSTBANK","N26"].map(kw => ({ kw, cc: "DE" })),
-  ...["BNP PARIBAS","CREDIT AGRICOLE","SOCIETE GENERALE","LA BANQUE POSTALE"].map(kw => ({ kw, cc: "FR" })),
-  ...["ING","ABN AMRO","RABOBANK","BUNQ"].map(kw => ({ kw, cc: "NL" })),
+  ...["SUTTON","CHASE","JPMORGAN","WELLS FARGO","BANK OF AMERICA","BOFA","CAPITAL ONE","CITI","CITIBANK","US BANK","USBANK","PNC","NAVY FEDERAL","USAA","DISCOVER","AMERICAN EXPRESS","AMEX","REGIONS","FIFTH THIRD","HUNTINGTON","KEYBANK","BB&T","TRUIST","SYNCHRONY","GOLDMAN","METABANK","GREEN DOT","COMERICA","M&T","CITIZENS","ALLY","SOFI","VARO","CHIME","MERCURY","BREX"].map(kw => ({ kw, cc: "US" })),
+  ...["BARCLAYS","LLOYDS","HSBC","NATWEST","MONZO","STARLING","HALIFAX","NATIONWIDE","SANTANDER UK","REVOLUT","TSB","METRO BANK","VIRGIN MONEY","CO-OPERATIVE","COOPERATIVE","CLYDESDALE","YORKSHIRE","FIRST DIRECT","ROYAL BANK OF SCOTLAND","RBS","UK","GB "].map(kw => ({ kw, cc: "GB" })),
+  ...["ROYAL BANK OF CANADA","RBC","TD CANADA","SCOTIABANK","BMO","CIBC","DESJARDINS","TANGERINE","CANADA","CANADIAN"].map(kw => ({ kw, cc: "CA" })),
+  ...["COMMONWEALTH","WESTPAC","ANZ","NAB","BENDIGO","MACQUARIE","AUSTRALIA","AUSTRALIAN"].map(kw => ({ kw, cc: "AU" })),
+  ...["DEUTSCHE","COMMERZBANK","SPARKASSE","POSTBANK","N26","DKB","DZ BANK","GERMANY","GERMAN"].map(kw => ({ kw, cc: "DE" })),
+  ...["BNP PARIBAS","CREDIT AGRICOLE","SOCIETE GENERALE","LA BANQUE POSTALE","CREDIT MUTUEL","BPCE","FRANCE"].map(kw => ({ kw, cc: "FR" })),
+  ...["ING","ABN AMRO","RABOBANK","BUNQ","SNS BANK","NETHERLANDS","DUTCH"].map(kw => ({ kw, cc: "NL" })),
+  ...["INTESA","UNICREDIT","MONTE DEI PASCHI","BANCA","ITALY","ITALIAN"].map(kw => ({ kw, cc: "IT" })),
+  ...["BBVA","CAIXA","BANKINTER","SABADELL","SPAIN","SPANISH"].map(kw => ({ kw, cc: "ES" })),
 ];
 
-const countryFromContext = (country: string, bank: string, _bin: string) => {
+// Common issuer BIN prefixes → country (fallback when bank text is ambiguous).
+const BIN_COUNTRY: { prefix: string; cc: string }[] = [
+  // UK
+  ...["4462","4543","4658","4751","4929","5301","5355","5404","5413","5522","5641","5648"].map(p => ({ prefix: p, cc: "GB" })),
+  // Canada
+  ...["4506","4520","4530","4536","4540","4560","4590","5191","5254","5490","5522"].map(p => ({ prefix: p, cc: "CA" })),
+  // Australia
+  ...["4557","4564","4921","5163","5313","5610"].map(p => ({ prefix: p, cc: "AU" })),
+  // Germany
+  ...["4104","4547","5232","5453","5544"].map(p => ({ prefix: p, cc: "DE" })),
+  // France
+  ...["4970","4974","4978","5131","5170"].map(p => ({ prefix: p, cc: "FR" })),
+  // Netherlands
+  ...["4032","4988","5300","5413"].map(p => ({ prefix: p, cc: "NL" })),
+  // Italy
+  ...["4023","4517","5333"].map(p => ({ prefix: p, cc: "IT" })),
+  // Spain
+  ...["4548","4930","5480"].map(p => ({ prefix: p, cc: "ES" })),
+];
+
+const countryFromContext = (country: string, bank: string, bin: string) => {
   const direct = findCountry(country) || findCountry(country.slice(0, 2));
   if (direct) return direct;
-  const b = (bank || "").toUpperCase();
-  const hit = BANK_COUNTRY.find((x) => b.includes(x.kw));
+  const b = ` ${(bank || "").toUpperCase()} `;
+  const hit = BANK_COUNTRY.find((x) => b.includes(` ${x.kw} `) || b.includes(x.kw));
   if (hit) return findCountry(hit.cc);
-  // Sensible default so the flag is never blank
+  const binHit = BIN_COUNTRY.find((x) => bin.startsWith(x.prefix));
+  if (binHit) return findCountry(binHit.cc);
   return findCountry("US");
 };
 
 
 const mockCardDetails = (bin: string, cc: string | null) => {
   const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
-  const fn = pick(FIRST_NAMES, seed);
-  const ln = pick(LAST_NAMES, seed >> 3);
   const locs = LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
   const loc = pick(locs, seed >> 5);
   const month = String(((Math.abs(seed) % 12) + 1)).padStart(2, "0");
@@ -640,8 +661,9 @@ const mockCardDetails = (bin: string, cc: string | null) => {
   const pan = (bin + trailing).slice(0, 16);
   const cvv = String(100 + (Math.abs(seed >> 11) % 900));
   return {
-    name: `${fn} ${ln}`,
-    city: loc.city,
+    // Hidden until purchase — show a tick in the inventory instead of the real value.
+    name: "✓",
+    city: "✓",
     state: loc.state,
     zip: loc.zip,
     exp: `${month}/${year}`,
