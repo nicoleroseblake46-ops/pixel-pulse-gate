@@ -723,8 +723,9 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         <div>
           <div className="font-display text-sm font-bold">Bulk paste cards</div>
           <div className="text-[11px] text-muted-foreground">
-            One per line: <code>BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY</code> (tab, comma or | separated)
+            Paste anything from just <code>BIN</code> to <code>BIN BRAND TYPE LEVEL BANK COUNTRY</code>. Missing fields (brand, country, flag, city, state, zip, name, exp, full PAN) are auto-detected & filled.
           </div>
+
         </div>
         <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary">{preview.length} parsed</span>
       </div>
