@@ -418,7 +418,8 @@ const AdminProducts = () => {
                   </div>
                 ) : (
                   items.map((p) => (
-                    <article key={p.id} className="grid gap-3 rounded-lg border border-border bg-card/60 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+                    <Fragment key={p.id}>
+                    <article className="grid gap-3 rounded-lg border border-border bg-card/60 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-display text-lg font-bold text-foreground">{p.name}</h3>
@@ -434,16 +435,24 @@ const AdminProducts = () => {
                         <div className="mt-2 font-mono text-sm font-bold text-primary">${Number(p.price).toFixed(2)}</div>
                       </div>
                       <div className="flex flex-wrap gap-2 md:justify-end">
-                        <Button type="button" variant="secondary" size="sm" onClick={() => edit(p)}><Edit3 className="h-4 w-4" /> Edit</Button>
+                        <Button type="button" variant="secondary" size="sm" onClick={() => edit(p)}><Edit3 className="h-4 w-4" /> {editingId === p.id ? "Editing…" : "Edit"}</Button>
                         <Button type="button" variant="secondary" size="sm" onClick={() => toggle(p)}><Power className="h-4 w-4" /> {p.is_active ? "Hide" : "Show"}</Button>
                         <Button type="button" variant="destructive" size="sm" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /> Delete</Button>
                       </div>
                     </article>
+                    {editingId === p.id && (
+                      <div className="animate-fade-up ml-0 md:ml-4 border-l-2 border-primary/50 pl-0 md:pl-4">
+                        {formSection}
+                      </div>
+                    )}
+                    </Fragment>
                   ))
                 )}
               </section>
             </TabsContent>
-          ))}
+            );
+          })}
+
         </Tabs>
       </div>
     </AppLayout>
