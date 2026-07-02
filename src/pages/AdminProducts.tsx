@@ -675,7 +675,7 @@ const mockCardDetails = (bin: string, cc: string | null) => {
 const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Promise<void> | void; defaultVendorId?: string }) => {
   const [raw, setRaw] = useState("");
   const [base, setBase] = useState("");
-  const [price, setPrice] = useState("5");
+  const [price, setPrice] = useState("20");
   const [busy, setBusy] = useState(false);
 
   const parse = (text: string) => {
