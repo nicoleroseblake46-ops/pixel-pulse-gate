@@ -593,6 +593,41 @@ const LOC_BY_CC: Record<string, { city: string; state: string; zip: string }[]> 
 const pick = <T,>(arr: T[], seed: number) => arr[Math.abs(seed) % arr.length];
 const seedFromString = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
 
+const brandFromBin = (bin: string): string => {
+  const d1 = bin[0];
+  const d2 = bin.slice(0, 2);
+  const d4 = parseInt(bin.slice(0, 4) || "0", 10);
+  if (d1 === "4") return "VISA";
+  if (["51","52","53","54","55"].includes(d2)) return "MASTERCARD";
+  if (d4 >= 2221 && d4 <= 2720) return "MASTERCARD";
+  if (d2 === "34" || d2 === "37") return "AMEX";
+  if (d2 === "60" || d2 === "62" || d2 === "64" || d2 === "65") return "DISCOVER";
+  if (d2 === "35") return "JCB";
+  if (d2 === "36" || d2 === "30" || d2 === "38") return "DINERS";
+  return "";
+};
+
+const BANK_COUNTRY: { kw: string; cc: string }[] = [
+  ...["SUTTON","CHASE","JPMORGAN","WELLS FARGO","BANK OF AMERICA","CAPITAL ONE","CITI","CITIBANK","US BANK","PNC","NAVY FEDERAL","USAA","DISCOVER","AMERICAN EXPRESS","AMEX","REGIONS","FIFTH THIRD","HUNTINGTON","KEYBANK","BB&T","TRUIST","SYNCHRONY","GOLDMAN","METABANK","GREEN DOT","COMERICA","M&T","CITIZENS","ALLY","SOFI"].map(kw => ({ kw, cc: "US" })),
+  ...["BARCLAYS","LLOYDS","HSBC UK","NATWEST","MONZO","STARLING","HALIFAX","NATIONWIDE","SANTANDER UK","REVOLUT"].map(kw => ({ kw, cc: "GB" })),
+  ...["ROYAL BANK OF CANADA","RBC","TD CANADA","SCOTIABANK","BMO","CIBC","DESJARDINS","TANGERINE"].map(kw => ({ kw, cc: "CA" })),
+  ...["COMMONWEALTH","WESTPAC","ANZ","NAB","BENDIGO"].map(kw => ({ kw, cc: "AU" })),
+  ...["DEUTSCHE","COMMERZBANK","SPARKASSE","POSTBANK","N26"].map(kw => ({ kw, cc: "DE" })),
+  ...["BNP PARIBAS","CREDIT AGRICOLE","SOCIETE GENERALE","LA BANQUE POSTALE"].map(kw => ({ kw, cc: "FR" })),
+  ...["ING","ABN AMRO","RABOBANK","BUNQ"].map(kw => ({ kw, cc: "NL" })),
+];
+
+const countryFromContext = (country: string, bank: string, _bin: string) => {
+  const direct = findCountry(country) || findCountry(country.slice(0, 2));
+  if (direct) return direct;
+  const b = (bank || "").toUpperCase();
+  const hit = BANK_COUNTRY.find((x) => b.includes(x.kw));
+  if (hit) return findCountry(hit.cc);
+  // Sensible default so the flag is never blank
+  return findCountry("US");
+};
+
+
 const mockCardDetails = (bin: string, cc: string | null) => {
   const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
   const fn = pick(FIRST_NAMES, seed);
