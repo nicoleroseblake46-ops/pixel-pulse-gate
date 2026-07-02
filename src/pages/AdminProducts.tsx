@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { Edit3, Plus, Power, RefreshCw, Trash2, X, Package, Tag as TagIcon, CreditCard, Network, Wrench, MonitorSmartphone, Zap, ScrollText, EyeOff } from "lucide-react";
 import { toast } from "sonner";
@@ -248,9 +248,10 @@ const AdminProducts = () => {
             ))}
           </TabsList>
 
-          {categories.map((c) => (
-            <TabsContent key={c.value} value={c.value} className="mt-6 space-y-6">
+          {categories.map((c) => {
+            const formSection = (
               <section className="glass rounded-xl p-4 md:p-5">
+
                 <form onSubmit={save} className="space-y-4">
                   <div className="flex items-center justify-between gap-3">
                     <h2 className="font-display text-2xl font-black tracking-tight">
@@ -399,6 +400,11 @@ const AdminProducts = () => {
                   </Button>
                 </form>
               </section>
+            );
+            return (
+            <TabsContent key={c.value} value={c.value} className="mt-6 space-y-6">
+              {!editingId && formSection}
+
 
               <section className="space-y-3">
                 <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
@@ -412,7 +418,8 @@ const AdminProducts = () => {
                   </div>
                 ) : (
                   items.map((p) => (
-                    <article key={p.id} className="grid gap-3 rounded-lg border border-border bg-card/60 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+                    <Fragment key={p.id}>
+                    <article className="grid gap-3 rounded-lg border border-border bg-card/60 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <h3 className="font-display text-lg font-bold text-foreground">{p.name}</h3>
@@ -428,16 +435,24 @@ const AdminProducts = () => {
                         <div className="mt-2 font-mono text-sm font-bold text-primary">${Number(p.price).toFixed(2)}</div>
                       </div>
                       <div className="flex flex-wrap gap-2 md:justify-end">
-                        <Button type="button" variant="secondary" size="sm" onClick={() => edit(p)}><Edit3 className="h-4 w-4" /> Edit</Button>
+                        <Button type="button" variant="secondary" size="sm" onClick={() => edit(p)}><Edit3 className="h-4 w-4" /> {editingId === p.id ? "Editing…" : "Edit"}</Button>
                         <Button type="button" variant="secondary" size="sm" onClick={() => toggle(p)}><Power className="h-4 w-4" /> {p.is_active ? "Hide" : "Show"}</Button>
                         <Button type="button" variant="destructive" size="sm" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /> Delete</Button>
                       </div>
                     </article>
+                    {editingId === p.id && (
+                      <div className="animate-fade-up ml-0 md:ml-4 border-l-2 border-primary/50 pl-0 md:pl-4">
+                        {formSection}
+                      </div>
+                    )}
+                    </Fragment>
                   ))
                 )}
               </section>
             </TabsContent>
-          ))}
+            );
+          })}
+
         </Tabs>
       </div>
     </AppLayout>
@@ -578,6 +593,41 @@ const LOC_BY_CC: Record<string, { city: string; state: string; zip: string }[]> 
 const pick = <T,>(arr: T[], seed: number) => arr[Math.abs(seed) % arr.length];
 const seedFromString = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
 
+const brandFromBin = (bin: string): string => {
+  const d1 = bin[0];
+  const d2 = bin.slice(0, 2);
+  const d4 = parseInt(bin.slice(0, 4) || "0", 10);
+  if (d1 === "4") return "VISA";
+  if (["51","52","53","54","55"].includes(d2)) return "MASTERCARD";
+  if (d4 >= 2221 && d4 <= 2720) return "MASTERCARD";
+  if (d2 === "34" || d2 === "37") return "AMEX";
+  if (d2 === "60" || d2 === "62" || d2 === "64" || d2 === "65") return "DISCOVER";
+  if (d2 === "35") return "JCB";
+  if (d2 === "36" || d2 === "30" || d2 === "38") return "DINERS";
+  return "";
+};
+
+const BANK_COUNTRY: { kw: string; cc: string }[] = [
+  ...["SUTTON","CHASE","JPMORGAN","WELLS FARGO","BANK OF AMERICA","CAPITAL ONE","CITI","CITIBANK","US BANK","PNC","NAVY FEDERAL","USAA","DISCOVER","AMERICAN EXPRESS","AMEX","REGIONS","FIFTH THIRD","HUNTINGTON","KEYBANK","BB&T","TRUIST","SYNCHRONY","GOLDMAN","METABANK","GREEN DOT","COMERICA","M&T","CITIZENS","ALLY","SOFI"].map(kw => ({ kw, cc: "US" })),
+  ...["BARCLAYS","LLOYDS","HSBC UK","NATWEST","MONZO","STARLING","HALIFAX","NATIONWIDE","SANTANDER UK","REVOLUT"].map(kw => ({ kw, cc: "GB" })),
+  ...["ROYAL BANK OF CANADA","RBC","TD CANADA","SCOTIABANK","BMO","CIBC","DESJARDINS","TANGERINE"].map(kw => ({ kw, cc: "CA" })),
+  ...["COMMONWEALTH","WESTPAC","ANZ","NAB","BENDIGO"].map(kw => ({ kw, cc: "AU" })),
+  ...["DEUTSCHE","COMMERZBANK","SPARKASSE","POSTBANK","N26"].map(kw => ({ kw, cc: "DE" })),
+  ...["BNP PARIBAS","CREDIT AGRICOLE","SOCIETE GENERALE","LA BANQUE POSTALE"].map(kw => ({ kw, cc: "FR" })),
+  ...["ING","ABN AMRO","RABOBANK","BUNQ"].map(kw => ({ kw, cc: "NL" })),
+];
+
+const countryFromContext = (country: string, bank: string, _bin: string) => {
+  const direct = findCountry(country) || findCountry(country.slice(0, 2));
+  if (direct) return direct;
+  const b = (bank || "").toUpperCase();
+  const hit = BANK_COUNTRY.find((x) => b.includes(x.kw));
+  if (hit) return findCountry(hit.cc);
+  // Sensible default so the flag is never blank
+  return findCountry("US");
+};
+
+
 const mockCardDetails = (bin: string, cc: string | null) => {
   const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
   const fn = pick(FIRST_NAMES, seed);
@@ -610,12 +660,13 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
     const rows: { bin: string; brand: string; card_type: string; level: string; bank: string; country: string }[] = [];
     for (const line of lines) {
-      const parts = line.split(/\t|\s*\|\s*|,(?=\s)|,/).map((p) => p.trim()).filter(Boolean);
+      if (/^bin\b/i.test(line) && /brand|type|bank|country/i.test(line)) continue; // header
+      // Split on tab, |, comma, or 2+ spaces. Preserves multi-word fields.
+      const parts = line.split(/\t|\s*\|\s*|,\s*|\s{2,}/).map((p) => p.trim()).filter(Boolean);
       if (!parts.length) continue;
-      if (/^bin$/i.test(parts[0])) continue; // header
       const [bin, brand = "", card_type = "", level = "", bank = "", country = ""] = parts;
       if (!/^\d{4,}/.test(bin)) continue;
-      rows.push({ bin, brand, card_type, level, bank, country });
+      rows.push({ bin: bin.replace(/\D/g, "").slice(0, 6), brand, card_type, level, bank, country });
     }
     return rows;
   };
@@ -628,7 +679,11 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     if (!Number.isFinite(priceN) || priceN < 0) { toast.error("Enter a valid default price"); return; }
     setBusy(true);
     const payload = preview.map((r) => {
-      const c = findCountry(r.country) ?? findCountry(r.country.slice(0, 2));
+      const brand = (r.brand || brandFromBin(r.bin) || "VISA").toUpperCase();
+      const card_type = (r.card_type || "CREDIT").toUpperCase();
+      const level = (r.level || "CLASSIC").toUpperCase();
+      const bank = (r.bank || "UNKNOWN BANK").toUpperCase();
+      const c = countryFromContext(r.country, bank, r.bin);
       const mock = mockCardDetails(r.bin, c?.code ?? null);
       return {
         category: "cards" as const,
@@ -636,13 +691,13 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         meta: "",
         price: priceN,
         bin: r.bin,
-        brand: r.brand || null,
-        scheme: r.brand || null,
-        card_type: r.card_type || null,
-        level: r.level || null,
-        bank: r.bank || null,
-        country: c?.name ?? r.country ?? null,
-        country_code: c?.code ?? null,
+        brand,
+        scheme: brand,
+        card_type,
+        level,
+        bank,
+        country: c?.name ?? r.country ?? "United States",
+        country_code: c?.code ?? "US",
         vendor_id: defaultVendorId || null,
         seller: mock.name,
         city: mock.city,
@@ -656,10 +711,11 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     const { error } = await supabase.from("products").insert(payload);
     setBusy(false);
     if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
-    toast.success(`Imported ${payload.length} cards with auto-filled details`);
+    toast.success(`Imported ${payload.length} cards — brand, country & flag auto-detected`);
     setRaw("");
     await onImported();
   };
+
 
   return (
     <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
@@ -667,8 +723,9 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         <div>
           <div className="font-display text-sm font-bold">Bulk paste cards</div>
           <div className="text-[11px] text-muted-foreground">
-            One per line: <code>BIN  BRAND  TYPE  LEVEL  BANK  COUNTRY</code> (tab, comma or | separated)
+            Paste anything from just <code>BIN</code> to <code>BIN BRAND TYPE LEVEL BANK COUNTRY</code>. Missing fields (brand, country, flag, city, state, zip, name, exp, full PAN) are auto-detected & filled.
           </div>
+
         </div>
         <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary">{preview.length} parsed</span>
       </div>
