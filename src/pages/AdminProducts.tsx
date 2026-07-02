@@ -400,6 +400,11 @@ const AdminProducts = () => {
                   </Button>
                 </form>
               </section>
+            );
+            return (
+            <TabsContent key={c.value} value={c.value} className="mt-6 space-y-6">
+              {!editingId && formSection}
+
 
               <section className="space-y-3">
                 <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.25em] text-muted-foreground">
