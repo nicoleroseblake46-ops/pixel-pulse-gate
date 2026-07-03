@@ -705,6 +705,36 @@ const COUNTRY_ALIASES: Record<string, string> = {
   NORWAY: "NO", NOR: "NO", NO: "NO",
   DENMARK: "DK", DNK: "DK", DK: "DK",
   POLAND: "PL", POL: "PL", PL: "PL",
+  CAMEROON: "CM", CMR: "CM", CM: "CM",
+  COLOMBIA: "CO", COL: "CO", CO: "CO",
+  ARGENTINA: "AR", ARG: "AR", AR: "AR",
+  CHILE: "CL", CHL: "CL", CL: "CL",
+  PERU: "PE", PER: "PE", PE: "PE",
+  VENEZUELA: "VE", VEN: "VE", VE: "VE",
+  NIGERIA: "NG", NGA: "NG", NG: "NG",
+  "SOUTH AFRICA": "ZA", ZAF: "ZA", ZA: "ZA",
+  KENYA: "KE", KEN: "KE", KE: "KE",
+  INDIA: "IN", IND: "IN", IN: "IN",
+  CHINA: "CN", CHN: "CN", CN: "CN",
+  "HONG KONG": "HK", HKG: "HK", HK: "HK",
+  SINGAPORE: "SG", SGP: "SG", SG: "SG",
+  PHILIPPINES: "PH", PHL: "PH", PH: "PH",
+  THAILAND: "TH", THA: "TH", TH: "TH",
+  INDONESIA: "ID", IDN: "ID", ID: "ID",
+  MALAYSIA: "MY", MYS: "MY", MY: "MY",
+  VIETNAM: "VN", VNM: "VN", VN: "VN",
+  TURKEY: "TR", TUR: "TR", TR: "TR",
+  RUSSIA: "RU", RUS: "RU", RU: "RU",
+  UKRAINE: "UA", UKR: "UA", UA: "UA",
+  ROMANIA: "RO", ROU: "RO", RO: "RO",
+  PORTUGAL: "PT", PRT: "PT", PT: "PT",
+  GREECE: "GR", GRC: "GR", GR: "GR",
+  "NEW ZEALAND": "NZ", NZL: "NZ", NZ: "NZ",
+  "UNITED ARAB EMIRATES": "AE", UAE: "AE", ARE: "AE", AE: "AE",
+  "SAUDI ARABIA": "SA", SAU: "SA", SA: "SA",
+  ISRAEL: "IL", ISR: "IL", IL: "IL",
+  EGYPT: "EG", EGY: "EG", EG: "EG",
+  MOROCCO: "MA", MAR: "MA", MA: "MA",
 };
 
 const resolveCountry = (raw: string) => {
@@ -772,16 +802,44 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
   const [busy, setBusy] = useState(false);
 
   const parse = (text: string) => {
-    const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const rawLines = text.split(/\r?\n/).map((l) => l.trim());
+    const lines = rawLines.filter(Boolean);
     const rows: { bin: string; brand: string; card_type: string; level: string; bank: string; country: string }[] = [];
-    for (const line of lines) {
-      if (/^bin\b/i.test(line) && /brand|type|bank|country/i.test(line)) continue; // header
-      // Split on tab, |, comma, or 2+ spaces. Preserves multi-word fields.
-      const parts = line.split(/\t|\s*\|\s*|,\s*|\s{2,}/).map((p) => p.trim()).filter(Boolean);
-      if (!parts.length) continue;
-      const [bin, brand = "", card_type = "", level = "", bank = "", country = ""] = parts;
-      if (!/^\d{4,}/.test(bin)) continue;
-      rows.push({ bin: bin.replace(/\D/g, "").slice(0, 6), brand, card_type, level, bank, country });
+    if (!lines.length) return rows;
+
+    // Detect format: if at least one line has an inline delimiter (tab, |, comma, or 2+ spaces)
+    // AND starts with a BIN, treat it as one-card-per-line. Otherwise treat as field-per-line.
+    const hasInlineDelim = lines.some((l) => /^\d{4,}/.test(l) && /(\t|\s\|\s|,|\s{2,})/.test(l));
+
+    if (hasInlineDelim) {
+      for (const line of lines) {
+        if (/^bin\b/i.test(line) && /brand|type|bank|country/i.test(line)) continue;
+        const parts = line.split(/\t|\s*\|\s*|,\s*|\s{2,}/).map((p) => p.trim()).filter(Boolean);
+        if (!parts.length) continue;
+        const [bin, brand = "", card_type = "", level = "", bank = "", country = ""] = parts;
+        if (!/^\d{4,}/.test(bin)) continue;
+        rows.push({ bin: bin.replace(/\D/g, "").slice(0, 6), brand, card_type, level, bank, country });
+      }
+      return rows;
+    }
+
+    // Field-per-line mode: walk through tokens, whenever we hit a BIN start a 6-field record.
+    // Order expected: BIN, BRAND, TYPE, LEVEL, BANK, COUNTRY. Missing tail fields tolerated.
+    let i = 0;
+    while (i < lines.length) {
+      const l = lines[i];
+      if (/^bin$/i.test(l)) { i++; continue; }
+      if (!/^\d{4,}$/.test(l.replace(/\s+/g, ""))) { i++; continue; }
+      const bin = l.replace(/\D/g, "").slice(0, 6);
+      const fields: string[] = [];
+      let j = i + 1;
+      while (j < lines.length && fields.length < 5 && !/^\d{4,}$/.test(lines[j].replace(/\s+/g, ""))) {
+        fields.push(lines[j]);
+        j++;
+      }
+      const [brand = "", card_type = "", level = "", bank = "", country = ""] = fields;
+      rows.push({ bin, brand, card_type, level, bank, country });
+      i = j;
     }
     return rows;
   };
