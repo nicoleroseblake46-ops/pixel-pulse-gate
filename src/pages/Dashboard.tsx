@@ -134,9 +134,70 @@ const Dashboard = () => {
     return s.value;
   };
 
+  const welcome = (settings.dashboard_welcome ?? {}) as {
+    enabled?: boolean; title?: string; body?: string; cta_label?: string; cta_href?: string; accent?: string;
+  };
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  useEffect(() => {
+    if (welcome.enabled === false) return;
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem("welcome_seen") === "1") return;
+    const t = setTimeout(() => setWelcomeOpen(true), 250);
+    return () => clearTimeout(t);
+  }, [welcome.enabled]);
+  const dismissWelcome = () => {
+    sessionStorage.setItem("welcome_seen", "1");
+    setWelcomeOpen(false);
+  };
+  const accentMap: Record<string, string> = {
+    primary: "from-primary/30 via-primary/10 to-accent/20",
+    accent: "from-accent/30 via-accent/10 to-primary/20",
+    emerald: "from-emerald-500/30 via-emerald-500/10 to-teal-500/20",
+    rose: "from-rose-500/30 via-rose-500/10 to-fuchsia-500/20",
+    amber: "from-amber-500/30 via-amber-500/10 to-orange-500/20",
+  };
+  const accentClass = accentMap[welcome.accent ?? "primary"] ?? accentMap.primary;
+
   return (
     <AppLayout>
+      <Dialog open={welcomeOpen} onOpenChange={(o) => { if (!o) dismissWelcome(); }}>
+        <DialogContent className="overflow-hidden border-primary/40 p-0 sm:max-w-lg">
+          <div className={`relative bg-gradient-to-br ${accentClass} p-6`}>
+            <button onClick={dismissWelcome} className="absolute right-3 top-3 rounded-full bg-background/40 p-1.5 text-foreground/80 backdrop-blur transition hover:bg-background/70">
+              <X className="h-4 w-4" />
+            </button>
+            <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-background/50 text-primary shadow-sm backdrop-blur">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <h2 className="font-display text-2xl font-black leading-tight">{welcome.title || "Welcome"}</h2>
+            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground/85">{welcome.body}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              {welcome.cta_label && welcome.cta_href && (
+                <Button asChild onClick={dismissWelcome}>
+                  <Link to={welcome.cta_href}>{welcome.cta_label}</Link>
+                </Button>
+              )}
+              <Button variant="ghost" onClick={dismissWelcome}>Dismiss</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
+      {/* Hero */}
+      <section className="mb-6 overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/15 via-background to-accent/10 p-5 shadow-sm md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="mb-1 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" /> Live inventory
+            </div>
+            <h1 className="font-display text-2xl font-black tracking-tight md:text-3xl">Dashboard</h1>
+          </div>
+          <div className="flex gap-2">
+            <Button asChild size="sm" variant="secondary"><Link to="/payments">Top up</Link></Button>
+            <Button asChild size="sm"><Link to="/cards">Browse cards</Link></Button>
+          </div>
+        </div>
+      </section>
 
       {/* Stats */}
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 animate-fade-up">
