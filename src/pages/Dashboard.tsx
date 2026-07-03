@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { CreditCard, MonitorSmartphone, Zap, ScrollText, History, Database, Server, Network, Shield, Plus, Globe, Wrench } from "lucide-react";
+import { CreditCard, MonitorSmartphone, Zap, ScrollText, History, Database, Server, Network, Shield, Plus, Globe, Wrench, Sparkles, X } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppSettings } from "@/hooks/use-app-settings";
 
