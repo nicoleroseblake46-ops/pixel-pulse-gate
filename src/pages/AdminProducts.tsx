@@ -527,6 +527,35 @@ const DashboardEditor = () => {
 
   return (
     <section className="glass space-y-6 rounded-xl border border-border p-4 md:p-5">
+      <div className="space-y-3 rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5 p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-xl font-black">Welcome pop-up (on login)</h2>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Switch checked={welcome.enabled} onCheckedChange={(v) => setWelcome({ ...welcome, enabled: v })} />
+            Enabled
+          </label>
+        </div>
+        <div className="grid gap-2 md:grid-cols-2">
+          <Input placeholder="Title" value={welcome.title} onChange={(e) => setWelcome({ ...welcome, title: e.target.value })} />
+          <div className="grid grid-cols-2 gap-2">
+            <Input placeholder="CTA label" value={welcome.cta_label} onChange={(e) => setWelcome({ ...welcome, cta_label: e.target.value })} />
+            <Input placeholder="CTA link (e.g. /cards)" value={welcome.cta_href} onChange={(e) => setWelcome({ ...welcome, cta_href: e.target.value })} />
+          </div>
+        </div>
+        <Textarea placeholder="Body" value={welcome.body} onChange={(e) => setWelcome({ ...welcome, body: e.target.value })} className="min-h-20" />
+        <Select value={welcome.accent} onValueChange={(v) => setWelcome({ ...welcome, accent: v })}>
+          <SelectTrigger className="md:w-[220px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="primary">Primary (blue)</SelectItem>
+            <SelectItem value="accent">Accent</SelectItem>
+            <SelectItem value="emerald">Emerald</SelectItem>
+            <SelectItem value="rose">Rose</SelectItem>
+            <SelectItem value="amber">Amber</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-[11px] text-muted-foreground">Shows once per browser session on the dashboard.</p>
+      </div>
+
       <div>
         <h2 className="font-display text-xl font-black">Dashboard — Stats row</h2>
         <p className="text-xs text-muted-foreground">Use <code>auto:cards</code>, <code>auto:rdp</code>, <code>auto:socks</code>, <code>auto:proxy</code>, <code>auto:logs</code>, <code>auto:tools</code>, <code>auto:sales</code> as the value to auto-count active products. Otherwise type any text.</p>
