@@ -485,16 +485,29 @@ const ACCENT_OPTIONS = [
   { value: "warning", label: "Yellow (warning)" },
 ];
 
+type Welcome = { enabled: boolean; title: string; body: string; cta_label: string; cta_href: string; accent: string };
+const DEFAULT_WELCOME: Welcome = {
+  enabled: true,
+  title: "Welcome back, agent",
+  body: "Fresh bases just dropped. Top up your wallet and grab premium cards before they're gone.",
+  cta_label: "Browse Cards",
+  cta_href: "/cards",
+  accent: "primary",
+};
+
 const DashboardEditor = () => {
   const { settings, setSetting } = useAppSettings();
   const initialStats = (Array.isArray(settings.dashboard_stats) ? settings.dashboard_stats : DEFAULT_STATS) as Stat[];
   const initialPanels = (Array.isArray(settings.dashboard_important) ? settings.dashboard_important : DEFAULT_PANELS) as Panel[];
+  const initialWelcome = { ...DEFAULT_WELCOME, ...(settings.dashboard_welcome as Partial<Welcome> | undefined ?? {}) };
   const [stats, setStats] = useState<Stat[]>(initialStats);
   const [panels, setPanels] = useState<Panel[]>(initialPanels);
+  const [welcome, setWelcome] = useState<Welcome>(initialWelcome);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { setStats(initialStats); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [JSON.stringify(initialStats)]);
   useEffect(() => { setPanels(initialPanels); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [JSON.stringify(initialPanels)]);
+  useEffect(() => { setWelcome(initialWelcome); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [JSON.stringify(initialWelcome)]);
 
   const save = async () => {
     setSaving(true);
@@ -502,6 +515,7 @@ const DashboardEditor = () => {
       await Promise.all([
         setSetting("dashboard_stats", stats),
         setSetting("dashboard_important", panels),
+        setSetting("dashboard_welcome", welcome),
       ]);
       toast.success("Dashboard updated");
     } catch (e: any) {
