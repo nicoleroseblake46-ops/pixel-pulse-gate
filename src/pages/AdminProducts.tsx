@@ -609,7 +609,7 @@ const brandFromBin = (bin: string): string => {
 
 const BANK_COUNTRY: { kw: string; cc: string }[] = [
   ...["SUTTON","CHASE","JPMORGAN","WELLS FARGO","BANK OF AMERICA","BOFA","CAPITAL ONE","CITI","CITIBANK","US BANK","USBANK","PNC","NAVY FEDERAL","USAA","DISCOVER","AMERICAN EXPRESS","AMEX","REGIONS","FIFTH THIRD","HUNTINGTON","KEYBANK","BB&T","TRUIST","SYNCHRONY","GOLDMAN","METABANK","GREEN DOT","COMERICA","M&T","CITIZENS","ALLY","SOFI","VARO","CHIME","MERCURY","BREX"].map(kw => ({ kw, cc: "US" })),
-  ...["BARCLAYS","LLOYDS","HSBC","NATWEST","MONZO","STARLING","HALIFAX","NATIONWIDE","SANTANDER UK","REVOLUT","TSB","METRO BANK","VIRGIN MONEY","CO-OPERATIVE","COOPERATIVE","CLYDESDALE","YORKSHIRE","FIRST DIRECT","ROYAL BANK OF SCOTLAND","RBS","UK","GB "].map(kw => ({ kw, cc: "GB" })),
+  ...["BARCLAYS","LLOYDS","HSBC","NATWEST","MONZO","STARLING","HALIFAX","NATIONWIDE","SANTANDER UK","REVOLUT","TSB","METRO BANK","VIRGIN MONEY","CO-OPERATIVE","COOPERATIVE","CLYDESDALE","YORKSHIRE","FIRST DIRECT","ROYAL BANK OF SCOTLAND","RBS","BRITISH","UNITED KINGDOM"].map(kw => ({ kw, cc: "GB" })),
   ...["ROYAL BANK OF CANADA","RBC","TD CANADA","SCOTIABANK","BMO","CIBC","DESJARDINS","TANGERINE","CANADA","CANADIAN"].map(kw => ({ kw, cc: "CA" })),
   ...["COMMONWEALTH","WESTPAC","ANZ","NAB","BENDIGO","MACQUARIE","AUSTRALIA","AUSTRALIAN"].map(kw => ({ kw, cc: "AU" })),
   ...["DEUTSCHE","COMMERZBANK","SPARKASSE","POSTBANK","N26","DKB","DZ BANK","GERMANY","GERMAN"].map(kw => ({ kw, cc: "DE" })),
@@ -619,37 +619,86 @@ const BANK_COUNTRY: { kw: string; cc: string }[] = [
   ...["BBVA","CAIXA","BANKINTER","SABADELL","SPAIN","SPANISH"].map(kw => ({ kw, cc: "ES" })),
 ];
 
-// Common issuer BIN prefixes → country (fallback when bank text is ambiguous).
+// Expanded issuer BIN prefixes → country (fallback when bank text is ambiguous).
 const BIN_COUNTRY: { prefix: string; cc: string }[] = [
   // UK
-  ...["4462","4543","4658","4751","4929","5301","5355","5404","5413","5522","5641","5648"].map(p => ({ prefix: p, cc: "GB" })),
+  ...["4462","4543","4658","4751","4929","5301","5355","5404","5413","5522","5641","5648","4659","4744","4745","4917","5187","5232","5432","5522"].map(p => ({ prefix: p, cc: "GB" })),
   // Canada
-  ...["4506","4520","4530","4536","4540","4560","4590","5191","5254","5490","5522"].map(p => ({ prefix: p, cc: "CA" })),
+  ...["4506","4520","4530","4536","4540","4560","4590","5191","5254","5490","5522","4519","4724","4590","4779","5162","5223","5241","5568"].map(p => ({ prefix: p, cc: "CA" })),
   // Australia
-  ...["4557","4564","4921","5163","5313","5610"].map(p => ({ prefix: p, cc: "AU" })),
+  ...["4557","4564","4921","5163","5313","5610","4072","4325","4362","4529","5218","5581"].map(p => ({ prefix: p, cc: "AU" })),
   // Germany
-  ...["4104","4547","5232","5453","5544"].map(p => ({ prefix: p, cc: "DE" })),
+  ...["4104","4547","5232","5453","5544","4176","4306","4319","4324","4568","5100","5170","5265","5390","5406"].map(p => ({ prefix: p, cc: "DE" })),
   // France
-  ...["4970","4974","4978","5131","5170"].map(p => ({ prefix: p, cc: "FR" })),
+  ...["4970","4974","4978","5131","5170","4972","4973","4976","4977","5132","5133","5134","5171"].map(p => ({ prefix: p, cc: "FR" })),
   // Netherlands
-  ...["4032","4988","5300","5413"].map(p => ({ prefix: p, cc: "NL" })),
+  ...["4032","4988","5300","5413","4034","4842","4844","5299","5405"].map(p => ({ prefix: p, cc: "NL" })),
   // Italy
-  ...["4023","4517","5333"].map(p => ({ prefix: p, cc: "IT" })),
+  ...["4023","4517","5333","4024","4025","4523","4599","5334","5401"].map(p => ({ prefix: p, cc: "IT" })),
   // Spain
-  ...["4548","4930","5480"].map(p => ({ prefix: p, cc: "ES" })),
+  ...["4548","4930","5480","4915","4548","5140","5254","5474","5482"].map(p => ({ prefix: p, cc: "ES" })),
+  // US common issuers
+  ...["4147","4266","4485","4532","4716","4147","5100","5200","5300","5400","5500","6011","3400","3700"].map(p => ({ prefix: p, cc: "US" })),
 ];
 
+const COUNTRY_ALIASES: Record<string, string> = {
+  UK: "GB", "U.K.": "GB", "UNITED KINGDOM": "GB", ENGLAND: "GB", BRITAIN: "GB", "GREAT BRITAIN": "GB", SCOTLAND: "GB", WALES: "GB", GB: "GB", GBR: "GB",
+  USA: "US", "U.S.": "US", "U.S.A.": "US", "UNITED STATES": "US", "UNITED STATES OF AMERICA": "US", AMERICA: "US", US: "US",
+  CANADA: "CA", CAN: "CA", CA: "CA",
+  AUSTRALIA: "AU", AUS: "AU", AU: "AU",
+  GERMANY: "DE", DEUTSCHLAND: "DE", GER: "DE", DEU: "DE", DE: "DE",
+  FRANCE: "FR", FRA: "FR", FR: "FR",
+  NETHERLANDS: "NL", HOLLAND: "NL", NLD: "NL", NL: "NL",
+  ITALY: "IT", ITA: "IT", IT: "IT",
+  SPAIN: "ES", ESP: "ES", ES: "ES",
+  JAPAN: "JP", JPN: "JP", JP: "JP",
+  BRAZIL: "BR", BRA: "BR", BR: "BR",
+  MEXICO: "MX", MEX: "MX", MX: "MX",
+  IRELAND: "IE", IRL: "IE", IE: "IE",
+  BELGIUM: "BE", BEL: "BE", BE: "BE",
+  SWITZERLAND: "CH", CHE: "CH", CH: "CH",
+  AUSTRIA: "AT", AUT: "AT", AT: "AT",
+  SWEDEN: "SE", SWE: "SE", SE: "SE",
+  NORWAY: "NO", NOR: "NO", NO: "NO",
+  DENMARK: "DK", DNK: "DK", DK: "DK",
+  POLAND: "PL", POL: "PL", PL: "PL",
+};
+
+const resolveCountry = (raw: string) => {
+  if (!raw) return undefined;
+  const t = raw.trim().toUpperCase();
+  if (!t) return undefined;
+  const alias = COUNTRY_ALIASES[t];
+  if (alias) return findCountry(alias);
+  const direct = findCountry(t) || findCountry(t.slice(0, 2));
+  if (direct) return direct;
+  // substring: allow "BANK OF UK" or "USA CARDS"
+  const hit = COUNTRIES.find((c) => t.includes(c.name.toUpperCase()));
+  if (hit) return hit;
+  return undefined;
+};
+
 const countryFromContext = (country: string, bank: string, bin: string) => {
-  const direct = findCountry(country) || findCountry(country.slice(0, 2));
+  const direct = resolveCountry(country);
   if (direct) return direct;
   const b = ` ${(bank || "").toUpperCase()} `;
   const hit = BANK_COUNTRY.find((x) => b.includes(` ${x.kw} `) || b.includes(x.kw));
   if (hit) return findCountry(hit.cc);
-  const binHit = BIN_COUNTRY.find((x) => bin.startsWith(x.prefix));
-  if (binHit) return findCountry(binHit.cc);
-  return findCountry("US");
+  // Try progressively longer BIN prefixes (6 → 4)
+  for (const len of [6, 5, 4]) {
+    const p = bin.slice(0, len);
+    const binHit = BIN_COUNTRY.find((x) => x.prefix === p);
+    if (binHit) return findCountry(binHit.cc);
+  }
+  return undefined; // leave undecided — do NOT force US
 };
 
+
+const initialsName = (seed: number) => {
+  const f = pick(FIRST_NAMES, seed);
+  const l = pick(LAST_NAMES, seed >> 3);
+  return `${f[0]}. ${l[0]}.`;
+};
 
 const mockCardDetails = (bin: string, cc: string | null) => {
   const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
@@ -661,9 +710,10 @@ const mockCardDetails = (bin: string, cc: string | null) => {
   const pan = (bin + trailing).slice(0, 16);
   const cvv = String(100 + (Math.abs(seed >> 11) % 900));
   return {
-    // Hidden until purchase — show a tick in the inventory instead of the real value.
-    name: "✓",
-    city: "✓",
+    // Show initials only (e.g. "J. S.") — full name revealed after purchase via full_card.
+    name: initialsName(seed),
+    // City shown as first letter + dot to hint locale without revealing.
+    city: `${loc.city[0]}${loc.city.length > 1 ? "•••" : ""}`,
     state: loc.state,
     zip: loc.zip,
     exp: `${month}/${year}`,
