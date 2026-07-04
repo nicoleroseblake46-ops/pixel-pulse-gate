@@ -19,13 +19,13 @@
     --popover-foreground: 236 40% 10%;
 
     /* Cerberux brand */
-    --primary: 241 86% 27%;            /* royal navy */
+    --primary: 232 84% 32%;            /* rich cobalt navy */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 242 82% 38%;
+    --primary-glow: 220 96% 56%;
 
-    --accent: 204 94% 43%;             /* bright action blue */
-    --accent-foreground: 0 0% 100%;
-    --accent-glow: 195 92% 58%;
+    --accent: 195 100% 50%;            /* electric cyan */
+    --accent-foreground: 232 42% 9%;
+    --accent-glow: 180 92% 62%;
 
     --secondary: 220 26% 91%;
     --secondary-foreground: 236 40% 10%;
