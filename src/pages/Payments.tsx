@@ -22,6 +22,8 @@ const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65, 1000: 150 };
 const Payments = () => {
   const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
   const { rates, loading: ratesLoading } = useCryptoRates();
+  const { settings } = useAppSettings();
+  const MIN_DEPOSIT = Math.max(0, Number(settings.min_deposit ?? 20));
   const [amount, setAmount] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
   const [coin, setCoin] = useState<keyof typeof wallets>("BTC");
