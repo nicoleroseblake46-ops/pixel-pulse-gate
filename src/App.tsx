@@ -15,6 +15,7 @@ import AdminPayments from "./pages/AdminPayments";
 import AdminNews from "./pages/AdminNews";
 import AdminTickets from "./pages/AdminTickets";
 import AdminProducts from "./pages/AdminProducts";
+import AdminHub from "./pages/AdminHub";
 import ResetPassword from "./pages/ResetPassword";
 import { Sales, Cards, Socks, Proxy, RDP, Logs } from "./pages/Sections";
 import Tools from "./pages/Tools";
