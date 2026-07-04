@@ -238,6 +238,40 @@ const AdminProducts = () => {
           </div>
         </section>
 
+        {/* Minimum deposit setting */}
+        <section className="glass rounded-xl border border-border p-4 md:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/40">
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <div className="font-display text-base font-bold">Minimum deposit (USD)</div>
+                <p className="text-xs text-muted-foreground">Buyers cannot submit a crypto top-up below this amount. Currently <span className="font-mono text-foreground">${currentMinDeposit.toFixed(2)}</span>.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                step="1"
+                value={minDepositInput}
+                onChange={(e) => setMinDepositInput(e.target.value)}
+                className="h-10 w-28"
+              />
+              <Button
+                onClick={async () => {
+                  const value = Math.max(0, Number(minDepositInput) || 0);
+                  await setSetting("min_deposit", value);
+                  toast.success(`Minimum deposit set to $${value}`);
+                }}
+              >
+                Save
+              </Button>
+            </div>
+          </div>
+        </section>
+
         <DashboardEditor />
 
 
