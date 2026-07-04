@@ -9,8 +9,8 @@
 @layer base {
   :root {
     /* Surfaces */
-    --background: 220 30% 94%;
-    --foreground: 236 40% 10%;
+    --background: 220 30% 96%;
+    --foreground: 232 42% 9%;
 
     --card: 0 0% 100%;
     --card-foreground: 236 40% 10%;
