@@ -45,10 +45,10 @@
     --radius: 0.75rem;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(232 84% 26%) 0%, hsl(220 96% 46%) 55%, hsl(195 100% 52%) 100%);
     --gradient-violet: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
-    --gradient-mesh: linear-gradient(180deg, hsl(220 30% 94%) 0%, hsl(220 32% 90%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 28% 98%));
+    --gradient-mesh: linear-gradient(180deg, hsl(220 30% 96%) 0%, hsl(220 32% 92%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(220 32% 98%));
 
     /* Glows / shadows */
     --glow-primary: 0 14px 30px hsl(var(--primary) / 0.24), 0 2px 0 hsl(var(--primary-glow) / 0.18);
