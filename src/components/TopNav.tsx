@@ -33,6 +33,9 @@ export const TopNav = () => {
   const loc = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [displayName, setDisplayName] = useState("User");
+  const [pendingPayments, setPendingPayments] = useState(0);
+  const [openTickets, setOpenTickets] = useState(0);
+  const pendingAdmin = pendingPayments + openTickets;
 
   useEffect(() => {
     if (!user) {
@@ -46,6 +49,21 @@ export const TopNav = () => {
       .maybeSingle()
       .then(({ data }) => setDisplayName((data?.username as string) || user.email?.split("@")[0] || "User"));
   }, [user]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const load = async () => {
+      const [{ count: pc }, { count: tc }] = await Promise.all([
+        (supabase as any).from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        (supabase as any).from("tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
+      ]);
+      setPendingPayments(pc ?? 0);
+      setOpenTickets(tc ?? 0);
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => clearInterval(id);
+  }, [isAdmin]);
 
   const visibleNav = mainNav.filter((it) => !(it.title === "Sales" && salesHidden && !isAdmin));
 
