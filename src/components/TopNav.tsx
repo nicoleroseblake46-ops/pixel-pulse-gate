@@ -150,9 +150,9 @@ export const TopNav = () => {
           {isAdmin && (
             <div className="ml-auto flex items-center gap-1">
               <NavLink
-                to="/admin/products"
+                to="/admin"
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold transition-smooth",
+                  "relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold transition-smooth",
                   loc.pathname.startsWith("/admin")
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -160,7 +160,11 @@ export const TopNav = () => {
               >
                 <ShieldCheck className="h-4 w-4" />
                 <span>Admin</span>
-                <ChevronDown className="h-3 w-3 opacity-60" />
+                {pendingAdmin > 0 && (
+                  <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
+                    {pendingAdmin}
+                  </span>
+                )}
               </NavLink>
             </div>
           )}
