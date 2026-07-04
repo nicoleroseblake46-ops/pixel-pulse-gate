@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCommerce } from "@/contexts/CommerceContext";
 import { useCryptoRates, formatCrypto } from "@/hooks/use-crypto-rates";
+import { useAppSettings } from "@/hooks/use-app-settings";
 import { copyToClipboard } from "@/lib/clipboard";
 import { toast } from "sonner";
 
@@ -14,7 +15,6 @@ const wallets = {
   LTC: "ltc1qu78zvrz0u6n0z4cxn34280p9fag6qrjxunz442",
   "USDT/TRC20": "TBTM7mbjaptqK2sKr8hxqDSMdmaQawd2t8",
 };
-const MIN_DEPOSIT = 0;
 const presetAmounts = [20, 50, 100, 200, 500];
 const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65, 1000: 150 };
 
@@ -22,6 +22,8 @@ const bonuses: Record<number, number> = { 100: 8, 200: 20, 500: 65, 1000: 150 };
 const Payments = () => {
   const { balance, cartItems, cartTotal, removeFromCart, createPendingPayment, purchaseCartWithBalance } = useCommerce();
   const { rates, loading: ratesLoading } = useCryptoRates();
+  const { settings } = useAppSettings();
+  const MIN_DEPOSIT = Math.max(0, Number(settings.min_deposit ?? 20));
   const [amount, setAmount] = useState("");
   const [selected, setSelected] = useState<number | null>(null);
   const [coin, setCoin] = useState<keyof typeof wallets>("BTC");
