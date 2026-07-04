@@ -216,6 +216,10 @@ export const TopNav = () => {
             {isAdmin && (
               <>
                 <div className="my-2 border-t border-border" />
+                <NavLink to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg bg-primary/10 px-4 py-3 font-semibold text-primary hover:bg-primary/20">
+                  <ShieldCheck className="h-5 w-5" /> Admin Console
+                  {pendingAdmin > 0 && <span className="ml-auto rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">{pendingAdmin}</span>}
+                </NavLink>
                 <NavLink to="/admin/news" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground hover:bg-secondary">
                   <FilePenLine className="h-5 w-5" /> News Admin
                 </NavLink>
