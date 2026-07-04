@@ -70,14 +70,14 @@ export const TopNav = () => {
   return (
     <>
       {/* Top utility bar */}
-      <header className="fixed left-0 right-0 top-0 z-50 h-14 bg-[hsl(241,86%,27%)] text-white shadow-md">
+      <header className="fixed left-0 right-0 top-0 z-50 h-14 bg-gradient-primary text-white shadow-[0_4px_20px_-8px_hsl(232_84%_20%/0.5)]">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-6">
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-12 items-center justify-center rounded-t-full rounded-bl-xl rounded-br-sm bg-white">
-              <span className="font-display text-xl font-black text-[hsl(241,86%,27%)]">N</span>
+            <div className="flex h-9 w-12 items-center justify-center rounded-t-full rounded-bl-xl rounded-br-sm bg-white shadow-sm">
+              <span className="font-display text-xl font-black text-primary">N</span>
             </div>
-            <span className="font-display text-lg font-black tracking-wide">NEXUS</span>
+            <span className="font-display text-lg font-black tracking-wide drop-shadow-sm">NEXUS</span>
           </NavLink>
 
           {/* Right utilities */}
