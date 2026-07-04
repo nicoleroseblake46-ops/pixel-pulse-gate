@@ -109,7 +109,7 @@ export const TopNav = () => {
               to="/profile"
               className="flex h-9 items-center gap-2 rounded-lg bg-white/15 px-2 hover:bg-white/25"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-display text-xs font-black text-[hsl(241,86%,27%)]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-display text-xs font-black text-primary">
                 {(displayName || "U").charAt(0).toUpperCase()}
               </span>
             </NavLink>
