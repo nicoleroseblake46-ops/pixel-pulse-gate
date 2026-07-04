@@ -33,6 +33,9 @@ export const TopNav = () => {
   const loc = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [displayName, setDisplayName] = useState("User");
+  const [pendingPayments, setPendingPayments] = useState(0);
+  const [openTickets, setOpenTickets] = useState(0);
+  const pendingAdmin = pendingPayments + openTickets;
 
   useEffect(() => {
     if (!user) {
@@ -47,19 +50,34 @@ export const TopNav = () => {
       .then(({ data }) => setDisplayName((data?.username as string) || user.email?.split("@")[0] || "User"));
   }, [user]);
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    const load = async () => {
+      const [{ count: pc }, { count: tc }] = await Promise.all([
+        (supabase as any).from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        (supabase as any).from("tickets").select("id", { count: "exact", head: true }).eq("status", "open"),
+      ]);
+      setPendingPayments(pc ?? 0);
+      setOpenTickets(tc ?? 0);
+    };
+    load();
+    const id = setInterval(load, 30000);
+    return () => clearInterval(id);
+  }, [isAdmin]);
+
   const visibleNav = mainNav.filter((it) => !(it.title === "Sales" && salesHidden && !isAdmin));
 
   return (
     <>
       {/* Top utility bar */}
-      <header className="fixed left-0 right-0 top-0 z-50 h-14 bg-[hsl(241,86%,27%)] text-white shadow-md">
+      <header className="fixed left-0 right-0 top-0 z-50 h-14 bg-gradient-primary text-white shadow-[0_4px_20px_-8px_hsl(232_84%_20%/0.5)]">
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 md:px-6">
           {/* Logo */}
           <NavLink to="/" className="flex items-center gap-2">
-            <div className="flex h-9 w-12 items-center justify-center rounded-t-full rounded-bl-xl rounded-br-sm bg-white">
-              <span className="font-display text-xl font-black text-[hsl(241,86%,27%)]">N</span>
+            <div className="flex h-9 w-12 items-center justify-center rounded-t-full rounded-bl-xl rounded-br-sm bg-white shadow-sm">
+              <span className="font-display text-xl font-black text-primary">N</span>
             </div>
-            <span className="font-display text-lg font-black tracking-wide">NEXUS</span>
+            <span className="font-display text-lg font-black tracking-wide drop-shadow-sm">NEXUS</span>
           </NavLink>
 
           {/* Right utilities */}
@@ -91,7 +109,7 @@ export const TopNav = () => {
               to="/profile"
               className="flex h-9 items-center gap-2 rounded-lg bg-white/15 px-2 hover:bg-white/25"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-display text-xs font-black text-[hsl(241,86%,27%)]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white font-display text-xs font-black text-primary">
                 {(displayName || "U").charAt(0).toUpperCase()}
               </span>
             </NavLink>
@@ -132,9 +150,9 @@ export const TopNav = () => {
           {isAdmin && (
             <div className="ml-auto flex items-center gap-1">
               <NavLink
-                to="/admin/products"
+                to="/admin"
                 className={cn(
-                  "flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold transition-smooth",
+                  "relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-semibold transition-smooth",
                   loc.pathname.startsWith("/admin")
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -142,7 +160,11 @@ export const TopNav = () => {
               >
                 <ShieldCheck className="h-4 w-4" />
                 <span>Admin</span>
-                <ChevronDown className="h-3 w-3 opacity-60" />
+                {pendingAdmin > 0 && (
+                  <span className="ml-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-[10px] font-bold text-destructive-foreground">
+                    {pendingAdmin}
+                  </span>
+                )}
               </NavLink>
             </div>
           )}
@@ -194,6 +216,10 @@ export const TopNav = () => {
             {isAdmin && (
               <>
                 <div className="my-2 border-t border-border" />
+                <NavLink to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg bg-primary/10 px-4 py-3 font-semibold text-primary hover:bg-primary/20">
+                  <ShieldCheck className="h-5 w-5" /> Admin Console
+                  {pendingAdmin > 0 && <span className="ml-auto rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">{pendingAdmin}</span>}
+                </NavLink>
                 <NavLink to="/admin/news" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-lg px-4 py-3 text-muted-foreground hover:bg-secondary">
                   <FilePenLine className="h-5 w-5" /> News Admin
                 </NavLink>
