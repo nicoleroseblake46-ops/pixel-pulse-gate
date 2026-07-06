@@ -143,12 +143,13 @@ const AdminProducts = () => {
       full_card: isCards ? form.full_card.trim() || null : null,
       host_ip: active === "rdp" ? form.host_ip.trim() || null : null,
     } as any;
-    const { error } = editingId
-      ? await supabase.from("products").update(payload).eq("id", editingId)
-      : await supabase.from("products").insert(payload);
+    const { data: saved, error } = editingId
+      ? await supabase.from("products").update(payload).eq("id", editingId).select("id,category,name,meta,price,bin,is_active").maybeSingle()
+      : await supabase.from("products").insert(payload).select("id,category,name,meta,price,bin,is_active").maybeSingle();
     if (error) toast.error("Save failed", { description: error.message });
     else {
       toast.success(editingId ? "Item updated" : "Item published");
+      if (saved) syncTelegram(productToUpsert(saved as any));
       reset();
       await load();
     }
