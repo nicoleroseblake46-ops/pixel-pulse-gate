@@ -16,6 +16,7 @@ import type { Product, ProductCategory } from "@/hooks/use-products";
 import { COUNTRIES, findCountry } from "@/lib/countries";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CountryFlag } from "@/components/CountryFlag";
+import { syncTelegram, productToUpsert } from "@/lib/site-sync";
 
 const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon }[] = [
   { value: "sales", label: "Sales", Icon: TagIcon },
@@ -142,12 +143,13 @@ const AdminProducts = () => {
       full_card: isCards ? form.full_card.trim() || null : null,
       host_ip: active === "rdp" ? form.host_ip.trim() || null : null,
     } as any;
-    const { error } = editingId
-      ? await supabase.from("products").update(payload).eq("id", editingId)
-      : await supabase.from("products").insert(payload);
+    const { data: saved, error } = editingId
+      ? await supabase.from("products").update(payload).eq("id", editingId).select("id,category,name,meta,price,bin,is_active").maybeSingle()
+      : await supabase.from("products").insert(payload).select("id,category,name,meta,price,bin,is_active").maybeSingle();
     if (error) toast.error("Save failed", { description: error.message });
     else {
       toast.success(editingId ? "Item updated" : "Item published");
+      if (saved) syncTelegram(productToUpsert(saved as any));
       reset();
       await load();
     }
@@ -189,6 +191,7 @@ const AdminProducts = () => {
     if (error) toast.error("Delete failed", { description: error.message });
     else {
       toast.success("Item removed");
+      syncTelegram({ type: "product.delete", data: { external_id: id } });
       if (editingId === id) reset();
       await load();
     }
@@ -199,6 +202,7 @@ const AdminProducts = () => {
     if (error) toast.error("Toggle failed", { description: error.message });
     else {
       toast.success(p.is_active ? "Item hidden" : "Item visible");
+      syncTelegram(productToUpsert({ ...p, is_active: !p.is_active }));
       await load();
     }
   };
@@ -970,10 +974,11 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         full_card: mock.full_card,
       } as any;
     });
-    const { error } = await supabase.from("products").insert(payload);
+    const { data: inserted, error } = await supabase.from("products").insert(payload).select("id,category,name,meta,price,bin,is_active");
     setBusy(false);
     if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
     toast.success(`Imported ${payload.length} cards — brand, country & flag auto-detected`);
+    if (inserted?.length) syncTelegram(inserted.map((p: any) => productToUpsert(p)));
     setRaw("");
     await onImported();
   };
