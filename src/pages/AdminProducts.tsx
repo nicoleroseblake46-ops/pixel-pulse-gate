@@ -191,6 +191,7 @@ const AdminProducts = () => {
     if (error) toast.error("Delete failed", { description: error.message });
     else {
       toast.success("Item removed");
+      syncTelegram({ type: "product.delete", data: { external_id: id } });
       if (editingId === id) reset();
       await load();
     }
@@ -201,6 +202,7 @@ const AdminProducts = () => {
     if (error) toast.error("Toggle failed", { description: error.message });
     else {
       toast.success(p.is_active ? "Item hidden" : "Item visible");
+      syncTelegram(productToUpsert({ ...p, is_active: !p.is_active }));
       await load();
     }
   };
