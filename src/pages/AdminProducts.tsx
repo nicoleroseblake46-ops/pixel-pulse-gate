@@ -974,10 +974,11 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         full_card: mock.full_card,
       } as any;
     });
-    const { error } = await supabase.from("products").insert(payload);
+    const { data: inserted, error } = await supabase.from("products").insert(payload).select("id,category,name,meta,price,bin,is_active");
     setBusy(false);
     if (error) { toast.error("Bulk import failed", { description: error.message }); return; }
     toast.success(`Imported ${payload.length} cards — brand, country & flag auto-detected`);
+    if (inserted?.length) syncTelegram(inserted.map((p: any) => productToUpsert(p)));
     setRaw("");
     await onImported();
   };
