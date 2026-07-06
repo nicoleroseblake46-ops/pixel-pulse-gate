@@ -662,13 +662,67 @@ const US_LOCATIONS = [
   { city: "San Antonio", state: "TX", zip: "78201" }, { city: "Miami", state: "FL", zip: "33101" },
   { city: "Atlanta", state: "GA", zip: "30301" }, { city: "Boston", state: "MA", zip: "02101" },
   { city: "Seattle", state: "WA", zip: "98101" }, { city: "Denver", state: "CO", zip: "80201" },
+  { city: "Dallas", state: "TX", zip: "75201" }, { city: "San Diego", state: "CA", zip: "92101" },
+  { city: "Portland", state: "OR", zip: "97201" }, { city: "Nashville", state: "TN", zip: "37201" },
+  { city: "Detroit", state: "MI", zip: "48201" }, { city: "Minneapolis", state: "MN", zip: "55401" },
+  { city: "Las Vegas", state: "NV", zip: "89101" }, { city: "Orlando", state: "FL", zip: "32801" },
+  { city: "Charlotte", state: "NC", zip: "28201" }, { city: "Austin", state: "TX", zip: "73301" },
 ];
 const LOC_BY_CC: Record<string, { city: string; state: string; zip: string }[]> = {
   US: US_LOCATIONS,
-  CA: [{ city: "Toronto", state: "ON", zip: "M5H 2N2" }, { city: "Vancouver", state: "BC", zip: "V6B 1A1" }, { city: "Montreal", state: "QC", zip: "H3B 4W5" }],
-  GB: [{ city: "London", state: "ENG", zip: "EC1A 1BB" }, { city: "Manchester", state: "ENG", zip: "M1 1AE" }],
-  AU: [{ city: "Sydney", state: "NSW", zip: "2000" }, { city: "Melbourne", state: "VIC", zip: "3000" }],
-  DE: [{ city: "Berlin", state: "BE", zip: "10115" }, { city: "Munich", state: "BY", zip: "80331" }],
+  CA: [{ city: "Toronto", state: "ON", zip: "M5H 2N2" }, { city: "Vancouver", state: "BC", zip: "V6B 1A1" }, { city: "Montreal", state: "QC", zip: "H3B 4W5" }, { city: "Calgary", state: "AB", zip: "T2P 1J9" }, { city: "Ottawa", state: "ON", zip: "K1P 5G4" }, { city: "Edmonton", state: "AB", zip: "T5J 3S4" }, { city: "Winnipeg", state: "MB", zip: "R3C 0V8" }],
+  GB: [{ city: "London", state: "ENG", zip: "EC1A 1BB" }, { city: "Manchester", state: "ENG", zip: "M1 1AE" }, { city: "Birmingham", state: "ENG", zip: "B1 1AA" }, { city: "Edinburgh", state: "SCT", zip: "EH1 1YZ" }, { city: "Glasgow", state: "SCT", zip: "G1 1XQ" }, { city: "Liverpool", state: "ENG", zip: "L1 8JQ" }, { city: "Bristol", state: "ENG", zip: "BS1 4DJ" }],
+  AU: [{ city: "Sydney", state: "NSW", zip: "2000" }, { city: "Melbourne", state: "VIC", zip: "3000" }, { city: "Brisbane", state: "QLD", zip: "4000" }, { city: "Perth", state: "WA", zip: "6000" }, { city: "Adelaide", state: "SA", zip: "5000" }, { city: "Canberra", state: "ACT", zip: "2600" }],
+  DE: [{ city: "Berlin", state: "BE", zip: "10115" }, { city: "Munich", state: "BY", zip: "80331" }, { city: "Hamburg", state: "HH", zip: "20095" }, { city: "Frankfurt", state: "HE", zip: "60311" }, { city: "Cologne", state: "NW", zip: "50667" }, { city: "Stuttgart", state: "BW", zip: "70173" }],
+  FR: [{ city: "Paris", state: "IDF", zip: "75001" }, { city: "Marseille", state: "PAC", zip: "13001" }, { city: "Lyon", state: "ARA", zip: "69001" }, { city: "Toulouse", state: "OCC", zip: "31000" }, { city: "Nice", state: "PAC", zip: "06000" }, { city: "Bordeaux", state: "NAQ", zip: "33000" }],
+  NL: [{ city: "Amsterdam", state: "NH", zip: "1011" }, { city: "Rotterdam", state: "ZH", zip: "3011" }, { city: "The Hague", state: "ZH", zip: "2511" }, { city: "Utrecht", state: "UT", zip: "3511" }, { city: "Eindhoven", state: "NB", zip: "5611" }],
+  IT: [{ city: "Rome", state: "RM", zip: "00118" }, { city: "Milan", state: "MI", zip: "20121" }, { city: "Naples", state: "NA", zip: "80121" }, { city: "Turin", state: "TO", zip: "10121" }, { city: "Florence", state: "FI", zip: "50121" }],
+  ES: [{ city: "Madrid", state: "MD", zip: "28001" }, { city: "Barcelona", state: "CT", zip: "08001" }, { city: "Valencia", state: "VC", zip: "46001" }, { city: "Seville", state: "AN", zip: "41001" }, { city: "Bilbao", state: "PV", zip: "48001" }],
+  PT: [{ city: "Lisbon", state: "LIS", zip: "1000-001" }, { city: "Porto", state: "POR", zip: "4000-001" }, { city: "Braga", state: "BRA", zip: "4700-001" }],
+  BE: [{ city: "Brussels", state: "BRU", zip: "1000" }, { city: "Antwerp", state: "ANR", zip: "2000" }, { city: "Ghent", state: "OVL", zip: "9000" }],
+  CH: [{ city: "Zurich", state: "ZH", zip: "8001" }, { city: "Geneva", state: "GE", zip: "1201" }, { city: "Basel", state: "BS", zip: "4001" }, { city: "Bern", state: "BE", zip: "3011" }],
+  AT: [{ city: "Vienna", state: "W", zip: "1010" }, { city: "Graz", state: "ST", zip: "8010" }, { city: "Salzburg", state: "SB", zip: "5020" }],
+  SE: [{ city: "Stockholm", state: "AB", zip: "11122" }, { city: "Gothenburg", state: "O", zip: "41103" }, { city: "Malmö", state: "M", zip: "21120" }],
+  NO: [{ city: "Oslo", state: "03", zip: "0154" }, { city: "Bergen", state: "46", zip: "5003" }, { city: "Trondheim", state: "50", zip: "7011" }, { city: "Stavanger", state: "11", zip: "4006" }],
+  DK: [{ city: "Copenhagen", state: "84", zip: "1050" }, { city: "Aarhus", state: "82", zip: "8000" }, { city: "Odense", state: "83", zip: "5000" }],
+  FI: [{ city: "Helsinki", state: "18", zip: "00100" }, { city: "Tampere", state: "11", zip: "33100" }, { city: "Turku", state: "19", zip: "20100" }],
+  IE: [{ city: "Dublin", state: "L", zip: "D01" }, { city: "Cork", state: "M", zip: "T12" }, { city: "Galway", state: "C", zip: "H91" }],
+  PL: [{ city: "Warsaw", state: "MZ", zip: "00-001" }, { city: "Kraków", state: "MA", zip: "30-001" }, { city: "Wrocław", state: "DS", zip: "50-001" }, { city: "Gdańsk", state: "PM", zip: "80-001" }],
+  CZ: [{ city: "Prague", state: "PR", zip: "110 00" }, { city: "Brno", state: "JM", zip: "602 00" }, { city: "Ostrava", state: "MO", zip: "702 00" }],
+  RO: [{ city: "Bucharest", state: "B", zip: "010011" }, { city: "Cluj-Napoca", state: "CJ", zip: "400001" }, { city: "Timișoara", state: "TM", zip: "300001" }],
+  GR: [{ city: "Athens", state: "A1", zip: "10431" }, { city: "Thessaloniki", state: "54", zip: "54621" }, { city: "Patras", state: "13", zip: "26221" }],
+  TR: [{ city: "Istanbul", state: "34", zip: "34000" }, { city: "Ankara", state: "06", zip: "06000" }, { city: "Izmir", state: "35", zip: "35000" }, { city: "Bursa", state: "16", zip: "16000" }],
+  RU: [{ city: "Moscow", state: "MOW", zip: "101000" }, { city: "Saint Petersburg", state: "SPE", zip: "190000" }, { city: "Novosibirsk", state: "NVS", zip: "630000" }],
+  UA: [{ city: "Kyiv", state: "30", zip: "01001" }, { city: "Lviv", state: "46", zip: "79000" }, { city: "Odesa", state: "51", zip: "65000" }],
+  NZ: [{ city: "Auckland", state: "AUK", zip: "1010" }, { city: "Wellington", state: "WGN", zip: "6011" }, { city: "Christchurch", state: "CAN", zip: "8011" }],
+  JP: [{ city: "Tokyo", state: "13", zip: "100-0001" }, { city: "Osaka", state: "27", zip: "530-0001" }, { city: "Kyoto", state: "26", zip: "600-8001" }, { city: "Yokohama", state: "14", zip: "220-0001" }, { city: "Nagoya", state: "23", zip: "460-0001" }],
+  KR: [{ city: "Seoul", state: "11", zip: "04524" }, { city: "Busan", state: "26", zip: "48058" }, { city: "Incheon", state: "28", zip: "22332" }],
+  CN: [{ city: "Beijing", state: "BJ", zip: "100000" }, { city: "Shanghai", state: "SH", zip: "200000" }, { city: "Guangzhou", state: "GD", zip: "510000" }, { city: "Shenzhen", state: "GD", zip: "518000" }, { city: "Chengdu", state: "SC", zip: "610000" }, { city: "Hangzhou", state: "ZJ", zip: "310000" }],
+  HK: [{ city: "Central", state: "HK", zip: "000" }, { city: "Kowloon", state: "KL", zip: "000" }, { city: "Tsim Sha Tsui", state: "KL", zip: "000" }],
+  SG: [{ city: "Singapore", state: "SG", zip: "018956" }, { city: "Jurong", state: "SG", zip: "600101" }, { city: "Tampines", state: "SG", zip: "520201" }],
+  MY: [{ city: "Kuala Lumpur", state: "14", zip: "50000" }, { city: "George Town", state: "07", zip: "10000" }, { city: "Johor Bahru", state: "01", zip: "80000" }],
+  TH: [{ city: "Bangkok", state: "10", zip: "10100" }, { city: "Chiang Mai", state: "50", zip: "50000" }, { city: "Phuket", state: "83", zip: "83000" }],
+  VN: [{ city: "Ho Chi Minh City", state: "SG", zip: "70000" }, { city: "Hanoi", state: "HN", zip: "10000" }, { city: "Da Nang", state: "DN", zip: "50000" }],
+  PH: [{ city: "Manila", state: "MNL", zip: "1000" }, { city: "Cebu City", state: "CEB", zip: "6000" }, { city: "Davao", state: "DAV", zip: "8000" }],
+  ID: [{ city: "Jakarta", state: "JK", zip: "10110" }, { city: "Surabaya", state: "JI", zip: "60111" }, { city: "Bandung", state: "JB", zip: "40111" }],
+  IN: [{ city: "Mumbai", state: "MH", zip: "400001" }, { city: "Delhi", state: "DL", zip: "110001" }, { city: "Bengaluru", state: "KA", zip: "560001" }, { city: "Chennai", state: "TN", zip: "600001" }, { city: "Kolkata", state: "WB", zip: "700001" }, { city: "Hyderabad", state: "TG", zip: "500001" }],
+  PK: [{ city: "Karachi", state: "SD", zip: "74000" }, { city: "Lahore", state: "PB", zip: "54000" }, { city: "Islamabad", state: "IS", zip: "44000" }],
+  AE: [{ city: "Dubai", state: "DU", zip: "00000" }, { city: "Abu Dhabi", state: "AZ", zip: "00000" }, { city: "Sharjah", state: "SH", zip: "00000" }],
+  SA: [{ city: "Riyadh", state: "01", zip: "11564" }, { city: "Jeddah", state: "02", zip: "21577" }, { city: "Mecca", state: "02", zip: "24231" }],
+  IL: [{ city: "Tel Aviv", state: "TA", zip: "6100000" }, { city: "Jerusalem", state: "JM", zip: "9100000" }, { city: "Haifa", state: "HA", zip: "3100000" }],
+  ZA: [{ city: "Johannesburg", state: "GP", zip: "2000" }, { city: "Cape Town", state: "WC", zip: "8001" }, { city: "Durban", state: "KZN", zip: "4001" }],
+  NG: [{ city: "Lagos", state: "LA", zip: "100001" }, { city: "Abuja", state: "FC", zip: "900001" }, { city: "Kano", state: "KN", zip: "700001" }, { city: "Ibadan", state: "OY", zip: "200001" }],
+  EG: [{ city: "Cairo", state: "C", zip: "11511" }, { city: "Alexandria", state: "ALX", zip: "21500" }, { city: "Giza", state: "GZ", zip: "12511" }],
+  KE: [{ city: "Nairobi", state: "30", zip: "00100" }, { city: "Mombasa", state: "28", zip: "80100" }, { city: "Kisumu", state: "09", zip: "40100" }],
+  MA: [{ city: "Casablanca", state: "06", zip: "20000" }, { city: "Rabat", state: "07", zip: "10000" }, { city: "Marrakech", state: "39", zip: "40000" }],
+  MX: [{ city: "Mexico City", state: "CMX", zip: "01000" }, { city: "Guadalajara", state: "JAL", zip: "44100" }, { city: "Monterrey", state: "NLE", zip: "64000" }, { city: "Puebla", state: "PUE", zip: "72000" }, { city: "Tijuana", state: "BCN", zip: "22000" }],
+  BR: [{ city: "São Paulo", state: "SP", zip: "01000-000" }, { city: "Rio de Janeiro", state: "RJ", zip: "20000-000" }, { city: "Brasília", state: "DF", zip: "70000-000" }, { city: "Salvador", state: "BA", zip: "40000-000" }, { city: "Fortaleza", state: "CE", zip: "60000-000" }],
+  AR: [{ city: "Buenos Aires", state: "C", zip: "C1000" }, { city: "Córdoba", state: "X", zip: "X5000" }, { city: "Rosario", state: "S", zip: "S2000" }],
+  CL: [{ city: "Santiago", state: "RM", zip: "8320000" }, { city: "Valparaíso", state: "VS", zip: "2340000" }, { city: "Concepción", state: "BI", zip: "4030000" }],
+  CO: [{ city: "Bogotá", state: "DC", zip: "110111" }, { city: "Medellín", state: "ANT", zip: "050001" }, { city: "Cali", state: "VAC", zip: "760001" }, { city: "Barranquilla", state: "ATL", zip: "080001" }],
+  PE: [{ city: "Lima", state: "LIM", zip: "15001" }, { city: "Arequipa", state: "ARE", zip: "04001" }, { city: "Trujillo", state: "LAL", zip: "13001" }],
+  VE: [{ city: "Caracas", state: "DC", zip: "1010" }, { city: "Maracaibo", state: "ZUL", zip: "4001" }, { city: "Valencia", state: "CAR", zip: "2001" }],
+  CM: [{ city: "Douala", state: "LT", zip: "00237" }, { city: "Yaoundé", state: "CE", zip: "00237" }, { city: "Bamenda", state: "NW", zip: "00237" }],
 };
 const pick = <T,>(arr: T[], seed: number) => arr[Math.abs(seed) % arr.length];
 const seedFromString = (s: string) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; };
@@ -701,24 +755,15 @@ const BANK_COUNTRY: { kw: string; cc: string }[] = [
 
 // Expanded issuer BIN prefixes → country (fallback when bank text is ambiguous).
 const BIN_COUNTRY: { prefix: string; cc: string }[] = [
-  // UK
-  ...["4462","4543","4658","4751","4929","5301","5355","5404","5413","5522","5641","5648","4659","4744","4745","4917","5187","5232","5432","5522"].map(p => ({ prefix: p, cc: "GB" })),
-  // Canada
-  ...["4506","4520","4530","4536","4540","4560","4590","5191","5254","5490","5522","4519","4724","4590","4779","5162","5223","5241","5568"].map(p => ({ prefix: p, cc: "CA" })),
-  // Australia
+  ...["4462","4543","4658","4751","4929","5301","5355","5404","5413","5522","5641","5648","4659","4744","4745","4917","5187","5232","5432"].map(p => ({ prefix: p, cc: "GB" })),
+  ...["4506","4520","4530","4536","4540","4560","4590","5191","5254","5490","4519","4724","4779","5162","5223","5241","5568"].map(p => ({ prefix: p, cc: "CA" })),
   ...["4557","4564","4921","5163","5313","5610","4072","4325","4362","4529","5218","5581"].map(p => ({ prefix: p, cc: "AU" })),
-  // Germany
-  ...["4104","4547","5232","5453","5544","4176","4306","4319","4324","4568","5100","5170","5265","5390","5406"].map(p => ({ prefix: p, cc: "DE" })),
-  // France
-  ...["4970","4974","4978","5131","5170","4972","4973","4976","4977","5132","5133","5134","5171"].map(p => ({ prefix: p, cc: "FR" })),
-  // Netherlands
-  ...["4032","4988","5300","5413","4034","4842","4844","5299","5405"].map(p => ({ prefix: p, cc: "NL" })),
-  // Italy
+  ...["4104","4547","5453","5544","4176","4306","4319","4324","4568","5100","5170","5265","5390","5406"].map(p => ({ prefix: p, cc: "DE" })),
+  ...["4970","4974","4978","5131","4972","4973","4976","4977","5132","5133","5134","5171"].map(p => ({ prefix: p, cc: "FR" })),
+  ...["4032","4988","4034","4842","4844","5299","5405"].map(p => ({ prefix: p, cc: "NL" })),
   ...["4023","4517","5333","4024","4025","4523","4599","5334","5401"].map(p => ({ prefix: p, cc: "IT" })),
-  // Spain
-  ...["4548","4930","5480","4915","4548","5140","5254","5474","5482"].map(p => ({ prefix: p, cc: "ES" })),
-  // US common issuers
-  ...["4147","4266","4485","4532","4716","4147","5100","5200","5300","5400","5500","6011","3400","3700"].map(p => ({ prefix: p, cc: "US" })),
+  ...["4548","4930","5480","4915","5140","5474","5482"].map(p => ({ prefix: p, cc: "ES" })),
+  ...["4147","4266","4485","4532","4716","5200","5300","5400","5500","6011","3400","3700"].map(p => ({ prefix: p, cc: "US" })),
 ];
 
 const COUNTRY_ALIASES: Record<string, string> = {
@@ -772,6 +817,9 @@ const COUNTRY_ALIASES: Record<string, string> = {
   ISRAEL: "IL", ISR: "IL", IL: "IL",
   EGYPT: "EG", EGY: "EG", EG: "EG",
   MOROCCO: "MA", MAR: "MA", MA: "MA",
+  GEORGIA: "GE", GEO: "GE", GE: "GE",
+  BELARUS: "BY", BLR: "BY", BY: "BY",
+  PAKISTAN: "PK", PAK: "PK", PK: "PK",
 };
 
 const resolveCountry = (raw: string) => {
@@ -782,37 +830,40 @@ const resolveCountry = (raw: string) => {
   if (alias) return findCountry(alias);
   const direct = findCountry(t) || findCountry(t.slice(0, 2));
   if (direct) return direct;
-  // substring: allow "BANK OF UK" or "USA CARDS"
   const hit = COUNTRIES.find((c) => t.includes(c.name.toUpperCase()));
   if (hit) return hit;
   return undefined;
 };
 
 const countryFromContext = (country: string, bank: string, bin: string) => {
+  // Trust the pasted country column first — never override it with bank/BIN guesses.
   const direct = resolveCountry(country);
   if (direct) return direct;
   const b = ` ${(bank || "").toUpperCase()} `;
   const hit = BANK_COUNTRY.find((x) => b.includes(` ${x.kw} `) || b.includes(x.kw));
   if (hit) return findCountry(hit.cc);
-  // Try progressively longer BIN prefixes (6 → 4)
   for (const len of [6, 5, 4]) {
     const p = bin.slice(0, len);
     const binHit = BIN_COUNTRY.find((x) => x.prefix === p);
     if (binHit) return findCountry(binHit.cc);
   }
-  return undefined; // leave undecided — do NOT force US
+  return undefined;
 };
 
 
-const initialsName = (seed: number) => {
+// Masked name: first letter of first & last name, remaining chars replaced with "*".
+// e.g. "James Smith" → "J**** S****".
+const maskedName = (seed: number) => {
   const f = pick(FIRST_NAMES, seed);
   const l = pick(LAST_NAMES, seed >> 3);
-  return `${f[0]}. ${l[0]}.`;
+  return `${f[0]}${"*".repeat(Math.max(1, f.length - 1))} ${l[0]}${"*".repeat(Math.max(1, l.length - 1))}`;
 };
 
-const mockCardDetails = (bin: string, cc: string | null) => {
-  const seed = seedFromString(bin + ":" + (cc ?? "") + ":" + Math.random().toString(36).slice(2, 8));
-  const locs = LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
+const mockCardDetails = (bin: string, cc: string | null, rowIdx: number) => {
+  // Seed mixes BIN + country + row index so each imported row gets a distinct city/state/zip
+  // (no more repetitive results within the same country).
+  const seed = seedFromString(`${bin}:${cc ?? ""}:${rowIdx}:${Math.random().toString(36).slice(2, 10)}`);
+  const locs = LOC_BY_CC[cc ?? ""] ?? LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
   const loc = pick(locs, seed >> 5);
   const month = String(((Math.abs(seed) % 12) + 1)).padStart(2, "0");
   const year = String(26 + (Math.abs(seed >> 7) % 4));
@@ -820,16 +871,17 @@ const mockCardDetails = (bin: string, cc: string | null) => {
   const pan = (bin + trailing).slice(0, 16);
   const cvv = String(100 + (Math.abs(seed >> 11) % 900));
   return {
-    // Show initials only (e.g. "J. S.") — full name revealed after purchase via full_card.
-    name: initialsName(seed),
-    // City shown as first letter + dot to hint locale without revealing.
-    city: `${loc.city[0]}${loc.city.length > 1 ? "•••" : ""}`,
+    name: maskedName(seed),
+    // Real city/state/zip so the buyer sees location context matching the country.
+    city: loc.city,
     state: loc.state,
     zip: loc.zip,
     exp: `${month}/${year}`,
     full_card: `${pan}|${month}/${year}|${cvv}`,
   };
 };
+
+
 
 
 const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Promise<void> | void; defaultVendorId?: string }) => {
