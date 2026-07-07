@@ -65,6 +65,7 @@ const MyOrders = () => {
     if (p.bank) parts.push(`BANK: ${p.bank}`);
     if (p.bin) parts.push(`BIN: ${p.bin}`);
     if (p.brand || p.card_type || p.level) parts.push(`TYPE: ${[p.brand, p.card_type, p.level].filter(Boolean).join(" · ")}`);
+    if (p.extras) parts.push(String(p.extras));
     return parts.length ? parts.join(" | ") : existing;
   };
 
