@@ -96,7 +96,7 @@ const MyOrders = () => {
     if (cardProductIds.length) {
       const { data: prods } = await supabase
         .from("products")
-        .select("id, full_card, seller, city, state, zip, exp, country, bank, bin, brand, card_type, level")
+        .select("id, full_card, seller, city, state, zip, exp, country, bank, bin, brand, card_type, level, extras")
         .in("id", cardProductIds);
       productMap = Object.fromEntries((prods ?? []).map((p: any) => [p.id, p]));
     }
