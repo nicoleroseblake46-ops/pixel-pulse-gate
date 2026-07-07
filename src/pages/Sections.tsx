@@ -81,12 +81,26 @@ export const Cards = () => {
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   const cartIdFor = (id: string) => `cards-${id}`;
+  const composeDelivery = (c: Product) => {
+    const anyC = c as any;
+    const parts: string[] = [];
+    if (anyC.full_card) parts.push(`CARD: ${anyC.full_card}`);
+    if (c.exp && !anyC.full_card?.includes(c.exp)) parts.push(`EXP: ${c.exp}`);
+    if (c.seller) parts.push(`NAME: ${c.seller}`);
+    const addr = [anyC.city, c.state, c.zip].filter(Boolean).join(", ");
+    if (addr) parts.push(`ADDRESS: ${addr}`);
+    if (c.country) parts.push(`COUNTRY: ${c.country}`);
+    if (c.bank) parts.push(`BANK: ${c.bank}`);
+    if (c.bin) parts.push(`BIN: ${c.bin}`);
+    if (c.brand || c.card_type || c.level) parts.push(`TYPE: ${[c.brand, c.card_type, c.level].filter(Boolean).join(" · ")}`);
+    return parts.length ? parts.join(" | ") : undefined;
+  };
   const buildItem = (c: Product) => ({
     id: cartIdFor(c.id),
     name: `${c.brand ?? c.scheme ?? "CARD"} ${c.bin ?? ""}`.trim(),
     meta: `${c.country ?? ""} · ${c.bank ?? ""}`,
     price: Number(c.price),
-    delivery: (c as any).full_card ?? undefined,
+    delivery: composeDelivery(c),
   });
 
   const addCard = (c: Product) => {
