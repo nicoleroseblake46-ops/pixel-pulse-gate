@@ -1002,6 +1002,7 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         exp: mock.exp,
         valid: "85%",
         full_card: mock.full_card,
+        extras: `EMAIL: ${mock.email} | PHONE: ${mock.phone}`,
       } as any;
     });
     const { data: inserted, error } = await supabase.from("products").insert(payload).select("id,category,name,meta,price,bin,is_active");
