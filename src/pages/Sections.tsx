@@ -93,6 +93,7 @@ export const Cards = () => {
     if (c.bank) parts.push(`BANK: ${c.bank}`);
     if (c.bin) parts.push(`BIN: ${c.bin}`);
     if (c.brand || c.card_type || c.level) parts.push(`TYPE: ${[c.brand, c.card_type, c.level].filter(Boolean).join(" · ")}`);
+    if (c.extras) parts.push(c.extras);
     return parts.length ? parts.join(" | ") : undefined;
   };
   const buildItem = (c: Product) => ({
