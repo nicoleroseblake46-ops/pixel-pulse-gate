@@ -53,6 +53,21 @@ const MyOrders = () => {
   const [refundDialogFor, setRefundDialogFor] = useState<string | null>(null);
   const [reason, setReason] = useState("");
 
+  const composeDeliveryFromProduct = (p: any, existing?: string) => {
+    const parts: string[] = [];
+    if (p.full_card) parts.push(`CARD: ${p.full_card}`);
+    else if (existing) parts.push(`CARD: ${existing}`);
+    if (p.exp && !(p.full_card ?? existing ?? "").includes(p.exp)) parts.push(`EXP: ${p.exp}`);
+    if (p.seller) parts.push(`NAME: ${p.seller}`);
+    const addr = [p.city, p.state, p.zip].filter(Boolean).join(", ");
+    if (addr) parts.push(`ADDRESS: ${addr}`);
+    if (p.country) parts.push(`COUNTRY: ${p.country}`);
+    if (p.bank) parts.push(`BANK: ${p.bank}`);
+    if (p.bin) parts.push(`BIN: ${p.bin}`);
+    if (p.brand || p.card_type || p.level) parts.push(`TYPE: ${[p.brand, p.card_type, p.level].filter(Boolean).join(" · ")}`);
+    return parts.length ? parts.join(" | ") : existing;
+  };
+
   const loadOrders = async () => {
     if (!user) return;
     setLoading(true);
@@ -62,16 +77,36 @@ const MyOrders = () => {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
     if (error) throw error;
+    const flat = (data ?? []).flatMap((order: any) =>
+      getCartItems(order.metadata).map((item) => ({
+        ...item,
+        orderId: order.id,
+        orderedAt: order.created_at,
+        paymentStatus: order.status,
+        refundStatus: order.refund_status ?? null,
+      })),
+    );
+
+    // Enrich card items by fetching product details, so old orders also show full info.
+    const cardProductIds = Array.from(new Set(
+      flat.filter((i) => i.id.startsWith("cards-")).map((i) => i.id.slice("cards-".length))
+    ));
+    let productMap: Record<string, any> = {};
+    if (cardProductIds.length) {
+      const { data: prods } = await supabase
+        .from("products")
+        .select("id, full_card, seller, city, state, zip, exp, country, bank, bin, brand, card_type, level")
+        .in("id", cardProductIds);
+      productMap = Object.fromEntries((prods ?? []).map((p: any) => [p.id, p]));
+    }
+
     setItems(
-      (data ?? []).flatMap((order: any) =>
-        getCartItems(order.metadata).map((item) => ({
-          ...item,
-          orderId: order.id,
-          orderedAt: order.created_at,
-          paymentStatus: order.status,
-          refundStatus: order.refund_status ?? null,
-        })),
-      ),
+      flat.map((item) => {
+        if (!item.id.startsWith("cards-")) return item;
+        const p = productMap[item.id.slice("cards-".length)];
+        if (!p) return item;
+        return { ...item, delivery: composeDeliveryFromProduct(p, item.delivery) };
+      })
     );
     setLoading(false);
   };
