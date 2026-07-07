@@ -855,17 +855,34 @@ const countryFromContext = (country: string, bank: string, bin: string) => {
 };
 
 
-// Masked name: first letter of first & last name, remaining chars replaced with "*".
-// e.g. "James Smith" → "J**** S****".
-const maskedName = (seed: number) => {
-  const f = pick(FIRST_NAMES, seed);
-  const l = pick(LAST_NAMES, seed >> 3);
-  return `${f[0]}${"*".repeat(Math.max(1, f.length - 1))} ${l[0]}${"*".repeat(Math.max(1, l.length - 1))}`;
+// Full realistic name — no masking (delivered as full cardholder identity).
+const fullName = (seed: number) => `${pick(FIRST_NAMES, seed)} ${pick(LAST_NAMES, seed >> 3)}`;
+
+const EMAIL_DOMAINS = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com", "proton.me"];
+
+// Country dial codes + local number lengths for realistic phone generation.
+const PHONE_FMT: Record<string, { dial: string; len: number }> = {
+  US: { dial: "+1", len: 10 }, CA: { dial: "+1", len: 10 }, GB: { dial: "+44", len: 10 },
+  DE: { dial: "+49", len: 10 }, FR: { dial: "+33", len: 9 }, NL: { dial: "+31", len: 9 },
+  ES: { dial: "+34", len: 9 }, IT: { dial: "+39", len: 10 }, PT: { dial: "+351", len: 9 },
+  BE: { dial: "+32", len: 9 }, CH: { dial: "+41", len: 9 }, AT: { dial: "+43", len: 10 },
+  SE: { dial: "+46", len: 9 }, NO: { dial: "+47", len: 8 }, DK: { dial: "+45", len: 8 },
+  FI: { dial: "+358", len: 9 }, IE: { dial: "+353", len: 9 }, PL: { dial: "+48", len: 9 },
+  CZ: { dial: "+420", len: 9 }, RO: { dial: "+40", len: 9 }, GR: { dial: "+30", len: 10 },
+  TR: { dial: "+90", len: 10 }, RU: { dial: "+7", len: 10 }, UA: { dial: "+380", len: 9 },
+  AU: { dial: "+61", len: 9 }, NZ: { dial: "+64", len: 9 }, JP: { dial: "+81", len: 10 },
+  KR: { dial: "+82", len: 10 }, CN: { dial: "+86", len: 11 }, HK: { dial: "+852", len: 8 },
+  SG: { dial: "+65", len: 8 }, MY: { dial: "+60", len: 9 }, TH: { dial: "+66", len: 9 },
+  VN: { dial: "+84", len: 9 }, PH: { dial: "+63", len: 10 }, ID: { dial: "+62", len: 10 },
+  IN: { dial: "+91", len: 10 }, PK: { dial: "+92", len: 10 }, AE: { dial: "+971", len: 9 },
+  SA: { dial: "+966", len: 9 }, IL: { dial: "+972", len: 9 }, ZA: { dial: "+27", len: 9 },
+  NG: { dial: "+234", len: 10 }, EG: { dial: "+20", len: 10 }, KE: { dial: "+254", len: 9 },
+  MA: { dial: "+212", len: 9 }, MX: { dial: "+52", len: 10 }, BR: { dial: "+55", len: 11 },
+  AR: { dial: "+54", len: 10 }, CL: { dial: "+56", len: 9 }, CO: { dial: "+57", len: 10 },
+  PE: { dial: "+51", len: 9 }, VE: { dial: "+58", len: 10 }, CM: { dial: "+237", len: 9 },
 };
 
 const mockCardDetails = (bin: string, cc: string | null, rowIdx: number) => {
-  // Seed mixes BIN + country + row index so each imported row gets a distinct city/state/zip
-  // (no more repetitive results within the same country).
   const seed = seedFromString(`${bin}:${cc ?? ""}:${rowIdx}:${Math.random().toString(36).slice(2, 10)}`);
   const locs = LOC_BY_CC[cc ?? ""] ?? LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
   const loc = pick(locs, seed >> 5);
@@ -874,9 +891,22 @@ const mockCardDetails = (bin: string, cc: string | null, rowIdx: number) => {
   const trailing = String(Math.floor(1000000000 + Math.abs(seed * 2654435761) % 9000000000)).slice(0, 10);
   const pan = (bin + trailing).slice(0, 16);
   const cvv = String(100 + (Math.abs(seed >> 11) % 900));
+  const first = pick(FIRST_NAMES, seed);
+  const last = pick(LAST_NAMES, seed >> 3);
+  const name = `${first} ${last}`;
+  const domain = pick(EMAIL_DOMAINS, seed >> 13);
+  const emailNum = String(Math.abs(seed >> 9) % 900 + 10);
+  const email = `${first}.${last}${emailNum}`.toLowerCase().replace(/[^a-z0-9.]/g, "") + `@${domain}`;
+  const fmt = PHONE_FMT[cc ?? "US"] ?? PHONE_FMT.US;
+  const phoneDigits = String(Math.abs(seed * 1103515245 + 12345))
+    .padStart(fmt.len, "0")
+    .slice(-fmt.len)
+    .replace(/^0/, "9");
+  const phone = `${fmt.dial} ${phoneDigits}`;
   return {
-    name: maskedName(seed),
-    // Real city/state/zip so the buyer sees location context matching the country.
+    name,
+    email,
+    phone,
     city: loc.city,
     state: loc.state,
     zip: loc.zip,
