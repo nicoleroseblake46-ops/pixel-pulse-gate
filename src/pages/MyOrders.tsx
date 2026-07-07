@@ -65,6 +65,7 @@ const MyOrders = () => {
     if (p.bank) parts.push(`BANK: ${p.bank}`);
     if (p.bin) parts.push(`BIN: ${p.bin}`);
     if (p.brand || p.card_type || p.level) parts.push(`TYPE: ${[p.brand, p.card_type, p.level].filter(Boolean).join(" · ")}`);
+    if (p.extras) parts.push(String(p.extras));
     return parts.length ? parts.join(" | ") : existing;
   };
 
@@ -95,7 +96,7 @@ const MyOrders = () => {
     if (cardProductIds.length) {
       const { data: prods } = await supabase
         .from("products")
-        .select("id, full_card, seller, city, state, zip, exp, country, bank, bin, brand, card_type, level")
+        .select("id, full_card, seller, city, state, zip, exp, country, bank, bin, brand, card_type, level, extras")
         .in("id", cardProductIds);
       productMap = Object.fromEntries((prods ?? []).map((p: any) => [p.id, p]));
     }
