@@ -384,6 +384,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_balance: {
+        Args: { _amount: number; _note?: string; _user_id: string }
+        Returns: number
+      }
       approve_payment: { Args: { _payment_id: string }; Returns: undefined }
       assign_admin_role_by_email: { Args: { _email: string }; Returns: Json }
       charge_checker_fee: {
