@@ -37,6 +37,11 @@ const AdminPayments = () => {
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState("");
   const [assigningAdmin, setAssigningAdmin] = useState(false);
+  const [adjustUser, setAdjustUser] = useState("");
+  const [adjustAmount, setAdjustAmount] = useState("");
+  const [adjustNote, setAdjustNote] = useState("");
+  const [adjusting, setAdjusting] = useState(false);
+
 
   const pendingCount = useMemo(() => payments.filter((payment) => payment.status === "pending").length, [payments]);
   const pendingImpact = useMemo(
