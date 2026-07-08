@@ -110,6 +110,38 @@ const AdminPayments = () => {
     setAssigningAdmin(false);
   };
 
+  const adjustBalance = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = adjustUser.trim();
+    const amount = Number(adjustAmount);
+    if (!query) return toast.error("Enter a username or user ID");
+    if (!Number.isFinite(amount) || amount === 0) return toast.error("Enter a non-zero amount");
+
+    setAdjusting(true);
+    // Resolve user by id or username
+    let userId: string | null = null;
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRe.test(query)) userId = query;
+    else {
+      const { data: matches } = await adminClient.from("profiles").select("id, username").ilike("username", query).limit(2);
+      if (!matches?.length) { setAdjusting(false); return toast.error("No user found with that username"); }
+      if (matches.length > 1) { setAdjusting(false); return toast.error("Multiple users match — use exact username or ID"); }
+      userId = matches[0].id;
+    }
+
+    const { data, error } = await adminClient.rpc("admin_adjust_balance", {
+      _user_id: userId, _amount: amount, _note: adjustNote.trim() || null,
+    });
+    if (error) toast.error("Adjustment failed", { description: error.message });
+    else {
+      toast.success(`Balance updated`, { description: `New balance: $${Number(data).toFixed(2)}` });
+      setAdjustUser(""); setAdjustAmount(""); setAdjustNote("");
+      await loadPayments();
+    }
+    setAdjusting(false);
+  };
+
+
   if (adminLoading) return <Loader />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
