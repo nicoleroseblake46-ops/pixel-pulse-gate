@@ -28,7 +28,188 @@ export const Sales = () => {
   return <SectionPage title="Sales" Icon={Tag} category="sales" />;
 };
 
-export const Socks = () => <SectionPage title="Socks" Icon={Zap} category="socks" />;
+/* ---------------- SOCKS ---------------- */
+
+const emptySockFilters = { country: "", state: "", city: "", type: "", provider: "" };
+
+export const Socks = () => {
+  const navigate = useNavigate();
+  const { cartItems, cartTotal, addToCart, addManyToCart } = useCommerce();
+  const { products, loading } = useProducts("socks");
+
+  const [draft, setDraft] = useState(emptySockFilters);
+  const [filters, setFilters] = useState(emptySockFilters);
+  const [priceRange, setPriceRange] = useState([0, 500]);
+  const [appliedPrice, setAppliedPrice] = useState([0, 500]);
+  const [page, setPage] = useState(1);
+  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const pageSize = 20;
+
+  const filtered = useMemo(() => {
+    const t = (v: string | null, q: string) => (v ?? "").toLowerCase().includes(q.trim().toLowerCase());
+    return products.filter((s) =>
+      t(s.country, filters.country) &&
+      t(s.state, filters.state) &&
+      t((s as any).city, filters.city) &&
+      t(s.card_type, filters.type) &&
+      t(s.bank, filters.provider) &&
+      Number(s.price) >= appliedPrice[0] &&
+      Number(s.price) <= appliedPrice[1]
+    );
+  }, [products, filters, appliedPrice]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+
+  const cartIdFor = (id: string) => `socks-${id}`;
+  const composeDelivery = (s: Product) => {
+    const parts: string[] = [];
+    const addr = [(s as any).city, s.state, s.country].filter(Boolean).join(", ");
+    if (addr) parts.push(`LOCATION: ${addr}`);
+    if (s.card_type) parts.push(`TYPE: ${s.card_type}`);
+    if (s.bank) parts.push(`PROVIDER: ${s.bank}`);
+    if (s.level) parts.push(`SPEED: ${s.level}`);
+    if (s.extras) parts.push(s.extras);
+    return parts.length ? parts.join(" | ") : undefined;
+  };
+  const buildItem = (s: Product) => ({
+    id: cartIdFor(s.id),
+    name: s.name,
+    meta: `${(s as any).city ?? ""}${(s as any).city && s.country ? " · " : ""}${s.country ?? ""}`.trim() || s.meta,
+    price: Number(s.price),
+    delivery: composeDelivery(s),
+  });
+
+  const addSock = (s: Product) => { addToCart(buildItem(s)); toast.success("Added to cart"); };
+  const addSelected = () => {
+    const items = filtered.filter((s) => selected[s.id]).map(buildItem);
+    if (!items.length) return toast.error("Nothing selected");
+    addManyToCart(items);
+    toast.success(`${items.length} proxies added`);
+    setSelected({});
+  };
+  const runSearch = () => { setFilters(draft); setAppliedPrice(priceRange); setPage(1); };
+
+  const opts = useMemo(() => {
+    const uniq = (arr: (string | null | undefined)[]) =>
+      Array.from(new Set(arr.map((v) => (v ?? "").trim()).filter(Boolean))).sort();
+    return {
+      country: uniq(products.map((p) => p.country)),
+      state: uniq(products.map((p) => p.state)),
+      city: uniq(products.map((p) => (p as any).city)),
+      type: uniq(products.map((p) => p.card_type)),
+      provider: uniq(products.map((p) => p.bank)),
+    };
+  }, [products]);
+
+  return (
+    <AppLayout>
+      <section className="mb-5 rounded-xl border border-border bg-card p-4 md:p-5 animate-fade-up">
+        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+          <Field label="Country"><FilterSelect placeholder="Any country" value={draft.country} options={opts.country} onChange={(v) => setDraft({ ...draft, country: v })} /></Field>
+          <Field label="State"><FilterSelect placeholder="Any state" value={draft.state} options={opts.state} onChange={(v) => setDraft({ ...draft, state: v })} /></Field>
+          <Field label="City"><FilterSelect placeholder="Any city" value={draft.city} options={opts.city} onChange={(v) => setDraft({ ...draft, city: v })} /></Field>
+          <Field label="Type"><FilterSelect placeholder="Any type" value={draft.type} options={opts.type} onChange={(v) => setDraft({ ...draft, type: v })} /></Field>
+          <Field label="Provider"><FilterSelect placeholder="Any provider" value={draft.provider} options={opts.provider} onChange={(v) => setDraft({ ...draft, provider: v })} /></Field>
+        </div>
+        <div className="mt-4 grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <div className="mb-2 flex items-center justify-between text-xs">
+              <span className="font-medium text-muted-foreground">Price</span>
+              <span className="font-mono text-primary">${priceRange[0]} - ${priceRange[1]}</span>
+            </div>
+            <Slider min={0} max={500} step={1} value={priceRange} onValueChange={setPriceRange} />
+          </div>
+          <Button onClick={runSearch} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Search className="h-4 w-4" /> Search
+          </Button>
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-border bg-card animate-fade-up">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={addSelected} className="bg-emerald-500 text-white hover:bg-emerald-600">+ Add Cart</Button>
+            <Button variant="secondary" onClick={() => navigate("/payments")} className="bg-emerald-700 text-white hover:bg-emerald-800">
+              <ShoppingCart className="h-4 w-4" /> Checkout · ${cartTotal.toFixed(2)} ({cartItems.length})
+            </Button>
+          </div>
+          <div className="font-mono text-xs text-muted-foreground">{filtered.length} matches</div>
+        </div>
+
+        {loading ? (
+          <div className="p-10"><Loader /></div>
+        ) : !filtered.length ? (
+          <div className="px-6 py-12 text-center text-muted-foreground">No proxies match the current filters.</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[900px] text-sm">
+              <thead className="bg-secondary/40 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <Th className="w-10"></Th>
+                  <Th>Name</Th>
+                  <Th>Country</Th>
+                  <Th>State</Th>
+                  <Th>City</Th>
+                  <Th>Type</Th>
+                  <Th>Provider</Th>
+                  <Th>Speed</Th>
+                  <Th>Price</Th>
+                  <Th>Action</Th>
+                </tr>
+              </thead>
+              <tbody>
+                {paged.map((s) => {
+                  const inCart = cartItems.some((i) => i.id === cartIdFor(s.id));
+                  return (
+                    <tr key={s.id} className="border-t border-border hover:bg-secondary/30">
+                      <Td>
+                        <Checkbox
+                          checked={!!selected[s.id]}
+                          onCheckedChange={(v) => setSelected((sel) => ({ ...sel, [s.id]: !!v }))}
+                        />
+                      </Td>
+                      <Td className="font-medium">{s.name}</Td>
+                      <Td>
+                        <span className="inline-flex items-center gap-1.5">
+                          <CountryFlag value={s.country_code ?? s.country} width={18} />
+                          <span className="text-xs font-medium">{(s.country_code ?? "").toUpperCase() || s.country || "—"}</span>
+                        </span>
+                      </Td>
+                      <Td>{s.state ?? "—"}</Td>
+                      <Td>{(s as any).city ?? "—"}</Td>
+                      <Td>{s.card_type ? <Pill tone="emerald">{s.card_type}</Pill> : "—"}</Td>
+                      <Td className="max-w-[160px] truncate" title={s.bank ?? ""}>{s.bank ?? "—"}</Td>
+                      <Td>{s.level ?? "—"}</Td>
+                      <Td className="font-mono font-semibold">${Number(s.price).toFixed(2)}</Td>
+                      <Td>
+                        <Button
+                          size="sm"
+                          onClick={() => addSock(s)}
+                          disabled={inCart}
+                          className="h-8 w-8 rounded-md bg-emerald-700 p-0 text-white hover:bg-emerald-800"
+                          title={inCart ? "In cart" : "Add to cart"}
+                        >
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                        </Button>
+                      </Td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {!loading && filtered.length > 0 && (
+          <Pagination page={page} totalPages={totalPages} setPage={setPage} total={filtered.length} pageSize={pageSize} />
+        )}
+      </section>
+    </AppLayout>
+  );
+};
+
 export const Proxy = () => <SectionPage title="Proxy" Icon={Network} category="proxy" />;
 export const Logs = () => <SectionPage title="Logs" Icon={ScrollText} category="logs" />;
 
