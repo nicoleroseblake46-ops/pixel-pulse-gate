@@ -216,6 +216,23 @@ const AdminPayments = () => {
         </section>
 
         <section className="glass rounded-xl p-4 md:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Manual Top-Up</div>
+              <h2 className="mt-1 font-display text-2xl font-black tracking-tight">Add balance to a user</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Credit or debit a user's balance instantly — no submit needed from their side. Use a negative amount to deduct.</p>
+            </div>
+            <form onSubmit={adjustBalance} className="grid w-full gap-2 sm:grid-cols-[1fr_120px_auto] lg:max-w-2xl">
+              <Input value={adjustUser} onChange={(e) => setAdjustUser(e.target.value)} placeholder="Username or user ID" className="bg-secondary/50" disabled={adjusting} required />
+              <Input type="number" step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} placeholder="Amount $" className="bg-secondary/50 font-mono" disabled={adjusting} required />
+              <Button type="submit" disabled={adjusting} className="shrink-0">{adjusting ? "Applying..." : "Add Balance"}</Button>
+              <Input value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} placeholder="Note (optional)" className="bg-secondary/50 sm:col-span-3" disabled={adjusting} />
+            </form>
+          </div>
+        </section>
+
+
+        <section className="glass rounded-xl p-4 md:p-5">
           {loading ? <Loader /> : (
             <Table>
               <TableHeader><TableRow><TableHead>User</TableHead><TableHead>Status</TableHead><TableHead>Deposit</TableHead><TableHead>Credit Impact</TableHead><TableHead>Balance After</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
