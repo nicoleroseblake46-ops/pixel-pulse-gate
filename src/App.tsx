@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import AdminPayments from "./pages/AdminPayments";
+import AdminOrders from "./pages/AdminOrders";
 import AdminNews from "./pages/AdminNews";
 import AdminTickets from "./pages/AdminTickets";
 import AdminProducts from "./pages/AdminProducts";
