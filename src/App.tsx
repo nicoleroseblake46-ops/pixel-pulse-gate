@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import AdminPayments from "./pages/AdminPayments";
+import AdminOrders from "./pages/AdminOrders";
 import AdminNews from "./pages/AdminNews";
 import AdminTickets from "./pages/AdminTickets";
 import AdminProducts from "./pages/AdminProducts";
@@ -92,6 +93,7 @@ const App = () => (
                 <Route path="/admin/products" element={<ProtectedRoute><AdminProducts /></ProtectedRoute>} />
                 <Route path="/admin/payments" element={<ProtectedRoute><AdminPayments /></ProtectedRoute>} />
                 <Route path="/admin/visitors" element={<ProtectedRoute><AdminVisitors /></ProtectedRoute>} />
+                <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

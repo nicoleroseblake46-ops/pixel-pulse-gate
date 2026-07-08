@@ -29,7 +29,8 @@ type Profile = { id: string; username: string | null };
 const tiles = [
   { label: "Inventory", to: "/admin/products", icon: Package, hint: "Products, cards, pricing" },
   { label: "News",      to: "/admin/news",     icon: FilePenLine, hint: "Announcements & updates" },
-  { label: "Payments",  to: "/admin/payments", icon: Wallet, hint: "Deposits & refunds" },
+  { label: "Payments",  to: "/admin/payments", icon: Wallet, hint: "Deposits, refunds, top-ups" },
+  { label: "Orders",    to: "/admin/orders",   icon: ShieldCheck, hint: "Client purchases & delivery" },
   { label: "Tickets",   to: "/admin/tickets",  icon: MessageSquareText, hint: "Support conversations" },
   { label: "Visitors",  to: "/admin/visitors", icon: Globe, hint: "IP & traffic logs" },
 ];

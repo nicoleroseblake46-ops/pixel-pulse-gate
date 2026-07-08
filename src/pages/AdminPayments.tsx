@@ -37,6 +37,11 @@ const AdminPayments = () => {
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [adminEmail, setAdminEmail] = useState("");
   const [assigningAdmin, setAssigningAdmin] = useState(false);
+  const [adjustUser, setAdjustUser] = useState("");
+  const [adjustAmount, setAdjustAmount] = useState("");
+  const [adjustNote, setAdjustNote] = useState("");
+  const [adjusting, setAdjusting] = useState(false);
+
 
   const pendingCount = useMemo(() => payments.filter((payment) => payment.status === "pending").length, [payments]);
   const pendingImpact = useMemo(
@@ -104,6 +109,38 @@ const AdminPayments = () => {
     }
     setAssigningAdmin(false);
   };
+
+  const adjustBalance = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = adjustUser.trim();
+    const amount = Number(adjustAmount);
+    if (!query) return toast.error("Enter a username or user ID");
+    if (!Number.isFinite(amount) || amount === 0) return toast.error("Enter a non-zero amount");
+
+    setAdjusting(true);
+    // Resolve user by id or username
+    let userId: string | null = null;
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRe.test(query)) userId = query;
+    else {
+      const { data: matches } = await adminClient.from("profiles").select("id, username").ilike("username", query).limit(2);
+      if (!matches?.length) { setAdjusting(false); return toast.error("No user found with that username"); }
+      if (matches.length > 1) { setAdjusting(false); return toast.error("Multiple users match — use exact username or ID"); }
+      userId = matches[0].id;
+    }
+
+    const { data, error } = await adminClient.rpc("admin_adjust_balance", {
+      _user_id: userId, _amount: amount, _note: adjustNote.trim() || null,
+    });
+    if (error) toast.error("Adjustment failed", { description: error.message });
+    else {
+      toast.success(`Balance updated`, { description: `New balance: $${Number(data).toFixed(2)}` });
+      setAdjustUser(""); setAdjustAmount(""); setAdjustNote("");
+      await loadPayments();
+    }
+    setAdjusting(false);
+  };
+
 
   if (adminLoading) return <Loader />;
   if (!isAdmin) return <Navigate to="/" replace />;
@@ -177,6 +214,23 @@ const AdminPayments = () => {
             </form>
           </div>
         </section>
+
+        <section className="glass rounded-xl p-4 md:p-5">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Manual Top-Up</div>
+              <h2 className="mt-1 font-display text-2xl font-black tracking-tight">Add balance to a user</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Credit or debit a user's balance instantly — no submit needed from their side. Use a negative amount to deduct.</p>
+            </div>
+            <form onSubmit={adjustBalance} className="grid w-full gap-2 sm:grid-cols-[1fr_120px_auto] lg:max-w-2xl">
+              <Input value={adjustUser} onChange={(e) => setAdjustUser(e.target.value)} placeholder="Username or user ID" className="bg-secondary/50" disabled={adjusting} required />
+              <Input type="number" step="0.01" value={adjustAmount} onChange={(e) => setAdjustAmount(e.target.value)} placeholder="Amount $" className="bg-secondary/50 font-mono" disabled={adjusting} required />
+              <Button type="submit" disabled={adjusting} className="shrink-0">{adjusting ? "Applying..." : "Add Balance"}</Button>
+              <Input value={adjustNote} onChange={(e) => setAdjustNote(e.target.value)} placeholder="Note (optional)" className="bg-secondary/50 sm:col-span-3" disabled={adjusting} />
+            </form>
+          </div>
+        </section>
+
 
         <section className="glass rounded-xl p-4 md:p-5">
           {loading ? <Loader /> : (

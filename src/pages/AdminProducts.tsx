@@ -126,7 +126,7 @@ const AdminProducts = () => {
       bin: isCards ? form.bin.trim() || null : null,
       country: form.country.trim() || null,
       state: form.state.trim() || null,
-      city: isCards ? form.city.trim() || null : null,
+      city: (isCards || active === "socks") ? form.city.trim() || null : null,
       brand: form.brand.trim() || null,
       card_type: form.card_type.trim() || null,
       bank: form.bank.trim() || null,
@@ -137,7 +137,7 @@ const AdminProducts = () => {
       scheme: isCards ? form.scheme.trim() || null : null,
       level: form.level.trim() || null,
       country_code: form.country_code.trim() || null,
-      extras: isCards ? form.extras.trim() || null : null,
+      extras: (isCards || active === "socks") ? form.extras.trim() || null : null,
       image_url: form.image_url.trim() || null,
       vendor_id: form.vendor_id || null,
       full_card: isCards ? form.full_card.trim() || null : null,
@@ -434,6 +434,34 @@ const AdminProducts = () => {
                       </div>
                     </div>
                   )}
+
+                  {active === "socks" && (
+                    <div className="grid gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 md:grid-cols-2">
+                      <Input placeholder="Name / Label" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                      <Input placeholder="Type (Residential / Datacenter / Mobile / ISP)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
+                      <Input placeholder="Provider" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
+                      <Input placeholder="Speed (e.g. 1Gbps)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
+                      <div className="md:col-span-2">
+                        <Select
+                          value={findCountry(form.country_code)?.code ?? ""}
+                          onValueChange={(code) => { const c = COUNTRIES.find((x) => x.code === code); if (c) setForm({ ...form, country: c.name, country_code: c.code }); }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Country">
+                              {form.country_code && (<span className="inline-flex items-center gap-2"><CountryFlag value={form.country_code} width={22} /><span>{form.country}</span></span>)}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent className="max-h-72">
+                            {COUNTRIES.map((c) => (<SelectItem key={c.code} value={c.code}><span className="inline-flex items-center gap-2"><CountryFlag value={c.code} width={22} /><span>{c.name}</span></span></SelectItem>))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
+                      <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+                      <Textarea placeholder="Delivery credentials (host:port:user:pass) — delivered on purchase" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} className="md:col-span-2 font-mono" />
+                    </div>
+                  )}
+
 
 
                   <Button type="submit" disabled={saving}>
