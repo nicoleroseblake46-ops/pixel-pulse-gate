@@ -17,7 +17,7 @@ const baseItems = [
   { title: "Proxy", url: "/proxy", icon: Network },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "RDP", url: "/rdp", icon: MonitorSmartphone },
-  { title: "Logs", url: "/logs", icon: ScrollText },
+  
   { title: "My Orders", url: "/orders", icon: ShoppingBag },
   { title: "Tickets", url: "/tickets", icon: MessageSquareText },
   { title: "Payments", url: "/payments", icon: Wallet },
