@@ -21,7 +21,6 @@ const mainNav = [
   { title: "Tools", url: "/tools", icon: Wrench, hasDropdown: true },
   { title: "My Orders", url: "/orders", icon: ShoppingBag, hasDropdown: true },
 
-  { title: "My Orders", url: "/orders", icon: ShoppingBag, hasDropdown: true },
   { title: "Tickets", url: "/tickets", icon: MessageSquareText },
 ];
 
