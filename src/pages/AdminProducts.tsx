@@ -21,11 +21,9 @@ import { syncTelegram, productToUpsert } from "@/lib/site-sync";
 const categories: { value: ProductCategory; label: string; Icon: typeof TagIcon }[] = [
   { value: "sales", label: "Sales", Icon: TagIcon },
   { value: "cards", label: "Cards", Icon: CreditCard },
-  { value: "socks", label: "Socks", Icon: Zap },
   { value: "proxy", label: "Proxy", Icon: Network },
   { value: "tools", label: "Tools", Icon: Wrench },
   { value: "rdp", label: "RDP", Icon: MonitorSmartphone },
-  { value: "logs", label: "Logs", Icon: ScrollText },
 ];
 
 const emptyForm = {

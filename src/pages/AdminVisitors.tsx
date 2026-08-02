@@ -23,16 +23,27 @@ const AdminVisitors = () => {
   useEffect(() => {
     if (!isAdmin) return;
     (async () => {
-      const { data, error } = await supabase
-        .from("visitor_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
+      // Exclude staff/admin traffic so this only shows real site visitors
+      const [{ data: roles }, { data, error }] = await Promise.all([
+        supabase.from("user_roles").select("user_id").eq("role", "admin"),
+        supabase
+          .from("visitor_logs")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(1000),
+      ]);
+      const adminIds = new Set((roles || []).map((r: { user_id: string }) => r.user_id));
       if (error) toast.error(error.message);
-      else setLogs((data as VisitorLog[]) || []);
+      else
+        setLogs(
+          ((data as VisitorLog[]) || [])
+            .filter((l) => !(l.user_id && adminIds.has(l.user_id)))
+            .slice(0, 500)
+        );
       setLoading(false);
     })();
   }, [isAdmin]);
+
 
   if (adminLoading) return null;
   if (!isAdmin) {

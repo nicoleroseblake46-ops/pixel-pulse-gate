@@ -19,9 +19,8 @@ const mainNav = [
   { title: "RDP", url: "/rdp", icon: MonitorSmartphone },
   { title: "Proxy", url: "/proxy", icon: Network },
   { title: "Tools", url: "/tools", icon: Wrench, hasDropdown: true },
-  { title: "Socks", url: "/socks", icon: Zap },
-  { title: "Logs", url: "/logs", icon: ScrollText },
   { title: "My Orders", url: "/orders", icon: ShoppingBag, hasDropdown: true },
+
   { title: "Tickets", url: "/tickets", icon: MessageSquareText },
 ];
 

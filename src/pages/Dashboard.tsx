@@ -14,8 +14,6 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 const DEFAULT_STATS = [
   { label: "Total CVVs", value: "0", icon: "CreditCard" },
   { label: "Total RDPs", value: "0", icon: "MonitorSmartphone" },
-  { label: "Total SOCKS", value: "0", icon: "Zap" },
-  { label: "Total LOGS", value: "0", icon: "ScrollText" },
   { label: "CVV Update Time", value: "Soon", icon: "History" },
 ];
 
@@ -90,7 +88,7 @@ const Dashboard = () => {
   // Auto live counts so stats with value "auto" pull from DB
   useEffect(() => {
     const run = async () => {
-      const cats = ["cards", "rdp", "socks", "proxy", "logs", "tools", "sales"] as const;
+      const cats = ["cards", "rdp", "proxy", "tools", "sales"] as const;
       const entries = await Promise.all(
         cats.map(async (c) => {
           const { count } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("category", c).eq("is_active", true);
@@ -161,17 +159,18 @@ const Dashboard = () => {
   return (
     <AppLayout>
       <Dialog open={welcomeOpen} onOpenChange={(o) => { if (!o) dismissWelcome(); }}>
-        <DialogContent className="overflow-hidden border-primary/40 p-0 sm:max-w-lg">
-          <div className={`relative bg-gradient-to-br ${accentClass} p-6`}>
+        <DialogContent className="max-h-[85vh] w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] overflow-y-auto overflow-x-hidden rounded-2xl border-primary/40 p-0 sm:w-full sm:max-w-lg">
+          <div className={`relative bg-gradient-to-br ${accentClass} p-4 sm:p-6`}>
             <button onClick={dismissWelcome} className="absolute right-3 top-3 rounded-full bg-background/40 p-1.5 text-foreground/80 backdrop-blur transition hover:bg-background/70">
               <X className="h-4 w-4" />
             </button>
-            <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-background/50 text-primary shadow-sm backdrop-blur">
+            <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-background/50 text-primary shadow-sm backdrop-blur sm:h-11 sm:w-11">
               <Sparkles className="h-5 w-5" />
             </div>
-            <h2 className="font-display text-2xl font-black leading-tight">{welcome.title || "Welcome"}</h2>
-            <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-foreground/85">{welcome.body}</p>
-            <div className="mt-5 flex flex-wrap items-center gap-2">
+            <h2 className="pr-8 font-display text-xl font-black leading-tight sm:text-2xl">{welcome.title || "Welcome"}</h2>
+            <p className="mt-2 whitespace-pre-line break-words text-sm leading-relaxed text-foreground/85">{welcome.body}</p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+
               {welcome.cta_label && welcome.cta_href && (
                 <Button asChild onClick={dismissWelcome}>
                   <Link to={welcome.cta_href}>{welcome.cta_label}</Link>

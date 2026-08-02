@@ -18,7 +18,7 @@ import AdminTickets from "./pages/AdminTickets";
 import AdminProducts from "./pages/AdminProducts";
 import AdminHub from "./pages/AdminHub";
 import ResetPassword from "./pages/ResetPassword";
-import { Sales, Cards, Socks, Proxy, RDP, Logs } from "./pages/Sections";
+import { Sales, Cards, Proxy, RDP } from "./pages/Sections";
 import Tools from "./pages/Tools";
 import MyOrders from "./pages/MyOrders";
 import Tickets from "./pages/Tickets";
@@ -79,11 +79,9 @@ const App = () => (
                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/sales" element={<ProtectedRoute><Sales /></ProtectedRoute>} />
                 <Route path="/cards" element={<ProtectedRoute><Cards /></ProtectedRoute>} />
-                <Route path="/socks" element={<ProtectedRoute><Socks /></ProtectedRoute>} />
                 <Route path="/proxy" element={<ProtectedRoute><Proxy /></ProtectedRoute>} />
                 <Route path="/tools" element={<ProtectedRoute><Tools /></ProtectedRoute>} />
                 <Route path="/rdp" element={<ProtectedRoute><RDP /></ProtectedRoute>} />
-                <Route path="/logs" element={<ProtectedRoute><Logs /></ProtectedRoute>} />
                 <Route path="/orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
                 <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
                 <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
