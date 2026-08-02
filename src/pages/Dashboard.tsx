@@ -14,8 +14,6 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
 const DEFAULT_STATS = [
   { label: "Total CVVs", value: "0", icon: "CreditCard" },
   { label: "Total RDPs", value: "0", icon: "MonitorSmartphone" },
-  { label: "Total SOCKS", value: "0", icon: "Zap" },
-  { label: "Total LOGS", value: "0", icon: "ScrollText" },
   { label: "CVV Update Time", value: "Soon", icon: "History" },
 ];
 
@@ -90,7 +88,7 @@ const Dashboard = () => {
   // Auto live counts so stats with value "auto" pull from DB
   useEffect(() => {
     const run = async () => {
-      const cats = ["cards", "rdp", "socks", "proxy", "logs", "tools", "sales"] as const;
+      const cats = ["cards", "rdp", "proxy", "tools", "sales"] as const;
       const entries = await Promise.all(
         cats.map(async (c) => {
           const { count } = await supabase.from("products").select("id", { count: "exact", head: true }).eq("category", c).eq("is_active", true);
