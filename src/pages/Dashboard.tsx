@@ -320,9 +320,12 @@ const Dashboard = () => {
               </div>
             )}
 
+            <div ref={sentinelRef} />
+
             {bases.length >= limit && (
-              <div className="flex justify-center pt-2">
-                <Button variant="secondary" onClick={() => setLimit((n) => n + 30)}>Load more</Button>
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <span className="font-mono text-[11px] uppercase tracking-widest text-muted-foreground">Loading older bases…</span>
+                <Button variant="secondary" size="sm" onClick={() => setLimit((n) => n + 30)}>Load more</Button>
               </div>
             )}
           </div>
