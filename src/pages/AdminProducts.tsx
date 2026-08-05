@@ -1171,15 +1171,14 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
     if (!Number.isFinite(priceN) || priceN < 0) { toast.error("Enter a valid default price"); return; }
     setBusy(true);
     const payload = preview.map((r, idx) => {
-      const brand = (r.brand || brandFromBin(r.bin) || "VISA").toUpperCase();
-      const card_type = (r.card_type || "CREDIT").toUpperCase();
-      const level = (r.level || "CLASSIC").toUpperCase();
-      const bank = (r.bank || "UNKNOWN BANK").toUpperCase();
-      const c = countryFromContext(r.country, bank, r.bin);
+      const seed = seedFromString(`${r.bin}:${idx}:${r.bank}`);
+      const { brand, type: card_type, level } = resolveSchema(r.brand, r.bin, r.card_type, r.level, seed);
+      const c = countryFromContext(r.country, r.bank, r.bin);
+      const bank = resolveBankName(r.bank, c?.code ?? null, seed >> 4);
       const mock = mockCardDetails(r.bin, c?.code ?? null, idx);
       return {
         category: "cards" as const,
-        name: base.trim() || `Base ${new Date().toISOString().slice(0, 10)}`,
+        name: base.trim() || "Recent Fetched Base",
         meta: "",
         price: priceN,
         bin: r.bin,
