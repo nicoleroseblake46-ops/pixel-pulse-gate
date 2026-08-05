@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ScrollText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tag, CreditCard, Zap, Network, Search, ShoppingCart, MonitorSmartphone, ScrollText, ChevronLeft, ChevronRight, Undo2 } from "lucide-react";
 import { AppLayout } from "@/components/AppLayout";
 import { SectionPage } from "@/components/SectionPage";
 import { Button } from "@/components/ui/button";
@@ -380,6 +380,7 @@ export const Cards = () => {
                   <Th>Zipcode</Th>
                   <Th>Base Name</Th>
                   <Th>Price</Th>
+                  <Th>Refund</Th>
                   <Th>Action</Th>
                 </tr>
               </thead>
