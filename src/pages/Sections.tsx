@@ -417,6 +417,14 @@ export const Cards = () => {
                       <Td className="max-w-[180px] truncate text-amber-600" title={c.name}>{c.name}</Td>
                       <Td className="font-mono font-semibold">${Number(c.price).toFixed(2)}</Td>
                       <Td>
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full border border-success/40 bg-success/10 px-2 py-0.5 font-mono text-[9px] uppercase tracking-widest text-success"
+                          title="Test the card in My Orders within 5 minutes — if it's dead, one click refunds you instantly."
+                        >
+                          <Undo2 className="h-3 w-3" /> 5m refund
+                        </span>
+                      </Td>
+                      <Td>
                         <Button
                           size="sm"
                           onClick={() => addCard(c)}
