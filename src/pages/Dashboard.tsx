@@ -105,10 +105,11 @@ const Dashboard = () => {
     const seen = new Set<string>();
     const uniq: BaseItem[] = [];
     for (const b of bases) {
-      const key = `${b.category}:${(b.name ?? "").trim().toLowerCase()}`;
-      if (!key || seen.has(key)) continue;
+      const clean = cleanBaseName(b.name);
+      const key = `${b.category}:${clean.toLowerCase()}`;
+      if (seen.has(key)) continue;
       seen.add(key);
-      uniq.push(b);
+      uniq.push({ ...b, name: clean });
     }
     const out: { label: string; items: BaseItem[] }[] = [];
     for (const b of uniq) {
@@ -119,6 +120,19 @@ const Dashboard = () => {
     }
     return out;
   }, [bases]);
+
+  // Infinite scroll — append older bases as the user reaches the end of the feed.
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && bases.length >= limit) setLimit((n) => n + 30);
+    }, { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [bases.length, limit]);
+
 
 
   const resolveStatValue = (s: Stat) => {
