@@ -1034,21 +1034,41 @@ const PHONE_FMT: Record<string, { dial: string; len: number }> = {
   PE: { dial: "+51", len: 9 }, VE: { dial: "+58", len: 10 }, CM: { dial: "+237", len: 9 },
 };
 
+/** Makes a PAN pass the Luhn checksum by fixing the final digit. */
+const luhnFix = (digits: string) => {
+  const body = digits.slice(0, -1);
+  let sum = 0;
+  const rev = body.split("").reverse();
+  for (let i = 0; i < rev.length; i++) {
+    let d = Number(rev[i]);
+    if (i % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
+    sum += d;
+  }
+  return body + String((10 - (sum % 10)) % 10);
+};
+
+const deaccent = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 const mockCardDetails = (bin: string, cc: string | null, rowIdx: number) => {
   const seed = seedFromString(`${bin}:${cc ?? ""}:${rowIdx}:${Math.random().toString(36).slice(2, 10)}`);
-  const locs = LOC_BY_CC[cc ?? ""] ?? LOC_BY_CC[cc ?? "US"] ?? US_LOCATIONS;
+  const locs = LOC_BY_CC[cc ?? ""] ?? US_LOCATIONS;
   const loc = pick(locs, seed >> 5);
   const month = String(((Math.abs(seed) % 12) + 1)).padStart(2, "0");
-  const year = String(26 + (Math.abs(seed >> 7) % 4));
-  const trailing = String(Math.floor(1000000000 + Math.abs(seed * 2654435761) % 9000000000)).slice(0, 10);
-  const pan = (bin + trailing).slice(0, 16);
-  const cvv = String(100 + (Math.abs(seed >> 11) % 900));
-  const first = pick(FIRST_NAMES, seed);
-  const last = pick(LAST_NAMES, seed >> 3);
+  // Always well in the future: 2028 – 2032, mixed per card.
+  const year = String(28 + (Math.abs(seed >> 7) % 5));
+  const len = bin.startsWith("34") || bin.startsWith("37") ? 15 : 16;
+  const trailing = String(Math.abs(seed * 2654435761)).padStart(len, "7").slice(0, len);
+  const pan = luhnFix((bin + trailing).slice(0, len));
+  const cvv = len === 15
+    ? String(1000 + (Math.abs(seed >> 11) % 9000))
+    : String(100 + (Math.abs(seed >> 11) % 900));
+  const pool = NAMES_BY_CC[cc ?? ""] ?? { first: FIRST_NAMES, last: LAST_NAMES };
+  const first = pick(pool.first, seed);
+  const last = pick(pool.last, seed >> 3);
   const name = `${first} ${last}`;
   const domain = pick(EMAIL_DOMAINS, seed >> 13);
   const emailNum = String(Math.abs(seed >> 9) % 900 + 10);
-  const email = `${first}.${last}${emailNum}`.toLowerCase().replace(/[^a-z0-9.]/g, "") + `@${domain}`;
+  const email = deaccent(`${first}.${last}${emailNum}`).toLowerCase().replace(/[^a-z0-9.]/g, "") + `@${domain}`;
   const fmt = PHONE_FMT[cc ?? "US"] ?? PHONE_FMT.US;
   const phoneDigits = String(Math.abs(seed * 1103515245 + 12345))
     .padStart(fmt.len, "0")
@@ -1065,6 +1085,30 @@ const mockCardDetails = (bin: string, cc: string | null, rowIdx: number) => {
     exp: `${month}/${year}`,
     full_card: `${pan}|${month}/${year}|${cvv}`,
   };
+};
+
+/** Card type + level that stay consistent with the brand/BIN. */
+const CARD_TYPES = ["CREDIT", "DEBIT", "CREDIT", "DEBIT", "PREPAID"];
+const LEVELS_BY_BRAND: Record<string, string[]> = {
+  VISA: ["CLASSIC", "GOLD", "PLATINUM", "SIGNATURE", "INFINITE", "BUSINESS"],
+  MASTERCARD: ["STANDARD", "GOLD", "PLATINUM", "WORLD", "WORLD ELITE", "BUSINESS"],
+  AMEX: ["GREEN", "GOLD", "PLATINUM", "CORPORATE"],
+  DISCOVER: ["CLASSIC", "IT", "MORE", "CASHBACK"],
+  JCB: ["CLASSIC", "GOLD", "PLATINUM"],
+  DINERS: ["CLASSIC", "PREMIER", "CORPORATE"],
+  UNIONPAY: ["CLASSIC", "GOLD", "PLATINUM", "DIAMOND"],
+};
+const resolveSchema = (rawBrand: string, bin: string, rawType: string, rawLevel: string, seed: number) => {
+  const fromBin = brandFromBin(bin);
+  const pasted = (rawBrand || "").trim().toUpperCase().replace(/\s+/g, " ");
+  const known = Object.keys(LEVELS_BY_BRAND);
+  // BIN is authoritative: it can't lie about the network.
+  const brand = fromBin || (known.includes(pasted) ? pasted : "VISA");
+  let type = (rawType || "").trim().toUpperCase();
+  if (!["CREDIT", "DEBIT", "PREPAID", "CHARGE"].includes(type)) type = pick(CARD_TYPES, seed >> 2);
+  if (brand === "AMEX" && type === "PREPAID") type = "CREDIT";
+  const level = (rawLevel || "").trim().toUpperCase() || pick(LEVELS_BY_BRAND[brand] ?? LEVELS_BY_BRAND.VISA, seed >> 6);
+  return { brand, type, level };
 };
 
 
