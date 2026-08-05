@@ -124,7 +124,7 @@ const AdminProducts = () => {
       bin: isCards ? form.bin.trim() || null : null,
       country: form.country.trim() || null,
       state: form.state.trim() || null,
-      city: (isCards || active === "socks") ? form.city.trim() || null : null,
+      city: isCards ? form.city.trim() || null : null,
       brand: form.brand.trim() || null,
       card_type: form.card_type.trim() || null,
       bank: form.bank.trim() || null,
@@ -135,7 +135,7 @@ const AdminProducts = () => {
       scheme: isCards ? form.scheme.trim() || null : null,
       level: form.level.trim() || null,
       country_code: form.country_code.trim() || null,
-      extras: (isCards || active === "socks") ? form.extras.trim() || null : null,
+      extras: isCards ? form.extras.trim() || null : null,
       image_url: form.image_url.trim() || null,
       vendor_id: form.vendor_id || null,
       full_card: isCards ? form.full_card.trim() || null : null,
@@ -433,32 +433,6 @@ const AdminProducts = () => {
                     </div>
                   )}
 
-                  {active === "socks" && (
-                    <div className="grid gap-3 rounded-lg border border-border/60 bg-secondary/30 p-3 md:grid-cols-2">
-                      <Input placeholder="Name / Label" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-                      <Input placeholder="Type (Residential / Datacenter / Mobile / ISP)" value={form.card_type} onChange={(e) => setForm({ ...form, card_type: e.target.value })} />
-                      <Input placeholder="Provider" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
-                      <Input placeholder="Speed (e.g. 1Gbps)" value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} />
-                      <div className="md:col-span-2">
-                        <Select
-                          value={findCountry(form.country_code)?.code ?? ""}
-                          onValueChange={(code) => { const c = COUNTRIES.find((x) => x.code === code); if (c) setForm({ ...form, country: c.name, country_code: c.code }); }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Country">
-                              {form.country_code && (<span className="inline-flex items-center gap-2"><CountryFlag value={form.country_code} width={22} /><span>{form.country}</span></span>)}
-                            </SelectValue>
-                          </SelectTrigger>
-                          <SelectContent className="max-h-72">
-                            {COUNTRIES.map((c) => (<SelectItem key={c.code} value={c.code}><span className="inline-flex items-center gap-2"><CountryFlag value={c.code} width={22} /><span>{c.name}</span></span></SelectItem>))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Input placeholder="State / region" value={form.state} onChange={(e) => setForm({ ...form, state: e.target.value })} />
-                      <Input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-                      <Textarea placeholder="Delivery credentials (host:port:user:pass) — delivered on purchase" value={form.extras} onChange={(e) => setForm({ ...form, extras: e.target.value })} className="md:col-span-2 font-mono" />
-                    </div>
-                  )}
 
 
 
@@ -534,8 +508,6 @@ type Panel = { accent?: string; title?: string; body: string };
 const DEFAULT_STATS: Stat[] = [
   { label: "Total CVVs", value: "auto:cards", icon: "CreditCard" },
   { label: "Total RDPs", value: "auto:rdp", icon: "MonitorSmartphone" },
-  { label: "Total SOCKS", value: "auto:socks", icon: "Zap" },
-  { label: "Total LOGS", value: "auto:logs", icon: "ScrollText" },
   { label: "CVV Update Time", value: "Soon", icon: "History" },
 ];
 
@@ -625,7 +597,7 @@ const DashboardEditor = () => {
 
       <div>
         <h2 className="font-display text-xl font-black">Dashboard — Stats row</h2>
-        <p className="text-xs text-muted-foreground">Use <code>auto:cards</code>, <code>auto:rdp</code>, <code>auto:socks</code>, <code>auto:proxy</code>, <code>auto:logs</code>, <code>auto:tools</code>, <code>auto:sales</code> as the value to auto-count active products. Otherwise type any text.</p>
+        <p className="text-xs text-muted-foreground">Use <code>auto:cards</code>, <code>auto:rdp</code>, <code>auto:proxy</code>, <code>auto:tools</code>, <code>auto:sales</code> as the value to auto-count active products. Otherwise type any text.</p>
       </div>
       <div className="space-y-3">
         {stats.map((s, i) => (
@@ -1008,7 +980,6 @@ const countryFromContext = (country: string, bank: string, bin: string) => {
 
 
 // Full realistic name — no masking (delivered as full cardholder identity).
-const fullName = (seed: number) => `${pick(FIRST_NAMES, seed)} ${pick(LAST_NAMES, seed >> 3)}`;
 
 const EMAIL_DOMAINS = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com", "proton.me"];
 
@@ -1223,7 +1194,7 @@ const BulkCardsPaste = ({ onImported, defaultVendorId }: { onImported: () => Pro
         <span className="rounded-full bg-primary/20 px-2 py-0.5 font-mono text-[10px] text-primary">{preview.length} parsed</span>
       </div>
       <div className="grid gap-2 md:grid-cols-[1fr_140px]">
-        <Input placeholder="Base name (applied to all rows)" value={base} onChange={(e) => setBase(e.target.value)} />
+        <Input placeholder="Base name — defaults to Recent Fetched Base" value={base} onChange={(e) => setBase(e.target.value)} />
         <Input placeholder="Price USD" type="number" min={0} step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
       </div>
       <Textarea
