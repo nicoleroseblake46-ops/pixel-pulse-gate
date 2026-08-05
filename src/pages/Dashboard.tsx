@@ -43,6 +43,21 @@ type Panel = { accent?: string; title?: string; body: string };
 
 type BaseItem = { id: string; name: string; created_at: string; category: string };
 
+/** Strips dates/timestamps from base names and normalises legacy "auto" bases. */
+const cleanBaseName = (raw: string) => {
+  let s = (raw ?? "").trim();
+  s = s
+    .replace(/\b\d{4}[-/]\d{2}[-/]\d{2}\b/g, "")
+    .replace(/\b\d{1,2}:\d{2}(:\d{2})?\b/g, "")
+    .replace(/\bT\d{2}\b/g, "")
+    .replace(/[·\-–—|,_]+\s*$/g, "")
+    .replace(/^\s*[·\-–—|,_]+/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (!s || /^(auto|base|import|cards)$/i.test(s)) return "Recent Fetched Base";
+  return s;
+};
+
 const bucketLabel = (iso: string) => {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return "just now";
