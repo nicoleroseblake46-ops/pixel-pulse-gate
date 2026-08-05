@@ -186,8 +186,13 @@ const MyOrders = () => {
               const s = statusCopy(item.paymentStatus);
               const StatusIcon = s.Icon;
               const canRefund = item.paymentStatus === "confirmed" && !item.refundStatus;
+              const key = `${item.orderId}-${item.id}`;
+              const isCard = item.id.startsWith("cards-");
+              const msLeft = GRACE_MS - (now - new Date(item.orderedAt).getTime());
+              const inGrace = msLeft > 0;
+              const check = checks[key];
               return (
-                <TableRow key={`${item.orderId}-${item.id}`}>
+                <TableRow key={key}>
                   <TableCell className="min-w-[200px]">
                     <div className="font-medium">{item.name}</div>
                     <div className="text-xs text-muted-foreground">{item.meta}</div>
@@ -218,12 +223,34 @@ const MyOrders = () => {
                     {item.refundStatus ? (
                       <Badge variant="outline" className="font-mono text-[10px] uppercase">{item.refundStatus}</Badge>
                     ) : canRefund ? (
-                      <Button size="sm" variant="ghost" onClick={() => setRefundDialogFor(item.orderId)}>
-                        <Undo2 className="h-3.5 w-3.5" /> Refund
-                      </Button>
+                      <div className="flex flex-col items-end gap-1.5">
+                        {isCard && inGrace && (
+                          <>
+                            <div className="flex items-center gap-1.5">
+                              <Button size="sm" variant="outline" className="h-7" disabled={check === "running"} onClick={() => runCheck(key)}>
+                                <Zap className="h-3.5 w-3.5" /> {check === "running" ? "Checking…" : "Test card"}
+                              </Button>
+                              {check === "live" && <Badge variant="outline" className="border-success/40 bg-success/10 font-mono text-[10px] text-success">LIVE</Badge>}
+                              {check === "dead" && <Badge variant="outline" className="border-destructive/40 bg-destructive/10 font-mono text-[10px] text-destructive">DEAD</Badge>}
+                            </div>
+                            {check === "dead" && (
+                              <Button size="sm" className="h-7" onClick={() => autoRefund(item.orderId)}>
+                                <Undo2 className="h-3.5 w-3.5" /> Refund now
+                              </Button>
+                            )}
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              auto-refund {Math.floor(msLeft / 60000)}:{String(Math.floor((msLeft % 60000) / 1000)).padStart(2, "0")}
+                            </span>
+                          </>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7" onClick={() => setRefundDialogFor(item.orderId)}>
+                          <Undo2 className="h-3.5 w-3.5" /> Request refund
+                        </Button>
+                      </div>
                     ) : <span className="text-xs text-muted-foreground">—</span>}
                   </TableCell>
                 </TableRow>
+
               );
             })}
             {!items.length && (
